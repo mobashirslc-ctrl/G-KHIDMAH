@@ -1,36 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-KHIDMAH | Quick Order</title>
+    <title>G KHIDMAH | আপনার খিদমতে আমরা</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
-<body class="bg-gray-100 p-5 font-sans">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-xl mt-10">
-        <h1 class="text-3xl font-extrabold text-center text-blue-700 mb-2">G KHIDMAH</h1>
-        <p class="text-center text-gray-500 text-sm mb-6 font-medium italic">Your Personal Shopping Assistant</p>
+<body class="bg-slate-50 min-h-screen">
+
+    <header class="bg-white shadow-sm p-4 text-center border-b border-blue-100">
+        <h1 class="text-2xl font-bold text-blue-700">G KHIDMAH</h1>
+        <p class="text-xs text-gray-500 italic">আপনার ভরসা, আমাদের আন্তরিকতা</p>
+    </header>
+
+    <div class="max-w-md mx-auto p-4 space-y-6">
         
-        <div class="space-y-4">
-            <label class="block text-gray-700 font-bold mb-1">আপনার বাজারের তালিকা লিখুন:</label>
-            <textarea id="orderList" rows="6" 
-                class="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
-                placeholder="১. চাল ৫ কেজি&#10;২. সয়াবিন তেল ২ লিটার..."></textarea>
+        <div id="orderSection" class="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">আজ আপনার কী কী লাগবে?</h2>
+            <textarea id="orderList" rows="5" 
+                class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 focus:ring-0 outline-none transition-all placeholder:text-gray-300" 
+                placeholder="যেমন: ৫ কেজি চাল, ২ লিটার তেল..."></textarea>
             
-            <button id="submitBtn" onclick="submitToFirebase()" 
-                class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200">
-                অর্ডার কনফার্ম করুন
+            <button id="submitBtn" onclick="placeOrder()" 
+                class="w-full bg-blue-600 text-white mt-4 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all">
+                খিদমত শুরু করুন
             </button>
         </div>
-        
-        <div id="status" class="mt-6 p-4 rounded-xl text-center hidden"></div>
+
+        <div id="trackingSection" class="hidden space-y-4">
+            <div id="statusCard" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-6 rounded-3xl shadow-xl">
+                <p class="text-xs opacity-80 mb-1">অর্ডারের বর্তমান অবস্থা:</p>
+                <h1 id="trackMessage" class="text-xl font-bold leading-tight italic">আপনার তালিকাটি আমরা পেয়েছি, একটু অপেক্ষা করুন...</h1>
+            </div>
+
+            <div id="trackingFlow" class="bg-white p-6 rounded-3xl shadow-md space-y-4 border border-gray-100">
+                <div id="invoiceBox" class="hidden border-b border-dashed pb-4 mb-4">
+                    </div>
+                
+                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-pending">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">১</div>
+                    <p class="text-sm font-semibold">তালিকা যাচাই করা হচ্ছে</p>
+                </div>
+                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-confirmed">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">২</div>
+                    <p class="text-sm font-semibold">বাজারমূল্য নিশ্চিত করা</p>
+                </div>
+                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-shopping">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">৩</div>
+                    <p class="text-sm font-semibold">কেনাকাটা চলছে</p>
+                </div>
+                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-delivery">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">৪</div>
+                    <p class="text-sm font-semibold">সহকারী আপনার পথে</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
             authDomain: "gkhidmah-8636b.firebaseapp.com",
@@ -40,48 +72,66 @@
             appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Submit Function
-        window.submitToFirebase = async () => {
-            const listText = document.getElementById('orderList').value;
-            const btn = document.getElementById('submitBtn');
-            const statusDiv = document.getElementById('status');
-
-            if(listText.trim() === "") {
-                alert("দয়া করে কিছু লিখুন!");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "প্রসেসিং হচ্ছে...";
+        // ১. অর্ডার প্লেস করা
+        window.placeOrder = async () => {
+            const list = document.getElementById('orderList').value;
+            if(!list.trim()) return alert("দয়া করে আপনার তালিকাটি লিখুন");
 
             try {
-                // Formatting data for Admin
-                const lines = listText.split('\n').filter(l => l.trim() !== "");
-                
-                await addDoc(collection(db, "orders"), {
-                    items: lines,
+                const docRef = await addDoc(collection(db, "orders"), {
+                    items: list.split('\n'),
                     status: "pending",
                     createdAt: serverTimestamp(),
-                    customerName: "Guest User", // Pore Login system add korbo
-                    totalBill: 0
+                    trackMsg: "আমরা আপনার তালিকাটি পেয়েছি, অ্যাডমিন এখনই চেক করছেন।"
                 });
-
-                statusDiv.innerText = "ধন্যবাদ! আপনার অর্ডারটি অ্যাডমিনের কাছে পাঠানো হয়েছে।";
-                statusDiv.className = "mt-6 p-4 rounded-xl text-center bg-green-100 text-green-700 font-bold block";
-                document.getElementById('orderList').value = "";
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                statusDiv.innerText = "দুঃখিত, আবার চেষ্টা করুন।";
-                statusDiv.className = "mt-6 p-4 rounded-xl text-center bg-red-100 text-red-700 font-bold block";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "অর্ডার কনফার্ম করুন";
-            }
+                localStorage.setItem('currentOrder', docRef.id);
+                loadTracking();
+            } catch (e) { alert("দুঃখিত, আবার চেষ্টা করুন!"); }
         };
+
+        // ২. ট্র্যাকিং আপডেট এবং মিষ্টি ভাষা সেট করা
+        function loadTracking() {
+            const orderId = localStorage.getItem('currentOrder');
+            if(!orderId) return;
+
+            document.getElementById('orderSection').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+
+            onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(1)), (snapshot) => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const msgEl = document.getElementById('trackMessage');
+                    
+                    // স্ট্যাটাস অনুযায়ী মেসেজ পরিবর্তন
+                    const statusMap = {
+                        "pending": "আমরা তালিকাটি দেখছি, একটু সময় দিন...",
+                        "invoice_ready": "আপনার তালিকাটি বর্তমান বাজারমূল্য অনুযায়ী আপডেট করা হয়েছে, দয়া করে চেক করে কনফার্ম করুন।",
+                        "shopping": "আপনার পছন্দের জিনিসগুলো আমরা খুঁজে খুঁজে সেরাটা কিনছি...",
+                        "delivery": "কেনাকাটা শেষ! আমাদের সহকারী এখন আপনার বাসার দিকে রওয়ানা দিয়েছেন।",
+                        "at_location": "সহকারী এখন আপনার বাসার নিচে অপেক্ষা করছেন, দয়া করে বাজারটি গ্রহণ করুন।",
+                        "completed": "খিদমতটি সফল হয়েছে। আমাদের পাশে থাকার জন্য আপনাকে অনেক ধন্যবাদ!"
+                    };
+
+                    msgEl.innerText = statusMap[data.status] || data.trackMsg;
+                    
+                    // ভিজ্যুয়াল স্টেপ আপডেট
+                    updateStepVisuals(data.status);
+                });
+            });
+        }
+
+        function updateStepVisuals(status) {
+            const steps = ['pending', 'invoice_ready', 'shopping', 'delivery', 'at_location'];
+            steps.forEach(s => {
+                const el = document.getElementById(`step-${s === 'invoice_ready' ? 'confirmed' : s}`);
+                if(el) el.style.opacity = "1";
+            });
+        }
+
+        window.onload = loadTracking;
     </script>
 </body>
 </html>
