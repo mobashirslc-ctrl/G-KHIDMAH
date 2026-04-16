@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-KHIDMAH | Admin Panel</title>
+    <title>G-KHIDMAH | কন্ট্রোল প্যানেল</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
-<body class="bg-slate-50 p-4 font-sans">
-    <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-8 bg-blue-700 p-4 rounded-xl shadow-lg">
-            <h1 class="text-xl font-bold text-white">G-KHIDMAH Admin</h1>
-            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">Live Orders</span>
+<body class="bg-slate-100 p-4">
+    <div class="max-w-2xl mx-auto">
+        <header class="bg-blue-800 text-white p-5 rounded-2xl shadow-lg mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold">G-KHIDMAH অ্যাডমিন</h1>
+                <p class="text-xs opacity-70">খিদমত পরিচালনা করুন</p>
+            </div>
+            <div id="orderCount" class="bg-blue-600 px-3 py-1 rounded-full text-sm font-bold">০টি অর্ডার</div>
         </header>
 
-        <div id="ordersContainer" class="space-y-6">
-            <p class="text-center text-gray-500">অর্ডার লোড হচ্ছে...</p>
-        </div>
+        <div id="adminOrders" class="space-y-6">
+            </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase config (Exact same as index.html)
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
             authDomain: "gkhidmah-8636b.firebaseapp.com",
@@ -35,62 +38,55 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Real-time listener for orders
-        onSnapshot(collection(db, "orders"), (snapshot) => {
-            const container = document.getElementById('ordersContainer');
+        // রিয়েল-টাইম অর্ডার লিসেনার
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const container = document.getElementById('adminOrders');
+            document.getElementById('orderCount').innerText = `${snapshot.size}টি অর্ডার`;
             container.innerHTML = "";
 
             snapshot.forEach((orderDoc) => {
                 const order = orderDoc.data();
-                if(order.status !== "pending") return;
+                const id = orderDoc.id;
 
-                const orderDiv = document.createElement('div');
-                orderDiv.className = "bg-white p-6 rounded-2xl shadow-md border-l-8 border-yellow-400";
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-3xl shadow-md border-l-8 " + 
+                                 (order.status === 'pending' ? 'border-yellow-400' : 'border-green-500');
                 
-                let itemsHtml = order.items.map((item, index) => `
-                    <div class="flex justify-between items-center py-2 border-b">
-                        <span class="text-gray-700">${item}</span>
-                        <input type="number" placeholder="দাম" class="price-input w-24 border rounded p-1 text-right" data-index="${index}">
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800 italic">অর্ডার আইডি: ...${id.slice(-5)}</h3>
+                            <p class="text-xs text-gray-400 font-medium">${order.createdAt?.toDate().toLocaleString() || 'এখনই'}</p>
+                        </div>
+                        <span class="bg-blue-50 px-3 py-1 rounded-full text-blue-600 text-[10px] font-bold uppercase tracking-wider">${order.status}</span>
                     </div>
-                `).join('');
 
-                orderDiv.innerHTML = `
-                    <div class="mb-4">
-                        <h3 class="font-bold text-lg">Order ID: ${orderDoc.id.slice(-5)}</h3>
-                        <p class="text-xs text-gray-400">${order.createdAt?.toDate().toLocaleString() || 'Just now'}</p>
+                    <div class="bg-slate-50 p-4 rounded-xl mb-4 text-sm text-gray-700">
+                        ${order.items.join('<br>')}
                     </div>
-                    <div class="space-y-1 mb-4">${itemsHtml}</div>
-                    <div class="flex gap-2">
-                        <input type="number" id="delCharge-${orderDoc.id}" placeholder="Delivery" class="w-1/2 border p-2 rounded" value="50">
-                        <input type="number" id="platFee-${orderDoc.id}" placeholder="Platform" class="w-1/2 border p-2 rounded" value="20">
+
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-200">১. ইনভয়েস রেডি</button>
+                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-purple-100 text-purple-700 py-2 rounded-lg text-xs font-bold hover:bg-purple-200">২. বাজারে আছি</button>
+                        <button onclick="updateStatus('${id}', 'delivery')" class="bg-orange-100 text-orange-700 py-2 rounded-lg text-xs font-bold hover:bg-orange-200">৩. পথে আসছি</button>
+                        <button onclick="updateStatus('${id}', 'at_location')" class="bg-teal-100 text-teal-700 py-2 rounded-lg text-xs font-bold hover:bg-teal-200">৪. বাসার নিচে</button>
                     </div>
-                    <button onclick="window.generateInvoice('${orderDoc.id}')" class="w-full bg-green-600 text-white mt-4 py-2 rounded-lg font-bold">ইনভয়েস কনফার্ম করুন</button>
+
+                    <button onclick="updateStatus('${id}', 'completed')" class="w-full mt-4 bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-green-100">খিদমত সম্পন্ন</button>
                 `;
-                container.appendChild(orderDiv);
+                container.appendChild(card);
             });
         });
 
-        // Invoice Generation Logic
-        window.generateInvoice = async (id) => {
-            const orderRef = doc(db, "orders", id);
-            const priceInputs = document.querySelectorAll('.price-input');
-            const deliveryCharge = parseFloat(document.getElementById(`delCharge-${id}`).value) || 0;
-            const platformFee = parseFloat(document.getElementById(`platFee-${id}`).value) || 0;
-            
-            let subTotal = 0;
-            priceInputs.forEach(input => subTotal += (parseFloat(input.value) || 0));
-
+        // স্ট্যাটাস আপডেট করার ফাংশন
+        window.updateStatus = async (id, newStatus) => {
             try {
-                await updateDoc(orderRef, {
-                    status: "invoice_ready",
-                    totalBill: subTotal + deliveryCharge + platformFee,
-                    deliveryCharge: deliveryCharge,
-                    platformFee: platformFee,
-                    subTotal: subTotal
-                });
-                alert("Invoice Sent to Customer!");
+                const orderRef = doc(db, "orders", id);
+                await updateDoc(orderRef, { status: newStatus });
+                console.log("Status Updated:", newStatus);
             } catch (e) {
-                alert("Error: " + e.message);
+                alert("ভুল হয়েছে: " + e.message);
             }
         };
     </script>
