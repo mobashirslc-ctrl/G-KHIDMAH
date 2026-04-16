@@ -122,23 +122,35 @@
             "completed": "খিদমতটি সফল হয়েছে। আপনাকে ধন্যবাদ!"
         };
 
-        window.placeOrder = async () => {
-            const listText = document.getElementById('orderList').value;
-            if(!listText.trim()) return alert("ফর্দটি লিখুন।");
-            const items = listText.split('\n').filter(i => i.trim() !== "");
+        // এই লাইনটি নিশ্চিত করবে যে বাটন ক্লিক করলে ফাংশনটি কাজ করবে
+window.placeOrder = async () => {
+    const listText = document.getElementById('orderList').value;
+    if(!listText.trim()) return alert("দয়া করে আপনার ফর্দটি লিখুন।");
+    
+    const items = listText.split('\n').filter(i => i.trim() !== "");
 
-            try {
-                const docRef = await addDoc(collection(db, "orders"), {
-                    items: items,
-                    itemPrices: {},
-                    status: "pending",
-                    createdAt: serverTimestamp(),
-                    subTotal: 0, deliveryCharge: 50, platformFee: 20, totalBill: 0
-                });
-                localStorage.setItem('activeOrderId', docRef.id);
-                initTracking();
-            } catch (e) { alert("ত্রুটি হয়েছে।"); }
-        };
+    try {
+        const docRef = await addDoc(collection(db, "orders"), {
+            items: items,
+            itemPrices: {},
+            status: "pending",
+            createdAt: serverTimestamp(),
+            subTotal: 0, 
+            deliveryCharge: 50, 
+            platformFee: 20, 
+            totalBill: 0,
+            couponDiscount: 0
+        });
+        
+        // আইডি সেভ করে ট্র্যাকিং শুরু করা
+        localStorage.setItem('activeOrderId', docRef.id);
+        initTracking();
+        
+    } catch (e) { 
+        console.error("Error adding document: ", e);
+        alert("দুঃখিত, আবার চেষ্টা করুন।"); 
+    }
+};
 
         window.initTracking = () => {
             const orderId = localStorage.getItem('activeOrderId');
