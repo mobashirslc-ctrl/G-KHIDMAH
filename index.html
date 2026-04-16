@@ -6,6 +6,7 @@
     <title>G KHIDMAH | আপনার বিশ্বস্ত খিদমতকারী</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         .animate-bounce-in { animation: bounceIn 0.5s ease-out; }
@@ -19,35 +20,32 @@
 <body class="bg-slate-50 min-h-screen">
 
     <header class="bg-white shadow-sm p-4 text-center border-b border-blue-100">
-        <img src="logo.png" alt="G-KHIDMAH Logo" class="h-20 mx-auto mb-2 drop-shadow-md">
+        <img src="logo.png" alt="Logo" class="h-20 mx-auto mb-2 drop-shadow-md">
         <h1 class="text-2xl font-bold text-blue-700">G KHIDMAH</h1>
-        <p class="text-xs text-gray-500 italic font-medium">আপনার ভরসা, আমাদের আন্তরিকতা</p>
     </header>
 
     <div class="max-w-md mx-auto p-4 pb-20 space-y-6">
         
         <div id="orderSection" class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 mt-4">
             <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">আজ আপনার কী কী লাগবে?</h2>
-            <textarea id="orderList" rows="5" 
-                class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 focus:ring-0 outline-none transition-all placeholder:text-gray-300 text-gray-700" 
-                placeholder="যেমন: ৫ কেজি চাল, ২ লিটার তেল..."></textarea>
-            
-            <button onclick="placeOrder()" 
-                class="w-full bg-blue-600 text-white mt-4 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-100">
+            <textarea id="orderList" rows="5" class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 outline-none transition-all placeholder:text-gray-300" placeholder="যেমন: ৫ কেজি চাল..."></textarea>
+            <button onclick="placeOrder()" id="startBtn" class="w-full bg-blue-600 text-white mt-4 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 shadow-lg">
                 খিদমত শুরু করুন
             </button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6 animate-bounce-in">
-            <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white p-6 rounded-3xl shadow-xl text-center relative overflow-hidden">
-                <p class="text-[10px] uppercase tracking-widest opacity-80 mb-2 font-bold">অর্ডারের বর্তমান অবস্থা</p>
-                <h1 id="trackMessage" class="text-lg font-bold leading-tight italic">তালিকা যাচাই করা হচ্ছে...</h1>
+            <div class="bg-white p-6 rounded-3xl shadow-xl text-center border border-blue-100">
+                <lottie-player id="mainAnim" src="" background="transparent" speed="1" class="w-48 h-48 mx-auto" loop autoplay></lottie-player>
+                
+                <p class="text-[10px] uppercase tracking-widest text-blue-400 mb-2 font-bold mt-4">অর্ডারের অবস্থা</p>
+                <h1 id="trackMessage" class="text-lg font-bold text-blue-900 leading-tight italic">প্রসেসিং হচ্ছে...</h1>
             </div>
 
-            <div id="invoiceBox" class="hidden bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-100 border-t-8 border-t-blue-700">
+            <div id="invoiceBox" class="hidden bg-white rounded-3xl shadow-2xl overflow-hidden border-t-8 border-t-blue-700">
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
-                    <h3 class="text-sm font-black text-blue-900 uppercase tracking-tighter">ডিজিটাল রশিদ (Invoice)</h3>
-                    <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">UNPAID</span>
+                    <h3 class="text-sm font-black text-blue-900 uppercase">ডিজিটাল রশিদ</h3>
+                    <span id="paymentStatus" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Unpaid</span>
                 </div>
                 
                 <div class="p-6 space-y-4" id="invoiceItemsDisplay"></div>
@@ -57,33 +55,28 @@
                         <input type="text" id="couponInput" placeholder="কুপন কোড দিন" class="flex-1 bg-white border border-blue-100 rounded-xl px-3 py-2 text-xs outline-none">
                         <button onclick="applyCoupon()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Apply</button>
                     </div>
-                    <p id="couponMsg" class="text-[10px] mt-1 hidden font-bold"></p>
+                    <p id="couponMsg" class="text-[10px] mt-1 hidden"></p>
                 </div>
 
-                <div class="p-6 bg-slate-50 border-t border-dashed border-gray-200 space-y-3">
+                <div class="p-6 bg-slate-50 space-y-3">
                     <div class="flex justify-between text-gray-500 text-sm">
-                        <span>পণ্যের মোট বাজারমূল্য:</span>
-                        <span id="displaySubtotal" class="font-bold text-gray-800">৳০</span>
+                        <span>বাজারমূল্য:</span> <span id="displaySubtotal" class="font-bold text-gray-800">৳০</span>
                     </div>
                     <div class="flex justify-between text-gray-500 text-sm">
-                        <span>ডেলিভারি ও সার্ভিস চার্জ:</span>
-                        <span id="displayCharges" class="font-bold text-gray-800">৳০</span>
+                        <span>সার্ভিস চার্জ:</span> <span id="displayCharges" class="font-bold text-gray-800">৳০</span>
                     </div>
                     <div id="discountRow" class="hidden flex justify-between text-green-600 text-sm font-bold">
-                        <span>কুপন ডিসকাউন্ট (-):</span>
-                        <span id="displayDiscount">৳০</span>
+                        <span>ডিসকাউন্ট (-):</span> <span id="displayDiscount">৳০</span>
                     </div>
-                    <div class="pt-4 mt-2 border-t-2 border-blue-200 flex justify-between items-end">
-                        <div>
-                            <span class="text-lg font-black text-blue-900 leading-none">মোট প্রদেয় বিল:</span>
-                        </div>
+                    <div class="pt-4 border-t-2 border-blue-200 flex justify-between items-end">
+                        <span class="text-lg font-black text-blue-900">মোট বিল:</span>
                         <span id="displayTotal" class="text-4xl font-black text-blue-700 tracking-tighter">৳০</span>
                     </div>
                 </div>
 
                 <div class="p-4 bg-white">
-                    <button id="finalConfirmBtn" onclick="confirmOrderPayment()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 flex items-center justify-center gap-2 transition-all active:scale-95">
-                        <span>অর্ডার নিশ্চিত করুন</span>
+                    <button id="finalConfirmBtn" onclick="confirmOrderPayment()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">
+                        অর্ডার নিশ্চিত করুন
                     </button>
                 </div>
             </div>
@@ -92,7 +85,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { statusAnimations } from "./animations.js"; // অ্যানিমেশন ফাইল ইমপোর্ট
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -110,47 +104,36 @@
         let discountAmount = 0;
 
         const statusMessages = {
-            "pending": "আমরা আপনার বাজারের ফর্দটি পেয়েছি। একটু অপেক্ষা করুন...",
-            "verifying": "বাজারদর অনুযায়ী একটি খসড়া রশিদ তৈরি করা হচ্ছে।",
+            "pending": "আমরা আপনার ফর্দটি পেয়েছি। একটু অপেক্ষা করুন...",
+            "verifying": "তালিকাটি যাচাই করে ইনভয়েস তৈরি করা হচ্ছে।",
             "invoice_ready": "আপনার ইনভয়েস তৈরি হয়েছে। চেক করে কনফার্ম করুন।",
-            "finding_assistant": "ধন্যবাদ! আমরা আপনার জন্য একজন সহকারী খুঁজছি।",
-            "assistant_assigned": "সহকারীকে দায়িত্ব দেওয়া হয়েছে। তিনি বাজারের দিকে যাচ্ছেন।",
-            "shopping": "আপনার কেনাকাটা চলছে।",
-            "packing": "কেনাকাটা শেষ! আমরা এখন প্যাকিং করছি।",
-            "delivery_started": "সহকারী আপনার বাসার দিকে রওয়ানা দিয়েছেন।",
-            "at_location": "সহকারী আপনার বাসার নিচে পৌঁছেছেন।",
-            "completed": "খিদমতটি সফল হয়েছে। আপনাকে ধন্যবাদ!"
+            "finding_assistant": "আমরা আপনার জন্য একজন সহকারী খুঁজছি।",
+            "assistant_assigned": "সহকারী নির্ধারিত হয়েছে। তিনি বাজারের দিকে যাচ্ছেন।",
+            "at_store": "আপনার সহকারী দোকানে পৌঁছেছেন।",
+            "shopping": "কেনাকাটা চলছে...",
+            "packing": "প্যাকিং করা হচ্ছে।",
+            "delivery_started": "সহকারী আপনার ঠিকানার দিকে রওয়ানা হয়েছেন।",
+            "at_location": "সহকারী পৌঁছে গেছেন। অনুগ্রহ করে বুঝে নিন।",
+            "completed": "খিদমতটি সফল হয়েছে। ধন্যবাদ!"
         };
 
-        // এই লাইনটি নিশ্চিত করবে যে বাটন ক্লিক করলে ফাংশনটি কাজ করবে
-window.placeOrder = async () => {
-    const listText = document.getElementById('orderList').value;
-    if(!listText.trim()) return alert("দয়া করে আপনার ফর্দটি লিখুন।");
-    
-    const items = listText.split('\n').filter(i => i.trim() !== "");
+        // এই window.placeOrder বাটন ফিক্স করে
+        window.placeOrder = async () => {
+            const listText = document.getElementById('orderList').value;
+            if(!listText.trim()) return alert("ফর্দ লিখুন");
 
-    try {
-        const docRef = await addDoc(collection(db, "orders"), {
-            items: items,
-            itemPrices: {},
-            status: "pending",
-            createdAt: serverTimestamp(),
-            subTotal: 0, 
-            deliveryCharge: 50, 
-            platformFee: 20, 
-            totalBill: 0,
-            couponDiscount: 0
-        });
-        
-        // আইডি সেভ করে ট্র্যাকিং শুরু করা
-        localStorage.setItem('activeOrderId', docRef.id);
-        initTracking();
-        
-    } catch (e) { 
-        console.error("Error adding document: ", e);
-        alert("দুঃখিত, আবার চেষ্টা করুন।"); 
-    }
-};
+            try {
+                const docRef = await addDoc(collection(db, "orders"), {
+                    items: listText.split('\n').filter(i => i.trim() !== ""),
+                    itemPrices: {},
+                    status: "pending",
+                    createdAt: serverTimestamp(),
+                    subTotal: 0, deliveryCharge: 50, platformFee: 20
+                });
+                localStorage.setItem('activeOrderId', docRef.id);
+                initTracking();
+            } catch (e) { alert("ত্রুটি হয়েছে!"); }
+        };
 
         window.initTracking = () => {
             const orderId = localStorage.getItem('activeOrderId');
@@ -170,85 +153,70 @@ window.placeOrder = async () => {
         function updateUI(data) {
             document.getElementById('trackMessage').innerText = statusMessages[data.status] || "প্রসেসিং...";
             
+            // অ্যানিমেশন আপডেট
+            const animPlayer = document.getElementById('mainAnim');
+            if(statusAnimations[data.status]) {
+                animPlayer.load(statusAnimations[data.status]);
+            }
+
             if(data.status !== "pending" && data.status !== "verifying") {
                 document.getElementById('invoiceBox').classList.remove('hidden');
-                
                 const prices = data.itemPrices || {};
-                const itemsHtml = data.items.map(item => `
+                document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
                     <div class="flex justify-between items-center border-b border-gray-50 pb-1 italic">
                         <span class="text-gray-700 text-sm">${item}</span>
                         <span class="text-blue-900 font-bold text-sm">৳${prices[item] || '...'}</span>
                     </div>
                 `).join('');
                 
-                document.getElementById('invoiceItemsDisplay').innerHTML = itemsHtml;
                 document.getElementById('displaySubtotal').innerText = `৳${data.subTotal || 0}`;
                 document.getElementById('displayCharges').innerText = `৳${(data.deliveryCharge || 0) + (data.platformFee || 0)}`;
-                
                 calculateFinalTotal();
+            }
+
+            if(data.status === "finding_assistant" || data.status === "completed") {
+                document.getElementById('paymentStatus').innerText = "PAID";
+                document.getElementById('paymentStatus').classList.replace('bg-red-100', 'bg-green-100');
+                document.getElementById('paymentStatus').classList.replace('text-red-600', 'text-green-600');
+                document.getElementById('finalConfirmBtn').classList.add('hidden');
             }
         }
 
-        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-window.applyCoupon = async () => {
-    const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    const msg = document.getElementById('couponMsg');
-    
-    if(!code) return alert("কোড লিখুন");
-
-    try {
-        // ডাটাবেস থেকে কুপনটি খুঁজবে
-        const couponSnap = await getDoc(doc(db, "coupons", code));
-        
-        if (couponSnap.exists()) {
-            discountAmount = couponSnap.data().amount;
-            msg.innerText = `অভিনন্দন! ${discountAmount} টাকা ডিসকাউন্ট পাওয়া গেছে।`;
-            msg.className = "text-[10px] mt-1 text-green-600 block font-bold";
-            document.getElementById('discountRow').classList.remove('hidden');
-            calculateFinalTotal(); // নতুন টোটাল বিল দেখাবে
-        } else {
-            msg.innerText = "দুঃখিত, কুপনটি সঠিক নয়।";
-            msg.className = "text-[10px] mt-1 text-red-500 block";
-        }
-    } catch (e) {
-        alert("কুপন চেক করতে সমস্যা হয়েছে।");
-    }
-};
-
+        window.applyCoupon = async () => {
+            const code = document.getElementById('couponInput').value.trim().toUpperCase();
+            const msg = document.getElementById('couponMsg');
+            const couponSnap = await getDoc(doc(db, "coupons", code));
+            
+            if (couponSnap.exists()) {
+                discountAmount = couponSnap.data().amount;
+                msg.innerText = `${discountAmount} টাকা ডিসকাউন্ট যুক্ত হয়েছে!`;
+                msg.className = "text-[10px] mt-1 text-green-600 block font-bold";
+                document.getElementById('discountRow').classList.remove('hidden');
+                calculateFinalTotal();
+            } else {
+                alert("ভুল কুপন!");
+            }
+        };
 
         function calculateFinalTotal() {
             if (!currentOrderData) return;
             const sub = currentOrderData.subTotal || 0;
             const extra = (currentOrderData.deliveryCharge || 0) + (currentOrderData.platformFee || 0);
             const finalTotal = (sub + extra) - discountAmount;
-            
             document.getElementById('displayDiscount').innerText = `৳${discountAmount}`;
             document.getElementById('displayTotal').innerText = `৳${finalTotal}`;
         }
 
         window.confirmOrderPayment = async () => {
             const orderId = localStorage.getItem('activeOrderId');
-            const btn = document.getElementById('finalConfirmBtn');
             if (!orderId) return;
-
             try {
-                btn.innerText = "প্রসেসিং...";
-                btn.disabled = true;
-
                 await updateDoc(doc(db, "orders", orderId), {
                     status: "finding_assistant",
-                    discount: discountAmount,
-                    finalPayable: document.getElementById('displayTotal').innerText.replace('৳', '')
+                    finalBill: document.getElementById('displayTotal').innerText.replace('৳', '')
                 });
-
-                btn.innerText = "অর্ডার নিশ্চিত হয়েছে! ✓";
-                btn.classList.replace('bg-green-600', 'bg-blue-600');
-            } catch (e) { 
-                alert("আবার চেষ্টা করুন।"); 
-                btn.disabled = false;
-                btn.innerText = "অর্ডার নিশ্চিত করুন";
-            }
+                alert("অর্ডার নিশ্চিত হয়েছে!");
+            } catch (e) { alert("আবার চেষ্টা করুন।"); }
         };
 
         window.onload = initTracking;
