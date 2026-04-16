@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-KHIDMAH | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 p-4 font-sans">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center mb-8 bg-blue-700 p-4 rounded-xl shadow-lg">
+            <h1 class="text-xl font-bold text-white">G-KHIDMAH Admin</h1>
+            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">Live Orders</span>
+        </header>
+
+        <div id="ordersContainer" class="space-y-6">
+            <p class="text-center text-gray-500">অর্ডার লোড হচ্ছে...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase config (Exact same as index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Real-time listener for orders
+        onSnapshot(collection(db, "orders"), (snapshot) => {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = "";
+
+            snapshot.forEach((orderDoc) => {
+                const order = orderDoc.data();
+                if(order.status !== "pending") return;
+
+                const orderDiv = document.createElement('div');
+                orderDiv.className = "bg-white p-6 rounded-2xl shadow-md border-l-8 border-yellow-400";
+                
+                let itemsHtml = order.items.map((item, index) => `
+                    <div class="flex justify-between items-center py-2 border-b">
+                        <span class="text-gray-700">${item}</span>
+                        <input type="number" placeholder="দাম" class="price-input w-24 border rounded p-1 text-right" data-index="${index}">
+                    </div>
+                `).join('');
+
+                orderDiv.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-bold text-lg">Order ID: ${orderDoc.id.slice(-5)}</h3>
+                        <p class="text-xs text-gray-400">${order.createdAt?.toDate().toLocaleString() || 'Just now'}</p>
+                    </div>
+                    <div class="space-y-1 mb-4">${itemsHtml}</div>
+                    <div class="flex gap-2">
+                        <input type="number" id="delCharge-${orderDoc.id}" placeholder="Delivery" class="w-1/2 border p-2 rounded" value="50">
+                        <input type="number" id="platFee-${orderDoc.id}" placeholder="Platform" class="w-1/2 border p-2 rounded" value="20">
+                    </div>
+                    <button onclick="window.generateInvoice('${orderDoc.id}')" class="w-full bg-green-600 text-white mt-4 py-2 rounded-lg font-bold">ইনভয়েস কনফার্ম করুন</button>
+                `;
+                container.appendChild(orderDiv);
+            });
+        });
+
+        // Invoice Generation Logic
+        window.generateInvoice = async (id) => {
+            const orderRef = doc(db, "orders", id);
+            const priceInputs = document.querySelectorAll('.price-input');
+            const deliveryCharge = parseFloat(document.getElementById(`delCharge-${id}`).value) || 0;
+            const platformFee = parseFloat(document.getElementById(`platFee-${id}`).value) || 0;
+            
+            let subTotal = 0;
+            priceInputs.forEach(input => subTotal += (parseFloat(input.value) || 0));
+
+            try {
+                await updateDoc(orderRef, {
+                    status: "invoice_ready",
+                    totalBill: subTotal + deliveryCharge + platformFee,
+                    deliveryCharge: deliveryCharge,
+                    platformFee: platformFee,
+                    subTotal: subTotal
+                });
+                alert("Invoice Sent to Customer!");
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        };
+    </script>
+</body>
+</html>
