@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-KHIDMAH | Your Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4 font-sans">
+    <div id="invoiceApp" class="max-w-md mx-auto mt-6">
+        <div id="statusCard" class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg mb-6 text-center">
+            <h2 class="text-lg font-medium opacity-80">অর্ডারের অবস্থা</h2>
+            <h1 id="orderStatus" class="text-2xl font-bold mt-1 uppercase tracking-wider italic">অর্ডার চেক করা হচ্ছে...</h1>
+        </div>
+
+        <div id="invoiceBox" class="bg-white rounded-3xl shadow-xl overflow-hidden hidden">
+            <div class="p-6 border-b border-dashed border-gray-200">
+                <h3 class="text-gray-400 text-xs font-bold uppercase mb-4">বাজারের রশিদ (Digital Invoice)</h3>
+                <div id="itemsList" class="space-y-3">
+                    </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">মোট বাজার:</span>
+                    <span id="subTotal" class="font-bold">৳0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">ডেলিভারি চার্জ:</span>
+                    <span id="delCharge" class="font-bold">৳0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">প্ল্যাটফর্ম ফি:</span>
+                    <span id="platFee" class="font-bold">৳0</span>
+                </div>
+                <div class="pt-4 mt-2 border-t-2 border-gray-200 flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-800">সর্বমোট প্রদেয়:</span>
+                    <span id="totalBill" class="text-2xl font-black text-blue-700">৳0</span>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <p class="text-[10px] text-gray-400 text-center mb-4 italic">*অর্ডার কনফার্ম করতে বিকাশ বা নগদে পেমেন্ট করুন।</p>
+                <button class="w-full bg-black text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+                    <span>পেমেন্ট করুন (MFS)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fetch the latest order for this user (Simple version)
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(1));
+        
+        onSnapshot(q, (snapshot) => {
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const statusEl = document.getElementById('orderStatus');
+                const invoiceBox = document.getElementById('invoiceBox');
+
+                if(data.status === "pending") {
+                    statusEl.innerText = "অ্যাডমিন চেক করছে...";
+                    invoiceBox.classList.add('hidden');
+                } else if(data.status === "invoice_ready") {
+                    statusEl.innerText = "ইনভয়েস রেডি!";
+                    statusEl.parentElement.className = "bg-green-600 text-white p-6 rounded-2xl shadow-lg mb-6 text-center";
+                    invoiceBox.classList.remove('hidden');
+
+                    // Fill Invoice Data
+                    document.getElementById('subTotal').innerText = `৳${data.subTotal}`;
+                    document.getElementById('delCharge').innerText = `৳${data.deliveryCharge}`;
+                    document.getElementById('platFee').innerText = `৳${data.platformFee}`;
+                    document.getElementById('totalBill').innerText = `৳${data.totalBill}`;
+
+                    const listHtml = data.items.map(item => `
+                        <div class="flex justify-between text-sm font-medium">
+                            <span class="text-gray-700">${item}</span>
+                            <span class="text-blue-600">চেকড</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('itemsList').innerHTML = listHtml;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
