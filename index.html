@@ -3,58 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G KHIDMAH | আপনার খিদমতে আমরা</title>
+    <title>G KHIDMAH | আপনার বিশ্বস্ত খিদমতকারী</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+        .animate-bounce-in { animation: bounceIn 0.5s ease-out; }
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <header class="bg-white shadow-sm p-4 text-center border-b border-blue-100">
+        <img src="logo.png" alt="G-KHIDMAH Logo" class="h-20 mx-auto mb-2 drop-shadow-md">
         <h1 class="text-2xl font-bold text-blue-700">G KHIDMAH</h1>
-        <p class="text-xs text-gray-500 italic">আপনার ভরসা, আমাদের আন্তরিকতা</p>
+        <p class="text-xs text-gray-500 italic font-medium">আপনার ভরসা, আমাদের আন্তরিকতা</p>
     </header>
 
-    <div class="max-w-md mx-auto p-4 space-y-6">
+    <div class="max-w-md mx-auto p-4 pb-20 space-y-6">
         
-        <div id="orderSection" class="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">আজ আপনার কী কী লাগবে?</h2>
+        <div id="orderSection" class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 mt-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">আজ আপনার কী কী লাগবে?</h2>
             <textarea id="orderList" rows="5" 
-                class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 focus:ring-0 outline-none transition-all placeholder:text-gray-300" 
+                class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 focus:ring-0 outline-none transition-all placeholder:text-gray-300 text-gray-700" 
                 placeholder="যেমন: ৫ কেজি চাল, ২ লিটার তেল..."></textarea>
             
-            <button id="submitBtn" onclick="placeOrder()" 
-                class="w-full bg-blue-600 text-white mt-4 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all">
+            <button onclick="placeOrder()" 
+                class="w-full bg-blue-600 text-white mt-4 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-100">
                 খিদমত শুরু করুন
             </button>
         </div>
 
-        <div id="trackingSection" class="hidden space-y-4">
-            <div id="statusCard" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-6 rounded-3xl shadow-xl">
-                <p class="text-xs opacity-80 mb-1">অর্ডারের বর্তমান অবস্থা:</p>
-                <h1 id="trackMessage" class="text-xl font-bold leading-tight italic">আপনার তালিকাটি আমরা পেয়েছি, একটু অপেক্ষা করুন...</h1>
+        <div id="trackingSection" class="hidden space-y-6 animate-bounce-in">
+            
+            <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white p-6 rounded-3xl shadow-xl text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                    <svg width="60" height="60" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                </div>
+                <p class="text-[10px] uppercase tracking-widest opacity-80 mb-2 font-bold">অর্ডারের বর্তমান অবস্থা</p>
+                <h1 id="trackMessage" class="text-lg font-bold leading-tight italic">তালিকা যাচাই করা হচ্ছে...</h1>
             </div>
 
-            <div id="trackingFlow" class="bg-white p-6 rounded-3xl shadow-md space-y-4 border border-gray-100">
-                <div id="invoiceBox" class="hidden border-b border-dashed pb-4 mb-4">
-                    </div>
+            <div id="invoiceBox" class="hidden bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-100 border-t-8 border-t-blue-700">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
+                    <h3 class="text-sm font-black text-blue-900 uppercase tracking-tighter">ডিজিটাল রশিদ (Invoice)</h3>
+                    <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">PAID/UNPAID</span>
+                </div>
                 
-                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-pending">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">১</div>
-                    <p class="text-sm font-semibold">তালিকা যাচাই করা হচ্ছে</p>
+                <div class="p-6 space-y-4" id="invoiceItemsDisplay">
+                    </div>
+
+                <div class="p-6 bg-slate-50 border-t border-dashed border-gray-200 space-y-3">
+                    <div class="flex justify-between text-gray-500 text-sm">
+                        <span>পণ্যের মোট বাজারমূল্য:</span>
+                        <span id="displaySubtotal" class="font-bold text-gray-800 tracking-wide">৳০</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500 text-sm">
+                        <span>ডেলিভারি চার্জ:</span>
+                        <span id="displayDelivery" class="font-bold text-gray-800 tracking-wide">৳০</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500 text-sm">
+                        <span>প্ল্যাটফর্ম ফি:</span>
+                        <span id="displayPlatform" class="font-bold text-gray-800 tracking-wide">৳০</span>
+                    </div>
+                    <div class="pt-4 mt-2 border-t-2 border-blue-200 flex justify-between items-end">
+                        <div>
+                            <span class="text-[10px] font-bold text-blue-400 uppercase block leading-none mb-1">Total Payable</span>
+                            <span class="text-lg font-black text-blue-900 leading-none">মোট প্রদেয় বিল:</span>
+                        </div>
+                        <span id="displayTotal" class="text-4xl font-black text-blue-700 tracking-tighter">৳০</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-confirmed">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">২</div>
-                    <p class="text-sm font-semibold">বাজারমূল্য নিশ্চিত করা</p>
+
+                <div class="p-4 bg-white">
+                    <button class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 flex items-center justify-center gap-2">
+                        <span>অর্ডার নিশ্চিত করুন</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </button>
                 </div>
-                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-shopping">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">৩</div>
-                    <p class="text-sm font-semibold">কেনাকাটা চলছে</p>
-                </div>
-                <div class="flex items-center gap-4 opacity-30 transition-opacity" id="step-delivery">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">৪</div>
-                    <p class="text-sm font-semibold">সহকারী আপনার পথে</p>
-                </div>
+            </div>
+
+            <div class="flex justify-center gap-2 py-4" id="progressDots">
+                <div class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-200"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-200"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-200"></div>
             </div>
         </div>
     </div>
@@ -63,6 +100,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
             authDomain: "gkhidmah-8636b.firebaseapp.com",
@@ -75,26 +113,44 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ১. অর্ডার প্লেস করা
+        // ১০টি মিষ্টি ট্র্যাকিং মেসেজ
+        const statusMessages = {
+            "pending": "আমরা আপনার বাজারের ফর্দটি পেয়েছি। একটু অপেক্ষা করুন, আমরা যাচাই করছি।",
+            "verifying": "আপনার তালিকাটি আমরা দেখেছি। বর্তমান বাজারদর অনুযায়ী একটি খসড়া রশিদ তৈরি করা হচ্ছে।",
+            "invoice_ready": "বাজারমূল্য ভিত্তিক আপনার ইনভয়েসটি তৈরি করা হয়েছে। দয়া করে নিচে চেক করে কনফার্ম করুন।",
+            "finding_assistant": "ধন্যবাদ! আমরা আপনার জন্য একজন দক্ষ সহকারী (Khidmah Assistant) খুঁজছি।",
+            "assistant_assigned": "আপনার খিদমতের জন্য আমাদের একজন সহকারীকে দায়িত্ব দেওয়া হয়েছে। তিনি বাজারের দিকে যাচ্ছেন।",
+            "shopping": "আপনার জন্য সেরা জিনিসগুলো আমরা খুঁজে খুঁজে কিনছি। একটু সময় দিন।",
+            "packing": "আপনার কেনাকাটা শেষ! আমরা এখন সবকিছু যত্নের সাথে প্যাকিং করছি।",
+            "delivery_started": "সহকারী আপনার বাজারের ব্যাগ নিয়ে আপনার বাসার দিকে রওয়ানা দিয়েছেন।",
+            "at_location": "আমাদের সহকারী আপনার বাসার নিচে পৌঁছেছেন। অনুগ্রহ করে বাজারটি বুঝে নিন।",
+            "completed": "খিদমতটি সফল হয়েছে। আমাদের পাশে থাকার জন্য আপনাকে অনেক ধন্যবাদ ও ভালোবাসা!"
+        };
+
         window.placeOrder = async () => {
-            const list = document.getElementById('orderList').value;
-            if(!list.trim()) return alert("দয়া করে আপনার তালিকাটি লিখুন");
+            const listText = document.getElementById('orderList').value;
+            if(!listText.trim()) return alert("দয়া করে আপনার ফর্দটি লিখুন।");
+
+            const items = listText.split('\n').filter(i => i.trim() !== "");
 
             try {
                 const docRef = await addDoc(collection(db, "orders"), {
-                    items: list.split('\n'),
+                    items: items,
+                    itemPrices: {}, // Admin will fill this
                     status: "pending",
                     createdAt: serverTimestamp(),
-                    trackMsg: "আমরা আপনার তালিকাটি পেয়েছি, অ্যাডমিন এখনই চেক করছেন।"
+                    subTotal: 0, 
+                    deliveryCharge: 0, 
+                    platformFee: 0, 
+                    totalBill: 0
                 });
-                localStorage.setItem('currentOrder', docRef.id);
-                loadTracking();
-            } catch (e) { alert("দুঃখিত, আবার চেষ্টা করুন!"); }
+                localStorage.setItem('activeOrderId', docRef.id);
+                initTracking();
+            } catch (e) { alert("দুঃখিত, কোনো সমস্যা হয়েছে।"); }
         };
 
-        // ২. ট্র্যাকিং আপডেট এবং মিষ্টি ভাষা সেট করা
-        function loadTracking() {
-            const orderId = localStorage.getItem('currentOrder');
+        function initTracking() {
+            const orderId = localStorage.getItem('activeOrderId');
             if(!orderId) return;
 
             document.getElementById('orderSection').classList.add('hidden');
@@ -103,35 +159,42 @@
             onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(1)), (snapshot) => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const msgEl = document.getElementById('trackMessage');
+                    // Update Message
+                    document.getElementById('trackMessage').innerText = statusMessages[data.status] || "আপনার খিদমতে কাজ চলছে...";
                     
-                    // স্ট্যাটাস অনুযায়ী মেসেজ পরিবর্তন
-                    const statusMap = {
-                        "pending": "আমরা তালিকাটি দেখছি, একটু সময় দিন...",
-                        "invoice_ready": "আপনার তালিকাটি বর্তমান বাজারমূল্য অনুযায়ী আপডেট করা হয়েছে, দয়া করে চেক করে কনফার্ম করুন।",
-                        "shopping": "আপনার পছন্দের জিনিসগুলো আমরা খুঁজে খুঁজে সেরাটা কিনছি...",
-                        "delivery": "কেনাকাটা শেষ! আমাদের সহকারী এখন আপনার বাসার দিকে রওয়ানা দিয়েছেন।",
-                        "at_location": "সহকারী এখন আপনার বাসার নিচে অপেক্ষা করছেন, দয়া করে বাজারটি গ্রহণ করুন।",
-                        "completed": "খিদমতটি সফল হয়েছে। আমাদের পাশে থাকার জন্য আপনাকে অনেক ধন্যবাদ!"
-                    };
-
-                    msgEl.innerText = statusMap[data.status] || data.trackMsg;
-                    
-                    // ভিজ্যুয়াল স্টেপ আপডেট
-                    updateStepVisuals(data.status);
+                    // Show Invoice when ready
+                    if(data.status !== "pending" && data.status !== "verifying") {
+                        showInvoice(data);
+                    }
                 });
             });
         }
 
-        function updateStepVisuals(status) {
-            const steps = ['pending', 'invoice_ready', 'shopping', 'delivery', 'at_location'];
-            steps.forEach(s => {
-                const el = document.getElementById(`step-${s === 'invoice_ready' ? 'confirmed' : s}`);
-                if(el) el.style.opacity = "1";
-            });
+        function showInvoice(data) {
+            const box = document.getElementById('invoiceBox');
+            box.classList.remove('hidden');
+            
+            // Numbers Update
+            document.getElementById('displaySubtotal').innerText = `৳${data.subTotal}`;
+            document.getElementById('displayDelivery').innerText = `৳${data.deliveryCharge}`;
+            document.getElementById('displayPlatform').innerText = `৳${data.platformFee}`;
+            document.getElementById('displayTotal').innerText = `৳${data.totalBill}`;
+
+            // Detailed Item List
+            const prices = data.itemPrices || {};
+            const itemsHtml = data.items.map(item => `
+                <div class="flex justify-between items-center group">
+                    <span class="text-gray-700 font-medium text-sm flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                        ${item}
+                    </span>
+                    <span class="text-blue-900 font-black text-sm tracking-tight">৳${prices[item] || '...'}</span>
+                </div>
+            `).join('');
+            document.getElementById('invoiceItemsDisplay').innerHTML = itemsHtml;
         }
 
-        window.onload = loadTracking;
+        window.onload = initTracking;
     </script>
 </body>
 </html>
