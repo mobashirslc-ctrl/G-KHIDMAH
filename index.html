@@ -151,19 +151,27 @@
         };
 
         function updateUI(data) {
-            const config = statusConfig[data.status] || statusConfig["pending"];
-            
-            // ট্র্যাকিং মেসেজ এবং ধাপ আপডেট
-            document.getElementById('trackMessage').innerText = config.msg;
-            document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-            
-            // অ্যানিমেশন আপডেট
-            const animPlayer = document.getElementById('mainAnim');
-            if(animPlayer.getAttribute('src') !== config.anim) {
-                animPlayer.load(config.anim);
-            }
+    const config = statusMessages[data.status] || statusMessages["pending"];
+    document.getElementById('trackMessage').innerText = config.msg;
+    document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+    
+    const animPlayer = document.getElementById('mainAnim');
+    const newAnimSrc = statusAnimations[data.status];
 
-            // ইনভয়েস ভিজিবিলিটি (পেন্ডিং স্টেজ বাদে)
+    // এনিমেশন সোর্স পরিবর্তন হলে লোড হবে
+    if (newAnimSrc && animPlayer.getAttribute('src') !== newAnimSrc) {
+        animPlayer.setAttribute('src', newAnimSrc);
+        
+        // কিছু ব্রাউজারে src সেট করার পর ম্যানুয়ালি load() কল করতে হয়
+        if (typeof animPlayer.load === 'function') {
+            animPlayer.load(newAnimSrc);
+        }
+    }
+    
+
+
+
+     // ইনভয়েস ভিজিবিলিটি (পেন্ডিং স্টেজ বাদে)
             if(data.status !== "pending" && data.status !== "verifying") {
                 document.getElementById('invoiceBox').classList.remove('hidden');
                 
