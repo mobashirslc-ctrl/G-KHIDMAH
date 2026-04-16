@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-KHIDMAH | কন্ট্রোল প্যানেল</title>
+    <title>G-KHIDMAH | অ্যাডমিন কন্ট্রোল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
-<body class="bg-slate-100 p-4">
+<body class="bg-slate-100 p-4 pb-10">
     <div class="max-w-2xl mx-auto">
-        <header class="bg-blue-800 text-white p-5 rounded-2xl shadow-lg mb-6 flex justify-between items-center">
+        <header class="bg-blue-900 text-white p-6 rounded-3xl shadow-xl mb-8 flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold">G-KHIDMAH অ্যাডমিন</h1>
-                <p class="text-xs opacity-70">খিদমত পরিচালনা করুন</p>
+                <h1 class="text-2xl font-black">G-KHIDMAH</h1>
+                <p class="text-[10px] uppercase tracking-widest opacity-70">অ্যাডমিন ড্যাশবোর্ড</p>
             </div>
-            <div id="orderCount" class="bg-blue-600 px-3 py-1 rounded-full text-sm font-bold">০টি অর্ডার</div>
+            <div id="activeCount" class="bg-blue-700 px-4 py-2 rounded-2xl text-xs font-bold italic">অর্ডার চেক করা হচ্ছে...</div>
         </header>
 
-        <div id="adminOrders" class="space-y-6">
+        <div id="adminOrders" class="space-y-8">
             </div>
     </div>
 
@@ -38,11 +38,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // রিয়েল-টাইম অর্ডার লিসেনার
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snapshot) => {
             const container = document.getElementById('adminOrders');
-            document.getElementById('orderCount').innerText = `${snapshot.size}টি অর্ডার`;
+            document.getElementById('activeCount').innerText = `${snapshot.size}টি অর্ডার পাওয়া গেছে`;
             container.innerHTML = "";
 
             snapshot.forEach((orderDoc) => {
@@ -50,44 +48,93 @@
                 const id = orderDoc.id;
 
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-3xl shadow-md border-l-8 " + 
-                                 (order.status === 'pending' ? 'border-yellow-400' : 'border-green-500');
+                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 relative overflow-hidden";
                 
+                let itemsInputHtml = order.items.map(item => `
+                    <div class="flex items-center justify-between gap-4 mb-2">
+                        <span class="text-sm font-bold text-gray-600 w-1/2">${item}</span>
+                        <input type="number" placeholder="দাম" class="item-price w-1/2 p-2 rounded-xl border border-blue-50 bg-blue-50/30 text-sm focus:outline-none focus:ring-1 focus:ring-blue-300" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
+                    </div>
+                `).join('');
+
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">অর্ডার: ...${id.slice(-5)}</span>
+                        <span class="text-xs font-bold text-gray-400 italic">${order.status}</span>
+                    </div>
+
+                    <div class="mb-6 bg-slate-50 p-5 rounded-3xl border border-dashed border-gray-200">
+                        <h4 class="text-xs font-bold text-gray-400 mb-4 uppercase italic">বাজারমূল্য সেট করুন:</h4>
+                        ${itemsInputHtml}
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 mb-6">
                         <div>
-                            <h3 class="font-bold text-gray-800 italic">অর্ডার আইডি: ...${id.slice(-5)}</h3>
-                            <p class="text-xs text-gray-400 font-medium">${order.createdAt?.toDate().toLocaleString() || 'এখনই'}</p>
+                            <label class="text-[10px] font-bold text-gray-400 block mb-1">ডেলিভারি চার্জ</label>
+                            <input type="number" id="del-${id}" class="w-full p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold" value="${order.deliveryCharge || 50}">
                         </div>
-                        <span class="bg-blue-50 px-3 py-1 rounded-full text-blue-600 text-[10px] font-bold uppercase tracking-wider">${order.status}</span>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 block mb-1">প্ল্যাটফর্ম ফি</label>
+                            <input type="number" id="plat-${id}" class="w-full p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold" value="${order.platformFee || 20}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 block mb-1">কুপন (৳)</label>
+                            <input type="number" id="coupon-${id}" class="w-full p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold text-red-500" value="${order.couponDiscount || 0}">
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-xl mb-4 text-sm text-gray-700">
-                        ${order.items.join('<br>')}
-                    </div>
+                    <button onclick="confirmInvoice('${id}')" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-bold mb-8 shadow-lg shadow-blue-100">ইনভয়েস আপডেট করুন</button>
 
-                    <div class="grid grid-cols-2 gap-2 mt-4">
-                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-200">১. ইনভয়েস রেডি</button>
-                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-purple-100 text-purple-700 py-2 rounded-lg text-xs font-bold hover:bg-purple-200">২. বাজারে আছি</button>
-                        <button onclick="updateStatus('${id}', 'delivery')" class="bg-orange-100 text-orange-700 py-2 rounded-lg text-xs font-bold hover:bg-orange-200">৩. পথে আসছি</button>
-                        <button onclick="updateStatus('${id}', 'at_location')" class="bg-teal-100 text-teal-700 py-2 rounded-lg text-xs font-bold hover:bg-teal-200">৪. বাসার নিচে</button>
+                    <div class="grid grid-cols-2 gap-2 text-[10px]">
+                        <button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-200 p-2 rounded-lg font-bold">১. যাচাই (Verifying)</button>
+                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="bg-blue-100 text-blue-700 p-2 rounded-lg font-bold">২. ইনভয়েস রেডি</button>
+                        <button onclick="updateStatus('${id}', 'finding_assistant')" class="bg-indigo-100 text-indigo-700 p-2 rounded-lg font-bold">৩. সহকারী খুঁজছি</button>
+                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="bg-purple-100 text-purple-700 p-2 rounded-lg font-bold">৪. সহকারী রেডি</button>
+                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-amber-100 text-amber-700 p-2 rounded-lg font-bold">৫. কেনাকাটা চলছে</button>
+                        <button onclick="updateStatus('${id}', 'packing')" class="bg-pink-100 text-pink-700 p-2 rounded-lg font-bold">৬. প্যাকিং চলছে</button>
+                        <button onclick="updateStatus('${id}', 'delivery_started')" class="bg-orange-100 text-orange-700 p-2 rounded-lg font-bold">৭. রওয়ানা হয়েছে</button>
+                        <button onclick="updateStatus('${id}', 'at_location')" class="bg-teal-100 text-teal-700 p-2 rounded-lg font-bold">৮. বাসার নিচে</button>
+                        <button onclick="updateStatus('${id}', 'completed')" class="bg-green-600 text-white p-2 rounded-lg font-bold col-span-2 mt-2 py-3">৯. খিদমত সম্পন্ন (Finish)</button>
                     </div>
-
-                    <button onclick="updateStatus('${id}', 'completed')" class="w-full mt-4 bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-green-100">খিদমত সম্পন্ন</button>
                 `;
                 container.appendChild(card);
             });
         });
 
-        // স্ট্যাটাস আপডেট করার ফাংশন
-        window.updateStatus = async (id, newStatus) => {
+        // ইনভয়েস কনফার্ম এবং ক্যালকুলেশন
+        window.confirmInvoice = async (id) => {
+            const card = event.target.closest('div');
+            const priceInputs = card.querySelectorAll('.item-price');
+            const itemPrices = {};
+            let subTotal = 0;
+
+            priceInputs.forEach(input => {
+                const val = parseFloat(input.value) || 0;
+                itemPrices[input.dataset.item] = val;
+                subTotal += val;
+            });
+
+            const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+            const platFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+            const coupon = parseFloat(document.getElementById(`coupon-${id}`).value) || 0;
+            const total = (subTotal + delCharge + platFee) - coupon;
+
             try {
-                const orderRef = doc(db, "orders", id);
-                await updateDoc(orderRef, { status: newStatus });
-                console.log("Status Updated:", newStatus);
-            } catch (e) {
-                alert("ভুল হয়েছে: " + e.message);
-            }
+                await updateDoc(doc(db, "orders", id), {
+                    itemPrices: itemPrices,
+                    subTotal: subTotal,
+                    deliveryCharge: delCharge,
+                    platformFee: platFee,
+                    couponDiscount: coupon,
+                    totalBill: total,
+                    status: "invoice_ready"
+                });
+                alert("ইনভয়েস কাস্টমার প্যানেলে আপডেট হয়েছে!");
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        window.updateStatus = async (id, status) => {
+            await updateDoc(doc(db, "orders", id), { status: status });
         };
     </script>
 </body>
