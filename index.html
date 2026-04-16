@@ -135,18 +135,29 @@
         };
 
         function updateUI(data) {
-            const config = statusConfig[data.status] || statusConfig["pending"];
+    const config = statusConfig[data.status] || statusConfig["pending"];
+    
+    // টেক্সট আপডেট
+    document.getElementById('trackMessage').innerText = config.msg;
+    document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+    
+    const animPlayer = document.getElementById('mainAnim');
+    const newSrc = config.anim;
+
+    // যদি অ্যানিমেশন প্লেয়ারটি তৈরি থাকে
+    if (animPlayer) {
+        // যদি সোর্স আলাদা হয় তবেই চেঞ্জ করবে
+        if (animPlayer.getAttribute('src') !== newSrc) {
+            animPlayer.setAttribute('src', newSrc);
             
-            // ১. টেক্সট এবং ধাপ আপডেট
-            document.getElementById('trackMessage').innerText = config.msg;
-            document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-            
-            // ২. অ্যানিমেশন লোড ফিক্স
-            const animPlayer = document.getElementById('mainAnim');
-            if(animPlayer.getAttribute('src') !== config.anim) {
-                animPlayer.setAttribute('src', config.anim);
-                if(typeof animPlayer.load === 'function') animPlayer.load(config.anim);
-            }
+            // ট্রায়াঙ্গেল বা ব্ল্যাঙ্ক ইস্যু ফিক্স করার জন্য load() কল
+            setTimeout(() => {
+                if (typeof animPlayer.load === 'function') {
+                    animPlayer.load(newSrc);
+                }
+            }, 50); // ছোট একটি ডিলে দিলে ব্রাউজার সোর্সটি ধরতে পারে
+        }
+    }
 
             // ৩. ইনভয়েস লজিক
             if(data.status !== "pending" && data.status !== "verifying") {
