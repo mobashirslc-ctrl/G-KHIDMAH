@@ -1,4 +1,4 @@
-// animations.js - Updated with working links (No Triangle Error)
+// animations.js
 export const statusAnimations = {
     "pending": "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json",
     "verifying": "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json",
