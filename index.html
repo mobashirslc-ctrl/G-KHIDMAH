@@ -177,20 +177,33 @@
             }
         }
 
-        window.applyCoupon = () => {
-            const code = document.getElementById('couponInput').value.trim().toUpperCase();
-            const msg = document.getElementById('couponMsg');
-            
-            if (code === "KHIDMAH50") {
-                discountAmount = 50;
-                msg.innerText = "৫০ টাকা ডিসকাউন্ট যুক্ত হয়েছে!";
-                msg.className = "text-[10px] mt-1 text-green-600 block";
-                document.getElementById('discountRow').classList.remove('hidden');
-                calculateFinalTotal();
-            } else {
-                alert("ভুল কুপন!");
-            }
-        };
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+window.applyCoupon = async () => {
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    const msg = document.getElementById('couponMsg');
+    
+    if(!code) return alert("কোড লিখুন");
+
+    try {
+        // ডাটাবেস থেকে কুপনটি খুঁজবে
+        const couponSnap = await getDoc(doc(db, "coupons", code));
+        
+        if (couponSnap.exists()) {
+            discountAmount = couponSnap.data().amount;
+            msg.innerText = `অভিনন্দন! ${discountAmount} টাকা ডিসকাউন্ট পাওয়া গেছে।`;
+            msg.className = "text-[10px] mt-1 text-green-600 block font-bold";
+            document.getElementById('discountRow').classList.remove('hidden');
+            calculateFinalTotal(); // নতুন টোটাল বিল দেখাবে
+        } else {
+            msg.innerText = "দুঃখিত, কুপনটি সঠিক নয়।";
+            msg.className = "text-[10px] mt-1 text-red-500 block";
+        }
+    } catch (e) {
+        alert("কুপন চেক করতে সমস্যা হয়েছে।");
+    }
+};
+
 
         function calculateFinalTotal() {
             if (!currentOrderData) return;
