@@ -28,12 +28,9 @@
         
         <div id="orderSection" class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 mt-4 text-center">
             <lottie-player src="https://lottie.host/7905b29c-6237-4d6d-b89a-0726618e001a/writing_list.json" background="transparent" speed="1" class="w-40 h-40 mx-auto" loop autoplay></lottie-player>
-            
             <h2 class="text-lg font-bold text-gray-800 mb-1 mt-4">আজ আপনার কী কী লাগবে?</h2>
             <p class="text-xs text-gray-500 mb-4 italic">নিচে আপনার বাজারের ফর্দটি লিখুন।</p>
-            
             <textarea id="orderList" rows="5" class="w-full border-2 border-blue-50 p-4 rounded-2xl focus:border-blue-300 outline-none transition-all placeholder:text-gray-300 text-sm" placeholder="যেমন: ৫ কেজি চাল, ২ লিটার তেল..."></textarea>
-            
             <button onclick="placeOrder()" id="startBtn" class="w-full bg-blue-600 text-white mt-5 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 shadow-lg shadow-blue-100">
                 খিদমত শুরু করুন
             </button>
@@ -42,46 +39,44 @@
         <div id="trackingSection" class="hidden space-y-6 animate-bounce-in">
             <div class="bg-white p-6 rounded-3xl shadow-xl text-center border border-blue-100">
                 <lottie-player id="mainAnim" src="" background="transparent" speed="1" class="w-48 h-48 mx-auto" loop autoplay></lottie-player>
-                
-                <p class="text-[10px] uppercase tracking-widest text-blue-400 mb-1 font-bold mt-4">অর্ডারের অবস্থা</p>
-                <h1 id="trackMessage" class="text-lg font-bold text-blue-900 leading-tight italic">আপনার ফর্দটি যাচাই করা হচ্ছে...</h1>
+                <p class="text-[10px] uppercase tracking-widest text-blue-400 mb-1 font-bold mt-4 italic" id="stepCounter">ধাপ: ১/১০</p>
+                <h1 id="trackMessage" class="text-lg font-bold text-blue-900 leading-tight italic">প্রসেসিং হচ্ছে...</h1>
             </div>
 
             <div id="invoiceBox" class="hidden bg-white rounded-3xl shadow-2xl overflow-hidden border-t-8 border-t-blue-700">
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
-                    <h3 class="text-sm font-black text-blue-900 uppercase">ডিজিটাল রশিদ</h3>
+                    <h3 class="text-sm font-black text-blue-900 uppercase italic">ডিজিটাল রশিদ</h3>
                     <span id="paymentStatus" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Unpaid</span>
                 </div>
                 
-                <div class="p-6 space-y-4" id="invoiceItemsDisplay">
-                    </div>
+                <div class="p-6 space-y-4" id="invoiceItemsDisplay"></div>
 
                 <div class="px-6 py-3 bg-blue-50/30 border-t border-b border-gray-100">
                     <div class="flex gap-2">
-                        <input type="text" id="couponInput" placeholder="কুপন কোড দিন" class="flex-1 bg-white border border-blue-100 rounded-xl px-3 py-2 text-xs outline-none">
-                        <button onclick="applyCoupon()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold apply-btn">Apply</button>
+                        <input type="text" id="couponInput" placeholder="কুপন কোড (SAVE50)" class="flex-1 bg-white border border-blue-100 rounded-xl px-3 py-2 text-xs outline-none uppercase font-bold">
+                        <button onclick="applyCoupon()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-95">Apply</button>
                     </div>
                     <p id="couponMsg" class="text-[10px] mt-1 hidden"></p>
                 </div>
 
                 <div class="p-6 bg-slate-50 space-y-3">
-                    <div class="flex justify-between text-gray-500 text-sm">
+                    <div class="flex justify-between text-gray-500 text-sm italic">
                         <span>বাজারমূল্য:</span> <span id="displaySubtotal" class="font-bold text-gray-800">৳০</span>
                     </div>
-                    <div class="flex justify-between text-gray-500 text-sm">
+                    <div class="flex justify-between text-gray-500 text-sm italic">
                         <span>সার্ভিস চার্জ:</span> <span id="displayCharges" class="font-bold text-gray-800">৳০</span>
                     </div>
-                    <div id="discountRow" class="hidden flex justify-between text-green-600 text-sm font-bold">
+                    <div id="discountRow" class="hidden flex justify-between text-green-600 text-sm font-bold italic">
                         <span>ডিসকাউন্ট (-):</span> <span id="displayDiscount">৳০</span>
                     </div>
                     <div class="pt-4 border-t-2 border-blue-200 flex justify-between items-end">
-                        <span class="text-lg font-black text-blue-900">মোট বিল:</span>
+                        <span class="text-lg font-black text-blue-900 uppercase italic">মোট বিল:</span>
                         <span id="displayTotal" class="text-4xl font-black text-blue-700 tracking-tighter">৳০</span>
                     </div>
                 </div>
 
                 <div class="p-4 bg-white" id="confirmBtnArea">
-                    <button id="finalConfirmBtn" onclick="confirmOrderPayment()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700">
+                    <button id="finalConfirmBtn" onclick="confirmOrderPayment()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 active:scale-95 transition-all">
                         অর্ডার নিশ্চিত করুন
                     </button>
                 </div>
@@ -108,36 +103,21 @@
         let currentOrderData = null;
         let discountAmount = 0;
 
-        // অ্যানিমেশন লিঙ্কগুলো ফিক্স করা হয়েছে (Triangle warning gone)
-        const statusAnimations = {
-            "pending": "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json",
-            "verifying": "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json",
-            "invoice_ready": "https://lottie.host/86c6242c-2384-4861-a537-88544a04588f/invoice_ready.json",
-            "finding_assistant": "https://lottie.host/3138b29c-850d-400d-9b0d-520e7df5d996/searching.json",
-            "assistant_assigned": "https://lottie.host/7e04b081-424d-446a-8b83-933c16a8d626/walking_bag.json",
-            "at_store": "https://lottie.host/a6162383-7c9c-4822-832f-7649d038e3e4/store.json",
-            "shopping": "https://lottie.host/d193630a-969d-427c-9b0a-4a25039f6588/shopping.json",
-            "packing": "https://lottie.host/f7468164-839e-43f1-b1e7-578d38769395/packing.json",
-            "delivery_started": "https://lottie.host/6d2c499c-e3bc-467a-bc12-8874136e65a0/delivery_scooter.json",
-            "at_location": "https://lottie.host/ec71c53e-360e-4375-926e-441617300c41/arrived.json",
-            "completed": "https://lottie.host/913ac69a-6337-4d6d-b89a-0726618e001a/success.json"
+        // ১০টি ধাপের অ্যানিমেশন লিঙ্ক এবং মেসেজ
+        const statusConfig = {
+            "pending": { step: "১/১০", msg: "আপনার ফর্দটি আমরা পেয়েছি। যাচাই চলছে...", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json" },
+            "verifying": { step: "২/১০", msg: "তালিকা যাচাই করে ইনভয়েস তৈরি করা হচ্ছে।", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/checking_invoice.json" },
+            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস তৈরি হয়েছে। চেক করে কনফার্ম করুন।", anim: "https://lottie.host/86c6242c-2384-4861-a537-88544a04588f/invoice_ready.json" },
+            "finding_assistant": { step: "৪/১০", msg: "আমরা আপনার জন্য একজন সহকারী খুঁজছি।", anim: "https://lottie.host/3138b29c-850d-400d-9b0d-520e7df5d996/searching.json" },
+            "assistant_assigned": { step: "৫/১০", msg: "সহকারী নির্ধারিত হয়েছে। তিনি বাজারের দিকে যাচ্ছেন।", anim: "https://lottie.host/7e04b081-424d-446a-8b83-933c16a8d626/walking_bag.json" },
+            "at_store": { step: "৬/১০", msg: "সহকারী দোকানে পৌঁছেছেন। বাজার শুরু হচ্ছে।", anim: "https://lottie.host/a6162383-7c9c-4822-832f-7649d038e3e4/store.json" },
+            "shopping": { step: "৭/১০", msg: "আপনার কেনাকাটা চলছে...", anim: "https://lottie.host/f7e04b08-124d-446a-8b83-933c16a8d626/shopping.json" },
+            "packing": { step: "৮/১০", msg: "বাজার প্যাকিং করা হচ্ছে।", anim: "https://lottie.host/f7468164-839e-43f1-b1e7-578d38769395/packing.json" },
+            "delivery_started": { step: "৯/১০", msg: "সহকারী আপনার ঠিকানার দিকে রওয়ানা হয়েছেন।", anim: "https://lottie.host/6d2c499c-e3bc-467a-bc12-8874136e65a0/delivery_scooter.json" },
+            "at_location": { step: "১০/১০", msg: "সহকারী বাসার নিচে পৌঁছে গেছেন। বাজার বুঝে নিন।", anim: "https://lottie.host/ec71c53e-360e-4375-926e-441617300c41/arrived.json" },
+            "completed": { step: "সফল", msg: "খিদমতটি সফল হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ!", anim: "https://lottie.host/703666d9-373b-4835-b82f-87d8120e360f/success.json" }
         };
 
-        const statusMessages = {
-            "pending": "আপনার ফর্দটি আমরা পেয়েছি। একটু অপেক্ষা করুন...",
-            "verifying": "তালিকা যাচাই করে ইনভয়েস তৈরি করা হচ্ছে।",
-            "invoice_ready": "আপনার ইনভয়েস তৈরি হয়েছে। চেক করে কনফার্ম করুন।",
-            "finding_assistant": "আমরা আপনার জন্য একজন সহকারী খুঁজছি।",
-            "assistant_assigned": "সহকারী নির্ধারিত হয়েছে। তিনি বাজারের দিকে যাচ্ছেন।",
-            "at_store": "সহকারী দোকানে পৌঁছেছেন।",
-            "shopping": "কেনাকাটা চলছে...",
-            "packing": "বাজার প্যাকিং করা হচ্ছে।",
-            "delivery_started": "সহকারী আপনার বাসার দিকে রওয়ানা হয়েছেন।",
-            "at_location": "সহকারী বাসার নিচে পৌঁছে গেছেন। অনুগ্রহ করে বাজারটি বুঝে নিন।",
-            "completed": "খিদমতটি সফল হয়েছে। ধন্যবাদ!"
-        };
-
-        // অর্ডার প্লেস ফাংশন (Fixes button not working issue)
         window.placeOrder = async () => {
             const listText = document.getElementById('orderList').value;
             if(!listText.trim()) return alert("ফর্দ লিখুন");
@@ -152,18 +132,16 @@
                 });
                 localStorage.setItem('activeOrderId', docRef.id);
                 initTracking();
-            } catch (e) { alert("ত্রুটি হয়েছে!"); }
+            } catch (e) { alert("Error: " + e.message); }
         };
 
         window.initTracking = () => {
             const orderId = localStorage.getItem('activeOrderId');
             if(!orderId) return;
 
-            // স্ক্রিন চেঞ্জ
             document.getElementById('orderSection').classList.add('hidden');
             document.getElementById('trackingSection').classList.remove('hidden');
 
-            // রিয়েল-টাইম লিসেনার
             onSnapshot(doc(db, "orders", orderId), (snapshot) => {
                 if (snapshot.exists()) {
                     currentOrderData = snapshot.data();
@@ -173,22 +151,26 @@
         };
 
         function updateUI(data) {
-            document.getElementById('trackMessage').innerText = statusMessages[data.status] || "প্রসেসিং...";
+            const config = statusConfig[data.status] || statusConfig["pending"];
             
-            // অ্যানিমেশন আপডেট (Triangle fix applied)
+            // ট্র্যাকিং মেসেজ এবং ধাপ আপডেট
+            document.getElementById('trackMessage').innerText = config.msg;
+            document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+            
+            // অ্যানিমেশন আপডেট
             const animPlayer = document.getElementById('mainAnim');
-            if(statusAnimations[data.status]) {
-                animPlayer.load(statusAnimations[data.status]);
+            if(animPlayer.getAttribute('src') !== config.anim) {
+                animPlayer.load(config.anim);
             }
 
-            // ইনভয়েস দেখানো (Pending/Verifying থাকা অবস্থায় লোকানো থাকবে)
+            // ইনভয়েস ভিজিবিলিটি (পেন্ডিং স্টেজ বাদে)
             if(data.status !== "pending" && data.status !== "verifying") {
                 document.getElementById('invoiceBox').classList.remove('hidden');
                 
                 const prices = data.itemPrices || {};
                 document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
                     <div class="flex justify-between items-center border-b border-gray-50 pb-1 italic">
-                        <span class="text-gray-700 text-sm">${item}</span>
+                        <span class="text-gray-700 text-sm font-semibold">${item}</span>
                         <span class="text-blue-900 font-bold text-sm">৳${prices[item] || '...'}</span>
                     </div>
                 `).join('');
@@ -197,11 +179,10 @@
                 document.getElementById('displayCharges').innerText = `৳${(data.deliveryCharge || 0) + (data.platformFee || 0)}`;
                 calculateFinalTotal();
             } else {
-                // ইনভয়েস লোকানো থাকবে পেন্ডিং অবস্থায়
                 document.getElementById('invoiceBox').classList.add('hidden');
             }
 
-            // পেইড স্ট্যাটাস আপডেট
+            // বাটন এবং পেইড স্ট্যাটাস
             if(data.status !== "pending" && data.status !== "verifying" && data.status !== "invoice_ready") {
                 document.getElementById('paymentStatus').innerText = "PAID";
                 document.getElementById('paymentStatus').classList.replace('bg-red-100', 'bg-green-100');
@@ -211,11 +192,15 @@
                 document.getElementById('paymentStatus').innerText = "UNPAID";
                 document.getElementById('paymentStatus').classList.replace('bg-green-100', 'bg-red-100');
                 document.getElementById('paymentStatus').classList.replace('text-green-600', 'text-red-600');
-                if(data.status === "invoice_ready") {
-                    document.getElementById('confirmBtnArea').classList.remove('hidden');
-                } else {
-                    document.getElementById('confirmBtnArea').classList.add('hidden');
-                }
+                if(data.status === "invoice_ready") document.getElementById('confirmBtnArea').classList.remove('hidden');
+            }
+
+            // কমপ্লিট হলে রিসেট (৫ সেকেন্ড পর)
+            if(data.status === "completed") {
+                setTimeout(() => {
+                    localStorage.removeItem('activeOrderId');
+                    location.reload(); 
+                }, 8000);
             }
         }
 
@@ -226,12 +211,12 @@
             
             if (couponSnap.exists()) {
                 discountAmount = couponSnap.data().amount;
-                msg.innerText = `${discountAmount} টাকা ডিসকাউন্ট যুক্ত হয়েছে!`;
-                msg.className = "text-[10px] mt-1 text-green-600 block font-bold";
+                msg.innerText = `অভিনন্দন! ৳${discountAmount} ডিসকাউন্ট যুক্ত হয়েছে।`;
+                msg.className = "text-[10px] mt-1 text-green-600 block font-bold italic";
                 document.getElementById('discountRow').classList.remove('hidden');
                 calculateFinalTotal();
             } else {
-                alert("ভুল কুপন!");
+                alert("দুঃখিত, কুপনটি সঠিক নয়।");
             }
         };
 
@@ -252,11 +237,10 @@
                     status: "finding_assistant",
                     finalBill: document.getElementById('displayTotal').innerText.replace('৳', '')
                 });
-                alert("অর্ডার নিশ্চিত হয়েছে!");
+                alert("অর্ডার নিশ্চিত হয়েছে! আমরা সহকারী পাঠাচ্ছি।");
             } catch (e) { alert("আবার চেষ্টা করুন।"); }
         };
 
-        // অন-লোড চেকিং
         window.onload = initTracking;
     </script>
 </body>
