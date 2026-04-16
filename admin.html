@@ -18,13 +18,21 @@
             <div id="activeCount" class="bg-blue-700 px-4 py-2 rounded-2xl text-xs font-bold italic">অর্ডার চেক করা হচ্ছে...</div>
         </header>
 
-        <div id="adminOrders" class="space-y-8">
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 mb-8">
+            <h3 class="text-lg font-black text-blue-900 mb-4 uppercase italic">কুপন জেনারেটর</h3>
+            <div class="flex gap-2">
+                <input type="text" id="newCouponCode" placeholder="কোড (SAVE50)" class="flex-1 p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold uppercase outline-none focus:ring-2 focus:ring-blue-200">
+                <input type="number" id="newCouponAmount" placeholder="টাকা" class="w-24 p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-200">
+                <button onclick="createCoupon()" class="bg-blue-700 text-white px-6 rounded-2xl font-bold text-sm active:scale-95 transition-all">সেভ</button>
             </div>
+        </div>
+
+        <div id="adminOrders" class="space-y-8"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -38,6 +46,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // কুপন তৈরির ফাংশন
+        window.createCoupon = async () => {
+            const codeInput = document.getElementById('newCouponCode');
+            const amountInput = document.getElementById('newCouponAmount');
+            const code = codeInput.value.trim().toUpperCase();
+            const amount = parseFloat(amountInput.value);
+            
+            if(!code || isNaN(amount)) return alert("সঠিক কোড এবং টাকার পরিমাণ লিখুন");
+            
+            try {
+                await setDoc(doc(db, "coupons", code), { 
+                    amount: amount,
+                    createdAt: new Date()
+                });
+                alert(`সফল! '${code}' কুপনটি ${amount} টাকায় সেট হয়েছে।`);
+                codeInput.value = "";
+                amountInput.value = "";
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // রিয়েল-টাইম অর্ডার লিসেনার
         onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snapshot) => {
             const container = document.getElementById('adminOrders');
             document.getElementById('activeCount').innerText = `${snapshot.size}টি অর্ডার পাওয়া গেছে`;
@@ -46,21 +75,20 @@
             snapshot.forEach((orderDoc) => {
                 const order = orderDoc.data();
                 const id = orderDoc.id;
-
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 relative overflow-hidden";
                 
                 let itemsInputHtml = order.items.map(item => `
                     <div class="flex items-center justify-between gap-4 mb-2">
-                        <span class="text-sm font-bold text-gray-600 w-1/2">${item}</span>
-                        <input type="number" placeholder="দাম" class="item-price w-1/2 p-2 rounded-xl border border-blue-50 bg-blue-50/30 text-sm focus:outline-none focus:ring-1 focus:ring-blue-300" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
+                        <span class="text-sm font-bold text-gray-600 w-1/2 italic">${item}</span>
+                        <input type="number" placeholder="দাম" class="item-price w-1/2 p-2 rounded-xl border border-blue-50 bg-blue-50/30 text-sm outline-none focus:ring-1 focus:ring-blue-300" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
                     </div>
                 `).join('');
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-6">
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">অর্ডার: ...${id.slice(-5)}</span>
-                        <span class="text-xs font-bold text-gray-400 italic">${order.status}</span>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest italic">অর্ডার: ...${id.slice(-5)}</span>
+                        <span class="text-[10px] font-black text-gray-400 italic uppercase">${order.status || 'নতুন'}</span>
                     </div>
 
                     <div class="mb-6 bg-slate-50 p-5 rounded-3xl border border-dashed border-gray-200">
@@ -70,7 +98,7 @@
 
                     <div class="grid grid-cols-3 gap-3 mb-6">
                         <div>
-                            <label class="text-[10px] font-bold text-gray-400 block mb-1">ডেলিভারি চার্জ</label>
+                            <label class="text-[10px] font-bold text-gray-400 block mb-1">ডেলিভারি</label>
                             <input type="number" id="del-${id}" class="w-full p-3 rounded-2xl bg-gray-50 border-0 text-sm font-bold" value="${order.deliveryCharge || 50}">
                         </div>
                         <div>
@@ -83,25 +111,26 @@
                         </div>
                     </div>
 
-                    <button onclick="confirmInvoice('${id}')" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-bold mb-8 shadow-lg shadow-blue-100">ইনভয়েস আপডেট করুন</button>
+                    <button onclick="confirmInvoice('${id}')" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-bold mb-8 shadow-lg shadow-blue-100 active:scale-95 transition-all">ইনভয়েস আপডেট করুন</button>
 
                     <div class="grid grid-cols-2 gap-2 text-[10px]">
-                        <button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-200 p-2 rounded-lg font-bold">১. যাচাই (Verifying)</button>
-                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="bg-blue-100 text-blue-700 p-2 rounded-lg font-bold">২. ইনভয়েস রেডি</button>
-                        <button onclick="updateStatus('${id}', 'finding_assistant')" class="bg-indigo-100 text-indigo-700 p-2 rounded-lg font-bold">৩. সহকারী খুঁজছি</button>
-                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="bg-purple-100 text-purple-700 p-2 rounded-lg font-bold">৪. সহকারী রেডি</button>
-                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-amber-100 text-amber-700 p-2 rounded-lg font-bold">৫. কেনাকাটা চলছে</button>
-                        <button onclick="updateStatus('${id}', 'packing')" class="bg-pink-100 text-pink-700 p-2 rounded-lg font-bold">৬. প্যাকিং চলছে</button>
-                        <button onclick="updateStatus('${id}', 'delivery_started')" class="bg-orange-100 text-orange-700 p-2 rounded-lg font-bold">৭. রওয়ানা হয়েছে</button>
-                        <button onclick="updateStatus('${id}', 'at_location')" class="bg-teal-100 text-teal-700 p-2 rounded-lg font-bold">৮. বাসার নিচে</button>
-                        <button onclick="updateStatus('${id}', 'completed')" class="bg-green-600 text-white p-2 rounded-lg font-bold col-span-2 mt-2 py-3">৯. খিদমত সম্পন্ন (Finish)</button>
+                        <button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-200 p-2 rounded-lg font-bold hover:bg-slate-300">১. যাচাই (Verifying)</button>
+                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="bg-blue-100 text-blue-700 p-2 rounded-lg font-bold hover:bg-blue-200">২. ইনভয়েস রেডি</button>
+                        <button onclick="updateStatus('${id}', 'finding_assistant')" class="bg-indigo-100 text-indigo-700 p-2 rounded-lg font-bold hover:bg-indigo-200">৩. সহকারী খুঁজছি</button>
+                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="bg-purple-100 text-purple-700 p-2 rounded-lg font-bold hover:bg-purple-200">৪. সহকারী রেডি</button>
+                        <button onclick="updateStatus('${id}', 'at_store')" class="bg-yellow-100 text-yellow-700 p-2 rounded-lg font-bold hover:bg-yellow-200">৫. দোকানে পৌঁছেছে</button>
+                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-amber-100 text-amber-700 p-2 rounded-lg font-bold hover:bg-amber-200">৬. কেনাকাটা চলছে</button>
+                        <button onclick="updateStatus('${id}', 'packing')" class="bg-pink-100 text-pink-700 p-2 rounded-lg font-bold hover:bg-pink-200">৭. প্যাকিং চলছে</button>
+                        <button onclick="updateStatus('${id}', 'delivery_started')" class="bg-orange-100 text-orange-700 p-2 rounded-lg font-bold hover:bg-orange-200">৮. রওয়ানা হয়েছে</button>
+                        <button onclick="updateStatus('${id}', 'at_location')" class="bg-teal-100 text-teal-700 p-2 rounded-lg font-bold hover:bg-teal-200">৯. বাসার নিচে</button>
+                        <button onclick="updateStatus('${id}', 'completed')" class="bg-green-600 text-white p-2 rounded-lg font-bold col-span-2 mt-2 py-3 active:scale-95 shadow-md shadow-green-100">১০. খিদমত সম্পন্ন (Finish)</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         });
 
-        // ইনভয়েস কনফার্ম এবং ক্যালকুলেশন
+        // ইনভয়েস কনফার্ম ফাংশন
         window.confirmInvoice = async (id) => {
             const card = event.target.closest('div');
             const priceInputs = card.querySelectorAll('.item-price');
@@ -129,12 +158,15 @@
                     totalBill: total,
                     status: "invoice_ready"
                 });
-                alert("ইনভয়েস কাস্টমার প্যানেলে আপডেট হয়েছে!");
+                alert("ইনভয়েস এবং বিল আপডেট হয়েছে!");
             } catch (e) { alert("Error: " + e.message); }
         };
 
+        // স্ট্যাটাস আপডেট ফাংশন
         window.updateStatus = async (id, status) => {
-            await updateDoc(doc(db, "orders", id), { status: status });
+            try {
+                await updateDoc(doc(db, "orders", id), { status: status });
+            } catch (e) { alert("Status Update Failed!"); }
         };
     </script>
 </body>
