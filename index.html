@@ -6,12 +6,11 @@
     <title>G KHIDMAH | কাস্টমার প্যানেল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         .brand-green { color: #15803d; }
         .bg-brand-dark-green { background-color: #15803d; }
-        #lottieContainer dotlottie-player { width: 250px; height: 250px; }
+        .progress-glow { box-shadow: 0 0 10px rgba(22, 163, 74, 0.5); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-10">
@@ -25,10 +24,8 @@
         
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div class="text-center mb-6">
-                <div class="w-32 h-32 mx-auto">
-                    <dotlottie-player src="https://lottie.host/7905b29c-6237-4d6d-b89a-0726618e001a/writing_list.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
-                </div>
-                <h2 class="text-lg font-bold text-gray-800 italic mt-2">আপনার তথ্য ও ফর্দ দিন</h2>
+                <div class="text-5xl mb-2">📝</div>
+                <h2 class="text-lg font-bold text-gray-800 italic">আপনার তথ্য ও ফর্দ দিন</h2>
             </div>
             
             <div class="space-y-3">
@@ -44,13 +41,16 @@
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl text-center border border-green-100">
-                <div id="lottieContainer" class="flex justify-center items-center min-h-[250px]">
-                    </div>
-                <div class="mt-2">
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-green-600 font-black italic" id="stepCounter">ধাপ: ১/১০</p>
-                    <h1 id="trackMessage" class="text-lg font-bold brand-green leading-tight italic font-black mt-1 uppercase">যাচাই করা হচ্ছে...</h1>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
+                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">🔍</div>
+                
+                <p class="text-[10px] uppercase tracking-[0.2em] text-green-600 font-black italic mb-2" id="stepCounter">ধাপ: ১/১০</p>
+                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">যাচাই করা হচ্ছে...</h1>
+
+                <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 border border-gray-50">
+                    <div id="progressBar" class="bg-brand-dark-green h-full rounded-full transition-all duration-1000 progress-glow" style="width: 10%"></div>
                 </div>
+                <p class="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-widest italic">Live Tracking Active</p>
             </div>
 
             <div id="couponSection" class="hidden bg-white p-6 rounded-[2rem] shadow-xl border border-dashed border-green-200">
@@ -63,13 +63,12 @@
 
             <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
                 <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center relative">
-                    <img src="logo.png" alt="Logo" class="h-10 mx-auto mb-2" onerror="this.style.display='none'">
                     <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">অফিসিয়াল খিদমত রশিদ</h3>
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1" id="orderIdDisplay"></p>
                 </div>
 
                 <div class="p-6">
-                    <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest italic">পণ্যের তালিকা ও মূল্য:</h4>
+                    <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest italic">পণ্যের তালিকা:</h4>
                     <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm"></div>
                 </div>
 
@@ -107,17 +106,17 @@
         const db = getFirestore(app);
 
         const statusConfig = {
-            "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি।", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
-            "verifying": { step: "২/১০", msg: "যাচাই চলছে...", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
-            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস রেডি।", anim: "https://lottie.host/86c6242c-2384-4861-a537-88544a04588f/M9GvS9F1Qp.json" },
-            "finding_assistant": { step: "৪/১০", msg: "সহকারী খুঁজছি...", anim: "https://lottie.host/3138b29c-850d-400d-9b0d-520e7df5d996/L8k5B0Z9Wq.json" },
-            "assistant_assigned": { step: "৫/১০", msg: "সহকারী যুক্ত হয়েছে।", anim: "https://lottie.host/7e04b081-424d-446a-8b83-933c16a8d626/UuX7fU6sQp.json" },
-            "at_store": { step: "৬/১০", msg: "সহকারী দোকানে।", anim: "https://lottie.host/a6162383-7c9c-4822-832f-7649d038e3e4/J9s2L0G5Wq.json" },
-            "shopping": { step: "৭/১০", msg: "বাজার কেনা হচ্ছে...", anim: "https://lottie.host/91b702ec-24e0-47b7-8495-257a1240c313/f5W9u3M2Lp.json" },
-            "packing": { step: "৮/১০", msg: "প্যাকিং চলছে...", anim: "https://lottie.host/f7468164-839e-43f1-b1e7-578d38769395/zL9p3Q6wXm.json" },
-            "delivery_started": { step: "৯/১০", msg: "সহকারী আসছেন...", anim: "https://lottie.host/6d2c499c-e3bc-467a-bc12-8874136e65a0/S9w2M3Xp4L.json" },
-            "at_location": { step: "১০/১০", msg: "সহকারী বাসার নিচে।", anim: "https://lottie.host/ec71c53e-360e-4375-926e-441617300c41/P9L0m2Wq9p.json" },
-            "completed": { step: "সফল", msg: "ধন্যবাদ!", anim: "https://lottie.host/703666d9-373b-4835-b82f-87d8120e360f/R9f2Z9Wq9p.json" }
+            "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি", icon: "📋", progress: 10 },
+            "verifying": { step: "২/১০", msg: "যাচাই চলছে", icon: "🔍", progress: 20 },
+            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস রেডি", icon: "📄", progress: 30 },
+            "finding_assistant": { step: "৪/১০", msg: "সহকারী খুঁজছি", icon: "🤝", progress: 40 },
+            "assistant_assigned": { step: "৫/১০", msg: "সহকারী যুক্ত হয়েছে", icon: "✅", progress: 50 },
+            "at_store": { step: "৬/১০", msg: "সহকারী দোকানে", icon: "🏪", progress: 60 },
+            "shopping": { step: "৭/১০", msg: "বাজার কেনা হচ্ছে", icon: "🛒", progress: 70 },
+            "packing": { step: "৮/১০", msg: "প্যাকিং চলছে", icon: "📦", progress: 85 },
+            "delivery_started": { step: "৯/১০", msg: "সহকারী আসছেন", icon: "🛵", progress: 95 },
+            "at_location": { step: "১০/১০", msg: "সহকারী বাসার নিচে", icon: "📍", progress: 100 },
+            "completed": { step: "সফল", msg: "খিদমত সম্পন্ন", icon: "🎉", progress: 100 }
         };
 
         document.getElementById('submitOrderBtn').addEventListener('click', async () => {
@@ -129,27 +128,18 @@
             if(!name || !phone || !addr || !list.trim()) return alert("সবগুলো ঘর পূরণ করুন");
 
             try {
-                // Sending customer data to Firebase
                 const docRef = await addDoc(collection(db, "orders"), {
-                    customerName: name,
-                    customerPhone: phone,
-                    customerAddress: addr,
+                    customerName: name, customerPhone: phone, customerAddress: addr,
                     items: list.split('\n').filter(i => i.trim() !== ""),
-                    status: "pending",
-                    createdAt: serverTimestamp(),
-                    subTotal: 0,
-                    deliveryCharge: 70,
-                    platformFee: 20,
-                    discount: 0,
-                    itemPrices: {},
-                    itemNotes: {}
+                    status: "pending", createdAt: serverTimestamp(),
+                    subTotal: 0, deliveryCharge: 70, platformFee: 20, discount: 0,
+                    itemPrices: {}, itemNotes: {}
                 });
                 localStorage.setItem('activeOrderId', docRef.id);
                 initTracking();
-            } catch (e) { alert("Error connecting to database!"); }
+            } catch (e) { alert("Data Connection Error!"); }
         });
 
-        // Coupon Logic
         document.getElementById('applyCouponBtn').addEventListener('click', async () => {
             const code = document.getElementById('couponInput').value.trim().toUpperCase();
             const orderId = localStorage.getItem('activeOrderId');
@@ -174,17 +164,11 @@
                 const data = snapshot.data();
                 if (!data) return;
 
-                // Fixed Animation Logic with dotlottie-player
                 const config = statusConfig[data.status] || statusConfig["pending"];
-                const container = document.getElementById('lottieContainer');
-                
-                if (container.dataset.status !== data.status) {
-                    container.innerHTML = `<dotlottie-player src="${config.anim}" background="transparent" speed="1" loop autoplay></dotlottie-player>`;
-                    container.dataset.status = data.status;
-                }
-                
+                document.getElementById('statusIcon').innerText = config.icon;
                 document.getElementById('trackMessage').innerText = config.msg;
                 document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+                document.getElementById('progressBar').style.width = config.progress + "%";
                 document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
                 if(data.status !== "pending" && data.status !== "verifying") {
@@ -194,21 +178,24 @@
                     const prices = data.itemPrices || {};
                     const notes = data.itemNotes || {};
                     
+                    // উন্নত ইনভয়েস আইটেম ডিজাইন (মিসিং আইটেমসহ)
                     document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => {
                         const isMissing = notes[item] === "Missing";
+                        const price = prices[item] || 0;
                         return `
-                            <div class="flex justify-between items-start border-b border-gray-50 pb-2 italic">
-                                <div>
-                                    <p class="${isMissing ? 'text-red-400 line-through' : 'text-gray-700'}">${item}</p>
-                                    ${notes[item] && !isMissing ? `<p class="text-[9px] text-orange-500 font-black">${notes[item]}</p>` : ''}
-                                    ${isMissing ? `<p class="text-[9px] text-red-500 font-black">পাওয়া যায়নি</p>` : ''}
+                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-800 font-semibold ${isMissing ? 'line-through text-red-400 opacity-50' : ''}">${item}</span>
+                                    ${isMissing ? '<span class="text-[8px] text-red-500 font-black uppercase tracking-tighter">পাওয়া যায়নি</span>' : ''}
+                                    ${notes[item] && !isMissing ? `<span class="text-[8px] text-orange-500 font-black uppercase">${notes[item]}</span>` : ''}
                                 </div>
-                                <span class="brand-green">৳${prices[item] || 0}</span>
-                            </div>
-                        `;
+                                <span class="font-bold brand-green">৳${price}</span>
+                            </div>`;
                     }).join('');
 
+                    // সব ফি যোগ করে ক্যালকুলেশন
                     const total = (data.subTotal || 0) + (data.deliveryCharge || 0) + (data.platformFee || 0) - (data.discount || 0);
+                    
                     document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
                     document.getElementById('delChargeDisplay').innerText = `৳${data.deliveryCharge || 0}`;
                     document.getElementById('platFeeDisplay').innerText = `৳${data.platformFee || 0}`;
