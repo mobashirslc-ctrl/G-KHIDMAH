@@ -3,75 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G KHIDMAH | পার্সেল ডেলিভারি</title>
+    <title>G KHIDMAH | ডেলিভারি</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Hind Siliguri', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-10">
 
-    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
     <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-between px-6">
         <div class="flex items-center gap-2">
-            <img src="logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
-            <h1 class="text-xl font-bold text-green-700 uppercase italic">G KHIDMAH</h1>
+            <div class="bg-green-700 w-8 h-8 rounded-lg flex items-center justify-center">
+                <span class="text-white font-black text-xl italic">G</span>
+            </div>
+            <h1 class="text-xl font-bold text-green-700 italic tracking-tighter">G KHIDMAH</h1>
         </div>
-        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full uppercase">নতুন পার্সেল</button>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full">নতুন পার্সেল</button>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-            <div class="text-center mb-6"><div class="text-5xl mb-2">📦</div><h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল ডেলিভারি</h2></div>
+            <div class="text-center mb-6"><div class="text-5xl mb-2">📦</div><h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল তথ্য</h2></div>
             <div class="space-y-3">
                 <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
                 <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
                 <input type="text" id="pickupAddr" placeholder="পিকআপ ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
                 <input type="text" id="deliveryAddr" placeholder="ডেলিভারি ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
-                <select id="parcelType" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent outline-none text-sm font-bold">
-                    <option value="" disabled selected>পার্সেলের ধরন</option>
-                    <option>জরুরি ডকুমেন্ট</option>
-                    <option>হোমমেড খাবার</option>
-                    <option>গিফট আইটেম</option>
-                </select>
-                <textarea id="parcelNote" rows="2" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold" placeholder="পার্সেলের বিবরণ..."></textarea>
+                <textarea id="parcelNote" rows="2" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold shadow-inner" placeholder="পার্সেলের বিবরণ..."></textarea>
             </div>
-            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">কনফার্ম ডেলিভারি</button>
+            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold text-lg shadow-lg">ডেলিভারি রিকোয়েস্ট পাঠান</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-4">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
                 <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
-                <p id="stepCounter" class="text-[10px] uppercase text-green-600 font-black italic mb-2">ধাপ: ১/১০</p>
-                <h1 id="trackMessage" class="text-xl font-black text-green-700 leading-tight uppercase">অনুরোধ পাঠানো হয়েছে...</h1>
+                <h1 id="trackMessage" class="text-xl font-black text-green-700 leading-tight uppercase">অপেক্ষা করুন...</h1>
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 mt-4">
                     <div id="progressBar" class="bg-green-700 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
                 </div>
             </div>
 
-            <div id="otpBox" class="hidden bg-yellow-50 p-6 rounded-[2rem] border-2 border-dashed border-yellow-300 text-center shadow-lg">
-                <p class="text-xs font-bold text-yellow-700 uppercase mb-2">Delivery Confirmation OTP</p>
-                <h2 id="displayOtp" class="text-4xl font-black tracking-[10px] text-gray-800">------</h2>
-                <p class="text-[10px] text-yellow-600 mt-2 font-bold italic">পার্সেল বুঝে পাওয়ার সময় এই কোডটি রাইডারকে দিন।</p>
+            <div id="chargeBox" class="hidden bg-white p-6 rounded-[2rem] border-2 border-dashed border-green-200 text-center shadow-lg">
+                <p class="text-xs font-bold text-gray-500 uppercase mb-2">Delivery Charge</p>
+                <h2 id="chargeDisplay" class="text-4xl font-black text-green-800 mb-4">৳০</h2>
+                <button id="confirmChargeBtn" class="w-full bg-green-700 text-white py-3 rounded-xl font-black uppercase shadow-lg">Confirm & Assign Rider</button>
             </div>
 
-            <div id="riderCard" class="hidden bg-white p-4 rounded-3xl border border-gray-100 shadow-md">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-xl">🛵</div>
-                    <div>
-                        <h4 id="riderName" class="font-bold text-gray-800 text-sm">রাইডার তথ্য</h4>
-                        <p id="riderLoc" class="text-[10px] text-gray-500 italic">অবস্থান: আপডেট হচ্ছে...</p>
-                    </div>
-                    <a id="riderCall" href="#" class="ml-auto bg-green-600 p-3 rounded-full text-white">📞</a>
+            <div id="riderCard" class="hidden bg-white p-5 rounded-[2rem] shadow-xl border border-gray-100 flex items-center gap-4">
+                <img id="riderPic" src="" class="w-16 h-16 rounded-full object-cover border-2 border-green-500">
+                <div class="flex-1">
+                    <h4 id="riderName" class="font-bold text-gray-800">রাইডার</h4>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Verified Rider</p>
                 </div>
+                <a id="riderCall" href="#" class="bg-green-100 p-3 rounded-full text-green-700">📞</a>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -83,32 +74,23 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let lastStatus = "";
 
         const parcelStatus = {
-            "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
-            "rider_assigned": { step: "৪/১০", msg: "রাইডার নিযুক্ত", icon: "🛵", progress: 40 },
-            "picked": { step: "৬/১০", msg: "পার্সেল রিসিভড", icon: "📦", progress: 65 },
-            "in_transit": { step: "৮/১০", msg: "পার্সেল পথে আছে", icon: "🚚", progress: 85 },
-            "completed": { step: "সফল", msg: "ডেলিভারি সম্পন্ন", icon: "🎉", progress: 100 }
+            "pending": { msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 15 },
+            "wait_confirmation": { msg: "চার্জ কনফার্ম করুন", icon: "💰", progress: 30 },
+            "rider_assigned": { msg: "রাইডার আপনার দিকে আসছে", icon: "🛵", progress: 50 },
+            "picked": { msg: "রাইডার পার্সেল নিয়েছে", icon: "📦", progress: 75 },
+            "completed": { msg: "ডেলিভারি সম্পন্ন", icon: "🎉", progress: 100 }
         };
 
         document.getElementById('submitBtn').onclick = async function() {
-            const name = document.getElementById('custName').value.trim();
-            const phone = document.getElementById('custPhone').value.trim();
-            const pAddr = document.getElementById('pickupAddr').value.trim();
-            const dAddr = document.getElementById('deliveryAddr').value.trim();
-            const type = document.getElementById('parcelType').value;
-            const note = document.getElementById('parcelNote').value.trim();
-            const otp = Math.floor(1000 + Math.random() * 9000); // 4 Digit OTP
-
-            if(!name || !phone || !pAddr || !dAddr) return alert("তথ্য পূরণ করুন!");
-
             const docRef = await addDoc(collection(db, "orders"), {
-                customerName: name, customerPhone: phone, pickupLocation: pAddr,
-                customerAddress: dAddr, parcelType: type, items: [note],
-                orderType: "parcel", status: "pending", otp: otp,
-                createdAt: serverTimestamp(), subTotal: 0
+                customerName: document.getElementById('custName').value,
+                customerPhone: document.getElementById('custPhone').value,
+                pickupLocation: document.getElementById('pickupAddr').value,
+                customerAddress: document.getElementById('deliveryAddr').value,
+                items: [document.getElementById('parcelNote').value],
+                orderType: "parcel", status: "pending", deliveryCharge: 0, createdAt: serverTimestamp()
             });
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
@@ -124,26 +106,29 @@
                 const data = snapshot.data();
                 if(!data) return;
 
-                if(lastStatus !== "" && lastStatus !== data.status) {
-                    document.getElementById('notifySound').play().catch(() => {});
-                }
-                lastStatus = data.status;
-
                 const config = parcelStatus[data.status] || parcelStatus["pending"];
                 document.getElementById('statusIcon').innerText = config.icon;
                 document.getElementById('trackMessage').innerText = config.msg;
-                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
                 document.getElementById('progressBar').style.width = config.progress + "%";
 
-                if(data.otp) {
-                    document.getElementById('otpBox').classList.remove('hidden');
-                    document.getElementById('displayOtp').innerText = data.otp;
+                // ডেলিভারি চার্জ লজিক
+                if(data.deliveryCharge > 0) {
+                    document.getElementById('chargeBox').classList.remove('hidden');
+                    document.getElementById('chargeDisplay').innerText = `৳${data.deliveryCharge}`;
+                    if(data.status === "wait_confirmation") {
+                        document.getElementById('confirmChargeBtn').onclick = async () => {
+                            await updateDoc(doc(db, "orders", orderId), { status: "rider_assigned" });
+                        };
+                    } else {
+                        document.getElementById('chargeBox').classList.add('hidden');
+                    }
                 }
-                
-                if(data.riderName) {
+
+                // রাইডার ডিটেইলস লজিক
+                if(["rider_assigned", "picked", "completed"].includes(data.status)) {
                     document.getElementById('riderCard').classList.remove('hidden');
-                    document.getElementById('riderName').innerText = data.riderName;
-                    document.getElementById('riderLoc').innerText = `অবস্থান: ${data.currentLoc || 'আপডেট হচ্ছে...'}`;
+                    document.getElementById('riderName').innerText = data.riderName || "রাইডার খুজছি...";
+                    document.getElementById('riderPic').src = data.riderPic || "https://ui-avatars.com/api/?name=Rider";
                     document.getElementById('riderCall').href = `tel:${data.riderPhone}`;
                 }
             });
