@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G KHIDMAH | আপনার বিশ্বস্ত খিদমতকারী</title>
+    <title>G KHIDMAH | কাস্টমার প্যানেল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         .brand-green { color: #15803d; }
@@ -16,13 +17,13 @@
 
     <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-center gap-2">
         <img src="logo.png" alt="G Khidmah" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
-        <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter">G KHIDMAH</h1>
+        <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter text-center">G KHIDMAH</h1>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 text-center">
-            <iframe id="initAnim" src="https://lottie.host/embed/7905b29c-6237-4d6d-b89a-0726618e001a/oIu6u8o5S6.json" style="width: 150px; height: 150px; border: none; margin: 0 auto;"></iframe>
+            <lottie-player src="https://lottie.host/7905b29c-6237-4d6d-b89a-0726618e001a/writing_list.json" background="transparent" speed="1" style="width: 150px; height: 150px; margin: 0 auto;" loop autoplay></lottie-player>
             <h2 class="text-lg font-bold text-gray-800 mt-4 italic">আজ আপনার কী কী খিদমত লাগবে?</h2>
             <textarea id="orderList" rows="5" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold mt-4 shadow-inner" placeholder="যেমন: ৫ কেজি চাল..."></textarea>
             <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg shadow-green-100 transition-all">
@@ -32,9 +33,8 @@
 
         <div id="trackingSection" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-[2.5rem] shadow-xl text-center border border-green-100">
-                <div id="animWrapper" class="w-48 h-48 mx-auto">
-                    <iframe id="trackingIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
-                </div>
+                <div id="lottieContainer" class="w-48 h-48 mx-auto flex items-center justify-center">
+                    </div>
                 <div class="mt-4">
                     <p class="text-[10px] uppercase tracking-[0.2em] text-green-600 font-black italic" id="stepCounter">ধাপ: ১/১০</p>
                     <h1 id="trackMessage" class="text-lg font-bold brand-green leading-tight italic font-black mt-1 uppercase">যাচাই করা হচ্ছে...</h1>
@@ -43,23 +43,42 @@
 
             <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
                 <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center relative">
-                    <img src="logo.png" alt="Logo" class="h-8 mx-auto mb-2" onerror="this.style.display='none'">
-                    <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">খিদমত রশিদ (লাইভ আপডেট)</h3>
+                    <img src="logo.png" alt="Logo" class="h-10 mx-auto mb-2" onerror="this.style.display='none'">
+                    <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">অফিসিয়াল খিদমত রশিদ</h3>
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1" id="orderIdDisplay"></p>
                 </div>
 
                 <div class="p-6">
-                    <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest">পণ্যের তালিকা ও মূল্য:</h4>
+                    <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest italic">পণ্যের তালিকা ও মূল্য:</h4>
                     <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm"></div>
                 </div>
 
                 <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
-                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>পণ্যের মোট দাম:</span> <span id="subTotalDisplay">৳০</span></div>
-                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>ডেলিভারি ও প্ল্যাটফর্ম:</span> <span id="chargesDisplay">৳০</span></div>
-                    <div id="discountRow" class="hidden flex justify-between text-xs font-bold text-green-600"><span>ডিসকাউন্ট:</span> <span id="discountDisplay">-৳০</span></div>
-                    <div class="pt-4 border-t border-green-100 flex justify-between items-center">
-                        <span class="text-xs font-black uppercase text-gray-400">সর্বমোট বিল:</span>
-                        <span id="grandTotalDisplay" class="text-4xl font-black brand-green tracking-tighter">৳০</span>
+                    <div class="flex justify-between text-xs font-bold text-gray-500">
+                        <span>পণ্যের মোট দাম (Subtotal):</span>
+                        <span id="subTotalDisplay">৳০</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-gray-500">
+                        <span>ডেলিভারি চার্জ:</span>
+                        <span id="delChargeDisplay">৳০</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-gray-500">
+                        <span>প্ল্যাটফর্ম ফি:</span>
+                        <span id="platFeeDisplay">৳০</span>
+                    </div>
+                    <div id="discountRow" class="hidden flex justify-between text-xs font-bold text-green-600">
+                        <span>কুপন ডিসকাউন্ট:</span>
+                        <span id="discountDisplay">-৳০</span>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-white flex justify-between items-end">
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-tighter italic">সর্বমোট প্রদেয় বিল:</p>
+                        <h2 id="grandTotalDisplay" class="text-4xl font-black brand-green tracking-tighter">৳০</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] text-gray-400 italic">নগদ পরিশোধযোগ্য।</p>
                     </div>
                 </div>
             </div>
@@ -82,24 +101,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ১০টি স্ট্যাটাসের জন্য Iframe Embed URLs
+        // ১০টি MNC স্ট্যান্ডার্ড স্ট্যাটাস অ্যানিমেশন লিংক
         const statusConfig = {
-            "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি।", anim: "https://lottie.host/embed/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
-            "verifying": { step: "২/১০", msg: "যাচাই চলছে...", anim: "https://lottie.host/embed/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
-            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস রেডি।", anim: "https://lottie.host/embed/86c6242c-2384-4861-a537-88544a04588f/M9GvS9F1Qp.json" },
-            "finding_assistant": { step: "৪/১০", msg: "সহকারী খুঁজছি...", anim: "https://lottie.host/embed/3138b29c-850d-400d-9b0d-520e7df5d996/L8k5B0Z9Wq.json" },
-            "assistant_assigned": { step: "৫/১০", msg: "সহকারী নিযুক্ত হয়েছে।", anim: "https://lottie.host/embed/7e04b081-424d-446a-8b83-933c16a8d626/UuX7fU6sQp.json" },
-            "at_store": { step: "৬/১০", msg: "সহকারী দোকানে।", anim: "https://lottie.host/embed/a6162383-7c9c-4822-832f-7649d038e3e4/J9s2L0G5Wq.json" },
-            "shopping": { step: "৭/১০", msg: "বাজার কেনা হচ্ছে...", anim: "https://lottie.host/embed/91b702ec-24e0-47b7-8495-257a1240c313/f5W9u3M2Lp.json" },
-            "packing": { step: "৮/১০", msg: "প্যাকিং চলছে...", anim: "https://lottie.host/embed/f7468164-839e-43f1-b1e7-578d38769395/zL9p3Q6wXm.json" },
-            "delivery_started": { step: "৯/১০", msg: "সহকারী আসছেন...", anim: "https://lottie.host/embed/6d2c499c-e3bc-467a-bc12-8874136e65a0/S9w2M3Xp4L.json" },
-            "at_location": { step: "১০/১০", msg: "সহকারী বাসার নিচে।", anim: "https://lottie.host/embed/ec71c53e-360e-4375-926e-441617300c41/P9L0m2Wq9p.json" },
-            "completed": { step: "সফল", msg: "ধন্যবাদ!", anim: "https://lottie.host/embed/703666d9-373b-4835-b82f-87d8120e360f/R9f2Z9Wq9p.json" }
+            "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি।", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
+            "verifying": { step: "২/১০", msg: "যাচাই চলছে...", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
+            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস রেডি।", anim: "https://lottie.host/86c6242c-2384-4861-a537-88544a04588f/M9GvS9F1Qp.json" },
+            "finding_assistant": { step: "৪/১০", msg: "সহকারী খুঁজছি...", anim: "https://lottie.host/3138b29c-850d-400d-9b0d-520e7df5d996/L8k5B0Z9Wq.json" },
+            "assistant_assigned": { step: "৫/১০", msg: "সহকারী যুক্ত হয়েছে।", anim: "https://lottie.host/7e04b081-424d-446a-8b83-933c16a8d626/UuX7fU6sQp.json" },
+            "at_store": { step: "৬/১০", msg: "সহকারী দোকানে।", anim: "https://lottie.host/a6162383-7c9c-4822-832f-7649d038e3e4/J9s2L0G5Wq.json" },
+            "shopping": { step: "৭/১০", msg: "বাজার কেনা হচ্ছে...", anim: "https://lottie.host/91b702ec-24e0-47b7-8495-257a1240c313/f5W9u3M2Lp.json" },
+            "packing": { step: "৮/১০", msg: "প্যাকিং চলছে...", anim: "https://lottie.host/f7468164-839e-43f1-b1e7-578d38769395/zL9p3Q6wXm.json" },
+            "delivery_started": { step: "৯/১০", msg: "সহকারী রওয়ানা দিয়েছেন।", anim: "https://lottie.host/6d2c499c-e3bc-467a-bc12-8874136e65a0/S9w2M3Xp4L.json" },
+            "at_location": { step: "১০/১০", msg: "সহকারী বাসার নিচে।", anim: "https://lottie.host/ec71c53e-360e-4375-926e-441617300c41/P9L0m2Wq9p.json" },
+            "completed": { step: "সফল", msg: "ধন্যবাদ!", anim: "https://lottie.host/703666d9-373b-4835-b82f-87d8120e360f/R9f2Z9Wq9p.json" }
         };
 
+        // অর্ডার সাবমিশন
         document.getElementById('submitOrderBtn').addEventListener('click', async () => {
             const list = document.getElementById('orderList').value;
-            if(!list.trim()) return alert("বাজারের ফর্দটি লিখুন");
+            if(!list.trim()) return alert("ফর্দটি লিখুন");
             try {
                 const docRef = await addDoc(collection(db, "orders"), {
                     items: list.split('\n').filter(i => i.trim() !== ""),
@@ -114,9 +134,10 @@
                 });
                 localStorage.setItem('activeOrderId', docRef.id);
                 initTracking();
-            } catch (e) { alert("অর্ডার নিতে সমস্যা হয়েছে।"); }
+            } catch (e) { alert("Error!"); }
         });
 
+        // লাইভ ট্র্যাকিং এবং ইনভয়েস
         const initTracking = () => {
             const orderId = localStorage.getItem('activeOrderId');
             if(!orderId) return;
@@ -128,15 +149,20 @@
                 const data = snapshot.data();
                 if (!data) return;
 
+                // ১. অ্যানিমেশন ফিক্সড লজিক
                 const config = statusConfig[data.status] || statusConfig["pending"];
-                const iframe = document.getElementById('trackingIframe');
-                if(iframe.src !== config.anim) iframe.src = config.anim;
+                const container = document.getElementById('lottieContainer');
+                
+                if (container.dataset.status !== data.status) {
+                    container.innerHTML = `<lottie-player src="${config.anim}" background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay></lottie-player>`;
+                    container.dataset.status = data.status;
+                }
                 
                 document.getElementById('trackMessage').innerText = config.msg;
                 document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-                document.getElementById('orderIdDisplay').innerText = `Order ID: #${orderId.slice(-6).toUpperCase()}`;
+                document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-                // ইনভয়েস লজিক
+                // ২. ডিটেইলড ইনভয়েস আপডেট
                 if(data.status !== "pending" && data.status !== "verifying") {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     const prices = data.itemPrices || {};
@@ -148,7 +174,7 @@
                             <div class="flex justify-between items-start border-b border-gray-50 pb-2 italic">
                                 <div>
                                     <p class="${isMissing ? 'text-red-400 line-through' : 'text-gray-700'}">${item}</p>
-                                    ${notes[item] ? `<p class="text-[9px] text-orange-500 font-bold tracking-tighter">${notes[item]}</p>` : ''}
+                                    ${notes[item] ? `<p class="text-[9px] text-orange-500 font-black tracking-tighter">${notes[item]}</p>` : ''}
                                 </div>
                                 <span class="brand-green">৳${prices[item] || 0}</span>
                             </div>
@@ -157,7 +183,8 @@
 
                     const total = (data.subTotal || 0) + (data.deliveryCharge || 0) + (data.platformFee || 0) - (data.discount || 0);
                     document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
-                    document.getElementById('chargesDisplay').innerText = `৳${(data.deliveryCharge || 0) + (data.platformFee || 0)}`;
+                    document.getElementById('delChargeDisplay').innerText = `৳${data.deliveryCharge || 0}`;
+                    document.getElementById('platFeeDisplay').innerText = `৳${data.platformFee || 0}`;
                     document.getElementById('grandTotalDisplay').innerText = `৳${total}`;
 
                     if(data.discount > 0) {
@@ -166,12 +193,8 @@
                     }
                 }
 
-                // অটো-রিসেট (১৫ সেকেন্ড পর)
                 if(data.status === "completed") {
-                    setTimeout(() => {
-                        localStorage.removeItem('activeOrderId');
-                        location.reload();
-                    }, 15000);
+                    setTimeout(() => { localStorage.removeItem('activeOrderId'); location.reload(); }, 15000);
                 }
             });
         };
