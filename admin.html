@@ -132,19 +132,57 @@
 
         // ইনভয়েস কনফার্ম ফাংশন
         window.confirmInvoice = async (id) => {
-    // ১. DOM ফিক্স: event.target থেকে সঠিক কার্ড কন্টেইনার খুঁজে বের করা
+    // ১. DOM ফিক্স: বাটন থেকে কার্ড কন্টেইনার খুঁজে বের করা
     const btn = event.target;
-    const card = btn.closest('.bg-white'); // কার্ডের মেইন ক্লাস দিয়ে খোঁজা নিরাপদ
+    const card = btn.closest('.bg-white'); 
     
     const priceInputs = card.querySelectorAll('.item-price');
+    const noteInputs = card.querySelectorAll('.item-note'); // নোট ইনপুট ধরার জন্য
+    
     const itemPrices = {};
+    const itemNotes = {};
     let subTotal = 0;
 
-    priceInputs.forEach(input => {
+    priceInputs.forEach((input, index) => {
+        const itemName = input.dataset.item;
         const val = parseFloat(input.value) || 0;
-        itemPrices[input.dataset.item] = val;
+        
+        // নোট সংগ্রহ করা (যদি ইনপুট থাকে)
+        const note = noteInputs[index] ? noteInputs[index].value : "";
+
+        itemPrices[itemName] = val;
+        itemNotes[itemName] = note;
+        
+        // শুধু দাম থাকলে সাব-টোটাল এ যোগ হবে
         subTotal += val;
     });
+
+    const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+    const platFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+    const couponDisc = parseFloat(document.getElementById(`coupon-${id}`).value) || 0;
+    
+    // গ্র্যান্ড টোটাল ক্যালকুলেশন
+    const total = (subTotal + delCharge + platFee) - couponDisc;
+
+    try {
+        // Firebase আপডেট
+        await updateDoc(doc(db, "orders", id), {
+            itemPrices: itemPrices,
+            itemNotes: itemNotes, // নতুন ফিল্ড: নোট (যেমন: Missing)
+            subTotal: subTotal,
+            deliveryCharge: delCharge,
+            platformFee: platFee,
+            discount: couponDisc,
+            totalBill: total,
+            status: "invoice_ready"
+        });
+        alert("ইনভয়েস এবং লাইভ আপডেট সফল হয়েছে!");
+    } catch (e) { 
+        console.error(e);
+        alert("Error: " + e.message); 
+    }
+};
+
 
     // ২. ইনপুট ভ্যালু সংগ্রহ
     const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
