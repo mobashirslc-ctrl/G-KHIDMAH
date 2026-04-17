@@ -6,7 +6,7 @@
     <title>G KHIDMAH | কাস্টমার প্যানেল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.4/dist/lottie-player.js"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         .brand-green { color: #15803d; }
@@ -16,26 +16,34 @@
 <body class="bg-slate-50 min-h-screen pb-10">
 
     <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-center gap-2">
-        <img src="logo.png" alt="G Khidmah" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
-        <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter text-center">G KHIDMAH</h1>
+        <img src="logo.png" alt="G" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
+        <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter">G KHIDMAH</h1>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
-        <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 text-center">
-            <lottie-player src="https://lottie.host/7905b29c-6237-4d6d-b89a-0726618e001a/writing_list.json" background="transparent" speed="1" style="width: 150px; height: 150px; margin: 0 auto;" loop autoplay></lottie-player>
-            <h2 class="text-lg font-bold text-gray-800 mt-4 italic">আজ আপনার কী কী খিদমত লাগবে?</h2>
-            <textarea id="orderList" rows="5" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold mt-4 shadow-inner" placeholder="যেমন: ৫ কেজি চাল..."></textarea>
+        <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+            <div class="text-center mb-4">
+                <lottie-player src="https://lottie.host/7905b29c-6237-4d6d-b89a-0726618e001a/writing_list.json" background="transparent" speed="1" style="width: 120px; height: 120px; margin: 0 auto;" loop autoplay></lottie-player>
+                <h2 class="text-lg font-bold text-gray-800 italic">আপনার তথ্য ও ফর্দ দিন</h2>
+            </div>
+            
+            <div class="space-y-3">
+                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                <input type="text" id="custAddress" placeholder="বাসার পূর্ণ ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                <textarea id="orderList" rows="4" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold shadow-inner" placeholder="বাজারের ফর্দ লিখুন (যেমন: ৫ কেজি চাল...)"></textarea>
+            </div>
+
             <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg shadow-green-100 transition-all">
                 খিদমত শুরু করুন
             </button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
-            
             <div class="bg-white p-6 rounded-[2.5rem] shadow-xl text-center border border-green-100">
-                <div id="lottieContainer" class="w-48 h-48 mx-auto flex items-center justify-center">
-                    </div>
+                <div id="lottieContainer" class="w-full h-48 flex items-center justify-center overflow-hidden">
+                </div>
                 <div class="mt-4">
                     <p class="text-[10px] uppercase tracking-[0.2em] text-green-600 font-black italic" id="stepCounter">ধাপ: ১/১০</p>
                     <h1 id="trackMessage" class="text-lg font-bold brand-green leading-tight italic font-black mt-1 uppercase">যাচাই করা হচ্ছে...</h1>
@@ -45,8 +53,8 @@
             <div id="couponSection" class="hidden bg-white p-6 rounded-[2rem] shadow-xl border border-dashed border-green-200">
                 <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 italic">ডিসকাউন্ট কুপন আছে?</p>
                 <div class="flex gap-2">
-                    <input type="text" id="couponInput" placeholder="কোড লিখুন" class="flex-1 p-3 rounded-xl bg-slate-50 border-0 text-sm font-bold uppercase outline-none focus:ring-2 focus:ring-green-200">
-                    <button id="applyCouponBtn" class="bg-green-700 text-white px-6 rounded-xl font-bold text-xs active:scale-95 transition-all">Apply</button>
+                    <input type="text" id="couponInput" placeholder="কোড" class="flex-1 p-3 rounded-xl bg-slate-50 border-0 text-sm font-bold uppercase outline-none focus:ring-2 focus:ring-green-200">
+                    <button id="applyCouponBtn" class="bg-green-700 text-white px-6 rounded-xl font-bold text-xs active:scale-95">Apply</button>
                 </div>
             </div>
 
@@ -64,7 +72,7 @@
 
                 <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
                     <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>পণ্যের মোট দাম (Subtotal):</span>
+                        <span>পণ্যের মোট দাম:</span>
                         <span id="subTotalDisplay">৳০</span>
                     </div>
                     <div class="flex justify-between text-xs font-bold text-gray-500">
@@ -83,10 +91,6 @@
                         <span class="text-xs font-black uppercase text-gray-400">সর্বমোট বিল:</span>
                         <span id="grandTotalDisplay" class="text-4xl font-black brand-green tracking-tighter">৳০</span>
                     </div>
-                </div>
-
-                <div class="p-4 text-center">
-                    <p class="text-[9px] text-gray-400 italic font-bold">খিদমত শেষে নগদ পরিশোধযোগ্য।</p>
                 </div>
             </div>
         </div>
@@ -108,7 +112,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ১০টি স্ট্যাটাস কনফিগারেশন
         const statusConfig = {
             "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি।", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
             "verifying": { step: "২/১০", msg: "যাচাই চলছে...", anim: "https://lottie.host/9f50e82c-6337-4d6d-b89a-0726618e001a/X3N5F3GZ6W.json" },
@@ -123,12 +126,19 @@
             "completed": { step: "সফল", msg: "ধন্যবাদ!", anim: "https://lottie.host/703666d9-373b-4835-b82f-87d8120e360f/R9f2Z9Wq9p.json" }
         };
 
-        // অর্ডার সাবমিশন
         document.getElementById('submitOrderBtn').addEventListener('click', async () => {
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const addr = document.getElementById('custAddress').value;
             const list = document.getElementById('orderList').value;
-            if(!list.trim()) return alert("ফর্দটি লিখুন");
+
+            if(!name || !phone || !addr || !list.trim()) return alert("সবগুলো ঘর পূরণ করুন");
+
             try {
                 const docRef = await addDoc(collection(db, "orders"), {
+                    customerName: name,
+                    customerPhone: phone,
+                    customerAddress: addr,
                     items: list.split('\n').filter(i => i.trim() !== ""),
                     status: "pending",
                     createdAt: serverTimestamp(),
@@ -154,15 +164,11 @@
                 const couponDoc = await getDoc(doc(db, "coupons", code));
                 if (couponDoc.exists()) {
                     await updateDoc(doc(db, "orders", orderId), { discount: couponDoc.data().amount });
-                    alert("কুপন সফল হয়েছে!");
-                    document.getElementById('couponInput').value = "";
-                } else {
-                    alert("ভুল কুপন!");
-                }
-            } catch (e) { alert("Error applying coupon"); }
+                    alert("কুপন সফল!");
+                } else { alert("ভুল কুপন!"); }
+            } catch (e) { alert("Error"); }
         });
 
-        // লাইভ ট্র্যাকিং ফাংশন
         const initTracking = () => {
             const orderId = localStorage.getItem('activeOrderId');
             if(!orderId) return;
@@ -174,12 +180,12 @@
                 const data = snapshot.data();
                 if (!data) return;
 
-                // ১. অ্যানিমেশন আপডেট
+                // অ্যানিমেশন ফিক্স: innerHTML রিপ্লেস
                 const config = statusConfig[data.status] || statusConfig["pending"];
                 const container = document.getElementById('lottieContainer');
                 
                 if (container.dataset.status !== data.status) {
-                    container.innerHTML = `<lottie-player src="${config.anim}" background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay></lottie-player>`;
+                    container.innerHTML = `<lottie-player src="${config.anim}" background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>`;
                     container.dataset.status = data.status;
                 }
                 
@@ -187,7 +193,6 @@
                 document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
                 document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-                // ২. ইনভয়েস ও কুপন বক্স কন্ট্রোল
                 if(data.status !== "pending" && data.status !== "verifying") {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     document.getElementById('couponSection').classList.remove('hidden');
@@ -195,7 +200,6 @@
                     const prices = data.itemPrices || {};
                     const notes = data.itemNotes || {};
                     
-                    // আইটেম লিস্ট রেন্ডারিং
                     document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => {
                         const isMissing = notes[item] === "Missing" || (prices[item] === 0 && notes[item]);
                         return `
@@ -209,9 +213,7 @@
                         `;
                     }).join('');
 
-                    // বিল ক্যালকুলেশন
                     const total = (data.subTotal || 0) + (data.deliveryCharge || 0) + (data.platformFee || 0) - (data.discount || 0);
-                    
                     document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
                     document.getElementById('delChargeDisplay').innerText = `৳${data.deliveryCharge || 0}`;
                     document.getElementById('platFeeDisplay').innerText = `৳${data.platformFee || 0}`;
@@ -220,17 +222,11 @@
                     if(data.discount > 0) {
                         document.getElementById('discountRow').classList.remove('hidden');
                         document.getElementById('discountDisplay').innerText = `-৳${data.discount}`;
-                    } else {
-                        document.getElementById('discountRow').classList.add('hidden');
                     }
                 }
 
-                // সম্পন্ন হলে অটো রিলোড
                 if(data.status === "completed") {
-                    setTimeout(() => { 
-                        localStorage.removeItem('activeOrderId'); 
-                        location.reload(); 
-                    }, 20000);
+                    setTimeout(() => { localStorage.removeItem('activeOrderId'); location.reload(); }, 30000);
                 }
             });
         };
