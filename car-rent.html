@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G KHIDMAH | গাড়ি ভাড়া</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+        .brand-green { color: #15803d; }
+        .bg-brand-dark-green { background-color: #15803d; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-10">
+
+    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-between px-6">
+        <div class="flex items-center gap-2">
+            <img src="logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
+            <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter">G KHIDMAH</h1>
+        </div>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full">নতুন বুকিং</button>
+    </header>
+
+    <div class="max-w-md mx-auto p-4 space-y-6">
+        <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+            <div class="text-center mb-6"><div class="text-5xl mb-2">🚗</div><h2 class="text-lg font-bold text-gray-800">গাড়ি ভাড়ার তথ্য দিন</h2></div>
+            <div class="space-y-3">
+                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm">
+                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm">
+                <input type="text" id="pickup" placeholder="পিকআপ পয়েন্ট (কোথা থেকে নিব)" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm">
+                <input type="text" id="destination" placeholder="গন্তব্য (কোথায় যাবেন)" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm">
+                <input type="datetime-local" id="tripTime" class="w-full p-4 rounded-2xl bg-slate-50 font-bold outline-none text-sm">
+                <textarea id="carNote" rows="3" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none font-semibold text-sm shadow-inner" placeholder="গাড়ির ধরন (সেডান/নোয়া) ও বিশেষ নির্দেশ..."></textarea>
+            </div>
+            <button id="submitBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">বুকিং রিকোয়েস্ট পাঠান</button>
+        </div>
+
+        <div id="trackingSection" class="hidden space-y-6">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
+                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
+                <p id="stepCounter" class="text-[10px] uppercase text-green-600 font-black italic mb-2">ধাপ: ১/১০</p>
+                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">অনুরোধ গ্রহণ করা হয়েছে...</h1>
+                <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 border border-gray-50">
+                    <div id="progressBar" class="bg-brand-dark-green h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
+                <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center">
+                    <h3 class="text-sm font-black brand-green uppercase italic tracking-tighter">গাড়ি ভাড়া রশিদ</h3>
+                </div>
+                <div class="p-6 space-y-2">
+                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>রেন্টাল ফি:</span><span id="subTotalDisplay">৳০</span></div>
+                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>অন্যান্য চার্জ:</span><span>৳৯০</span></div>
+                    <div class="pt-4 border-t border-green-100 flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-gray-400">সর্বমোট:</span>
+                        <span id="grandTotalDisplay" class="text-4xl font-black brand-green">৳০</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let lastStatus = "";
+
+        const statusConfig = {
+            "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
+            "verifying": { step: "২/১০", msg: "যাচাই চলছে", icon: "🔍", progress: 20 },
+            "invoice_ready": { step: "৩/১০", msg: "ইনভয়েস রেডি", icon: "📄", progress: 30 },
+            "finding_driver": { step: "৪/১০", msg: "ড্রাইভার খুঁজছি", icon: "🤝", progress: 40 },
+            "driver_assigned": { step: "৫/১০", msg: "ড্রাইভার কনফার্ম", icon: "✅", progress: 50 },
+            "on_way": { step: "৬/১০", msg: "গাড়ি আসছে", icon: "🚗", progress: 65 },
+            "at_pickup": { step: "৭/১০", msg: "গাড়ি দাঁড়িয়ে আছে", icon: "📍", progress: 80 },
+            "trip_started": { step: "৮/১০", msg: "যাত্রা শুরু", icon: "🛣️", progress: 90 },
+            "near_dest": { step: "৯/১০", msg: "গন্তব্যের কাছে", icon: "🏁", progress: 95 },
+            "completed": { step: "সফল", msg: "ট্রিপ শেষ", icon: "🎉", progress: 100 }
+        };
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const pickup = document.getElementById('pickup').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            const time = document.getElementById('tripTime').value;
+            const note = document.getElementById('carNote').value.trim();
+
+            if(!name || !phone || !pickup || !destination) return alert("তথ্য পূরণ করুন");
+
+            const docRef = await addDoc(collection(db, "orders"), {
+                customerName: name, customerPhone: phone, 
+                pickupLocation: pickup, destination: destination, tripTime: time,
+                items: [note], orderType: "car_rent", status: "pending", 
+                createdAt: serverTimestamp(), subTotal: 0, deliveryCharge: 70, platformFee: 20
+            });
+            localStorage.setItem('activeOrderId', docRef.id);
+            initTracking();
+        });
+
+        const initTracking = () => {
+            const orderId = localStorage.getItem('activeOrderId');
+            if(!orderId) return;
+
+            document.getElementById('orderSection').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+
+            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+                const data = snapshot.data();
+                if(!data) return;
+
+                if(lastStatus !== "" && lastStatus !== data.status) {
+                    document.getElementById('notifySound').play().catch(e => {});
+                }
+                lastStatus = data.status;
+
+                const config = statusConfig[data.status] || statusConfig["pending"];
+                document.getElementById('statusIcon').innerText = config.icon;
+                document.getElementById('trackMessage').innerText = config.msg;
+                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+                document.getElementById('progressBar').style.width = config.progress + "%";
+
+                if(data.status !== "pending" && data.status !== "verifying") {
+                    document.getElementById('invoiceBox').classList.remove('hidden');
+                    document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
+                    document.getElementById('grandTotalDisplay').innerText = `৳${(data.subTotal || 0) + 90}`;
+                }
+            });
+        };
+        window.addEventListener('load', initTracking);
+    </script>
+</body>
+</html>
