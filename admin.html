@@ -132,35 +132,46 @@
 
         // ইনভয়েস কনফার্ম ফাংশন
         window.confirmInvoice = async (id) => {
-            const card = event.target.closest('div');
-            const priceInputs = card.querySelectorAll('.item-price');
-            const itemPrices = {};
-            let subTotal = 0;
+    // ১. DOM ফিক্স: event.target থেকে সঠিক কার্ড কন্টেইনার খুঁজে বের করা
+    const btn = event.target;
+    const card = btn.closest('.bg-white'); // কার্ডের মেইন ক্লাস দিয়ে খোঁজা নিরাপদ
+    
+    const priceInputs = card.querySelectorAll('.item-price');
+    const itemPrices = {};
+    let subTotal = 0;
 
-            priceInputs.forEach(input => {
-                const val = parseFloat(input.value) || 0;
-                itemPrices[input.dataset.item] = val;
-                subTotal += val;
-            });
+    priceInputs.forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        itemPrices[input.dataset.item] = val;
+        subTotal += val;
+    });
 
-            const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-            const platFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-            const coupon = parseFloat(document.getElementById(`coupon-${id}`).value) || 0;
-            const total = (subTotal + delCharge + platFee) - coupon;
+    // ২. ইনপুট ভ্যালু সংগ্রহ
+    const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+    const platFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+    const couponDisc = parseFloat(document.getElementById(`coupon-${id}`).value) || 0;
+    
+    // ৩. টোটাল ক্যালকুলেশন
+    const total = (subTotal + delCharge + platFee) - couponDisc;
 
-            try {
-                await updateDoc(doc(db, "orders", id), {
-                    itemPrices: itemPrices,
-                    subTotal: subTotal,
-                    deliveryCharge: delCharge,
-                    platformFee: platFee,
-                    couponDiscount: coupon,
-                    totalBill: total,
-                    status: "invoice_ready"
-                });
-                alert("ইনভয়েস এবং বিল আপডেট হয়েছে!");
-            } catch (e) { alert("Error: " + e.message); }
-        };
+    try {
+        // ৪. Firebase আপডেট (ফিল্ডের নাম কাস্টমার প্যানেলের সাথে মিল রেখে)
+        await updateDoc(doc(db, "orders", id), {
+            itemPrices: itemPrices,
+            subTotal: subTotal,
+            deliveryCharge: delCharge,
+            platformFee: platFee,
+            discount: couponDisc, // 'couponDiscount' এর বদলে শুধু 'discount' দিন
+            totalBill: total,
+            status: "invoice_ready"
+        });
+        alert("ইনভয়েস এবং বিল সাকসেসফুলি আপডেট হয়েছে!");
+    } catch (e) { 
+        console.error(e);
+        alert("Error: " + e.message); 
+    }
+};
+
 
         // স্ট্যাটাস আপডেট ফাংশন
         window.updateStatus = async (id, status) => {
