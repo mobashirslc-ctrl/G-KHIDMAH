@@ -42,35 +42,49 @@
             </div>
 
             <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
-                <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center relative">
-                    <img src="logo.png" alt="Logo" class="h-10 mx-auto mb-2" onerror="this.style.display='none'">
-                    <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">অফিসিয়াল খিদমত রশিদ</h3>
-                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1" id="orderIdDisplay"></p>
-                </div>
+    
+    <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center relative">
+        <img src="logo.png" alt="Logo" class="h-10 mx-auto mb-2" onerror="this.style.display='none'">
+        <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">অফিসিয়াল খিদমত রশিদ</h3>
+        <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1" id="orderIdDisplay"></p>
+    </div>
 
-                <div class="p-6">
-                    <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest italic">পণ্যের তালিকা ও মূল্য:</h4>
-                    <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm"></div>
-                </div>
+    <div class="p-6">
+        <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest italic">পণ্যের তালিকা ও মূল্য:</h4>
+        <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm">
+            </div>
+    </div>
 
-                <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
-                    <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>পণ্যের মোট দাম (Subtotal):</span>
-                        <span id="subTotalDisplay">৳০</span>
-                    </div>
-                    <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>ডেলিভারি চার্জ:</span>
-                        <span id="delChargeDisplay">৳০</span>
-                    </div>
-                    <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>প্ল্যাটফর্ম ফি:</span>
-                        <span id="platFeeDisplay">৳০</span>
-                    </div>
-                    <div id="discountRow" class="hidden flex justify-between text-xs font-bold text-green-600">
-                        <span>কুপন ডিসকাউন্ট:</span>
-                        <span id="discountDisplay">-৳০</span>
-                    </div>
-                </div>
+    <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
+        <div class="flex justify-between text-xs font-bold text-gray-500">
+            <span>পণ্যের মোট দাম (Subtotal):</span>
+            <span id="subTotalDisplay">৳০</span>
+        </div>
+        <div class="flex justify-between text-xs font-bold text-gray-500">
+            <span>ডেলিভারি চার্জ:</span>
+            <span id="delChargeDisplay">৳০</span>
+        </div>
+        <div class="flex justify-between text-xs font-bold text-gray-500">
+            <span>প্ল্যাটফর্ম ফি:</span>
+            <span id="platFeeDisplay">৳০</span>
+        </div>
+        <div id="discountRow" class="hidden flex justify-between text-xs font-bold text-green-600 border-t border-green-100 pt-2">
+            <span>কুপন ডিসকাউন্ট:</span>
+            <span id="discountDisplay">-৳০</span>
+        </div>
+    </div>
+
+    <div class="p-6 bg-white flex justify-between items-end">
+        <div>
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-tighter italic">সর্বমোট প্রদেয় বিল:</p>
+            <h2 id="grandTotalDisplay" class="text-4xl font-black brand-green tracking-tighter">৳০</h2>
+        </div>
+        <div class="text-right">
+            <p class="text-[9px] text-gray-400 italic">নগদ পরিশোধযোগ্য।</p>
+        </div>
+    </div>
+</div>
+
 
                 <div class="p-6 bg-white flex justify-between items-end">
                     <div>
