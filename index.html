@@ -166,15 +166,19 @@
                 `).join('');
                 
                 const sub = data.subTotal || 0;
-                const disc = data.discount || 0;
-                document.getElementById('displaySubtotal').innerText = `৳${sub}`;
-                document.getElementById('displayTotal').innerText = `৳${(sub + 70) - disc}`;
+const dCharge = data.deliveryCharge || 50; // অ্যাডমিন থেকে না আসলে ডিফল্ট ৫০
+const pFee = data.platformFee || 20;       // অ্যাডমিন থেকে না আসলে ডিফল্ট ২০
+const disc = data.discount || 0;
 
-                if(disc > 0) {
-                    document.getElementById('discountRow').classList.remove('hidden');
-                    document.getElementById('displayDiscount').innerText = `-৳${disc}`;
-                }
-            }
+const total = (sub + dCharge + pFee) - disc;
+
+document.getElementById('displaySubtotal').innerText = `৳${sub}`;
+document.getElementById('displayTotal').innerText = `৳${total}`;
+
+// সার্ভিস ও ডেলিভারি টেক্সট আপডেট (কাস্টমার প্যানেল HTML-এ id="displayCharges" থাকলে)
+if(document.getElementById('displayCharges')){
+    document.getElementById('displayCharges').innerText = `৳${dCharge + pFee}`;
+}
 
             // বাটন কন্ট্রোল
             const isLive = !["pending", "verifying", "invoice_ready"].includes(data.status);
