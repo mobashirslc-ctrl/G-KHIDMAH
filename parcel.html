@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G KHIDMAH | পার্সেল ও ডেলিভারি</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+        .brand-green { color: #15803d; }
+        .bg-brand-dark-green { background-color: #15803d; }
+        .input-style { @apply w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-10">
+
+    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-between px-6">
+        <div class="flex items-center gap-2">
+            <img src="logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
+            <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter">G KHIDMAH</h1>
+        </div>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-100 uppercase italic">নতুন পার্সেল</button>
+    </header>
+
+    <div class="max-w-md mx-auto p-4 space-y-6">
+        
+        <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="text-5xl mb-2">📦</div>
+                <h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল তথ্য দিন</h2>
+            </div>
+            
+            <div class="space-y-3">
+                <input type="text" id="custName" placeholder="আপনার নাম" class="input-style">
+                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="input-style">
+                <input type="text" id="pickupAddr" placeholder="পিকআপ ঠিকানা (যেখান থেকে নিব)" class="input-style">
+                <input type="text" id="deliveryAddr" placeholder="ডেলিভারি ঠিকানা (যেখানে দিব)" class="input-style">
+                
+                <select id="parcelType" class="input-style text-gray-500">
+                    <option value="" disabled selected>পার্সেলের ধরন সিলেক্ট করুন</option>
+                    <option>জরুরি ডকুমেন্ট (Legal/Doc)</option>
+                    <option>হোমমেড খাবার (Food)</option>
+                    <option>গিফট বা উপহার (Gift)</option>
+                    <option>অন্যান্য (Others)</option>
+                </select>
+
+                <textarea id="parcelNote" rows="3" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold shadow-inner" placeholder="পার্সেলের বিবরণ (যেমন: কি কি আছে, ওজন বা জরুরি নির্দেশ)..."></textarea>
+            </div>
+
+            <button id="submitBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">ডেলিভারি রিকোয়েস্ট পাঠান</button>
+        </div>
+
+        <div id="trackingSection" class="hidden space-y-6">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
+                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
+                <p id="stepCounter" class="text-[10px] uppercase text-green-600 font-black italic mb-2">ধাপ: ১/১০</p>
+                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">অনুরোধ গ্রহণ করা হয়েছে...</h1>
+                <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1">
+                    <div id="progressBar" class="bg-brand-dark-green h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
+                <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center">
+                    <h3 class="text-sm font-black brand-green uppercase italic tracking-tighter">অফিসিয়াল ডেলিভারি রশিদ</h3>
+                </div>
+                <div class="p-6 space-y-4 font-semibold text-sm" id="itemsDisplay">
+                    </div>
+                <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
+                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>ডেলিভারি চার্জ:</span><span id="subTotalDisplay">৳০</span></div>
+                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>প্ল্যাটফর্ম ফি:</span><span>৳২০</span></div>
+                    <div class="pt-4 border-t border-green-100 flex justify-between items-center">
+                        <span class="text-xs font-black text-gray-400 uppercase">সর্বমোট বিল:</span>
+                        <span id="grandTotalDisplay" class="text-4xl font-black brand-green">৳০</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "
