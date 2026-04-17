@@ -20,13 +20,12 @@
 
         <div class="space-y-4 mb-8">
             <input type="text" id="adminSearch" placeholder="নাম বা মোবাইল নম্বর দিয়ে খুঁজুন..." class="w-full p-4 rounded-2xl border-0 shadow-lg outline-none focus:ring-2 focus:ring-blue-400 font-bold text-sm">
-            <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide text-[10px] font-bold uppercase italic">
+            <div class="flex gap-2 overflow-x-auto pb-2 hide-scroll text-[10px] font-bold uppercase italic">
                 <button onclick="filterType('all')" class="bg-blue-900 text-white px-4 py-2 rounded-full whitespace-nowrap">সব অর্ডার</button>
-                <button onclick="filterType('shopping')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm whitespace-nowrap border">🛒 বাজার</button>
-                <button onclick="filterType('parcel')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm whitespace-nowrap border">📦 পার্সেল</button>
-                <button onclick="filterType('car_rent')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm whitespace-nowrap border">🚗 কার রেন্ট</button>
-                <button onclick="filterType('home_service')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm whitespace-nowrap border">🛠️ সার্ভিস</button>
-                <button onclick="filterType('blood')" class="bg-red-50 text-red-600 px-4 py-2 rounded-full shadow-sm whitespace-nowrap border">🩸 ব্লাড</button>
+                <button onclick="filterType('shopping')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🛒 বাজার</button>
+                <button onclick="filterType('parcel')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">📦 পার্সেল</button>
+                <button onclick="filterType('car_rent')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🚗 গাড়ি</button>
+                <button onclick="filterType('blood')" class="bg-red-50 text-red-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🩸 ব্লাড</button>
             </div>
         </div>
 
@@ -63,280 +62,149 @@
         };
 
         function renderOrders(orders) {
-    const container = document.getElementById('adminOrders');
-    const filtered = currentFilter === 'all' ? orders : orders.filter(o => o.orderType === currentFilter);
-    container.innerHTML = "";
+            const container = document.getElementById('adminOrders');
+            const filtered = currentFilter === 'all' ? orders : orders.filter(o => o.orderType === currentFilter);
+            document.getElementById('activeCount').innerText = `${filtered.length}টি অর্ডার`;
+            container.innerHTML = "";
 
-    filtered.forEach((order) => {
-        const id = order.id;
-        const card = document.createElement('div');
-        
-        // সার্ভিস অনুযায়ী আলাদা আলাদা কালার ও ডিজাইন
-        let cardStyle = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[10px] mb-8 ";
-        if(order.orderType === 'shopping') cardStyle += "border-green-600";
-        else if(order.orderType === 'parcel') cardStyle += "border-orange-500";
-        else if(order.orderType === 'car_rent') cardStyle += "border-blue-600";
-        else if(order.orderType === 'blood') cardStyle += "border-red-600";
-        else cardStyle += "border-purple-600";
+            filtered.forEach((order) => {
+                const id = order.id;
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[10px] mb-8 " + getBorderColor(order.orderType);
 
-        card.className = cardStyle;
-
-        // সার্ভিস অনুযায়ী কন্টেন্ট তৈরি
-        let contentHtml = "";
-        let buttonsHtml = "";
-
-        if(order.orderType === 'shopping') {
-            // শপিংয়ের জন্য আগের সেই ইনভয়েস সিস্টেম
-            contentHtml = order.items.map(item => `
-                <div class="mb-4 p-3 bg-slate-50 rounded-2xl">
-                    <p class="text-[10px] font-bold text-gray-700 italic">📦 ${item}</p>
-                    <div class="flex gap-2 mt-2">
-                        <input type="number" placeholder="৳ দাম" class="item-price w-24 p-2 rounded-xl bg-white text-xs font-bold shadow-sm" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
-                        <input type="text" placeholder="নোট" class="item-note flex-1 p-2 rounded-xl bg-white text-[10px] shadow-sm" data-item="${item}" value="${order.itemNotes?.[item] || ''}">
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-[9px] font-black uppercase italic text-gray-400">
+                        <span>SERVICE: ${order.orderType}</span>
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full">${order.status}</span>
                     </div>
-                </div>
-            `).join('');
-            
-            buttonsHtml = `
-                <button onclick="updateStatus('${id}', 'shopping')" class="bg-amber-100 text-amber-700 p-2 rounded-lg font-bold text-[9px]">৬. কেনাকাটা</button>
-                <button onclick="updateStatus('${id}', 'delivery_started')" class="bg-orange-100 text-orange-700 p-2 rounded-lg font-bold text-[9px]">৮. রওয়ানা</button>
-            `;
-        } 
-        else if(order.orderType === 'parcel') {
-            contentHtml = `
-                <div class="bg-orange-50 p-4 rounded-3xl border border-dashed border-orange-200">
-                    <p class="text-xs font-black text-orange-800 uppercase italic">📦 পার্সেল তথ্য:</p>
-                    <p class="text-sm font-bold mt-1 text-gray-800">${order.parcelType || 'সাধারণ পার্সেল'}</p>
-                    <p class="text-[10px] text-gray-500 mt-1 italic">বিবরণ: ${order.items ? order.items[0] : 'নেই'}</p>
-                    <div class="mt-3 bg-white p-2 rounded-xl text-center font-black text-orange-600 border border-orange-100 uppercase tracking-widest">OTP: ${order.otp || 'N/A'}</div>
-                </div>
-            `;
-            buttonsHtml = `
-                <button onclick="updateStatus('${id}', 'rider_assigned')" class="bg-blue-100 text-blue-700 p-2 rounded-lg font-bold text-[9px]">১. রাইডার রেডি</button>
-                <button onclick="verifyOtp('${id}', ${order.otp})" class="bg-green-600 text-white p-2 rounded-lg font-bold text-[9px] shadow-lg">২. ডেলিভারি (OTP)</button>
-            `;
+
+                    <div class="mb-6 p-4 bg-slate-50 rounded-3xl border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-800">👤 ${order.customerName}</h3>
+                        <p class="text-[11px] font-bold text-blue-600">${order.customerPhone}</p>
+                        <p class="text-[10px] text-gray-400 italic">📍 ${order.customerAddress || order.pickupLocation}</p>
+                    </div>
+
+                    <div class="space-y-3 mb-6">${getContentBody(order)}</div>
+
+                    <div class="bg-gray-50 p-4 rounded-3xl mb-6 border border-dashed border-gray-200">
+                        ${getInvoiceInputs(order)}
+                        <button onclick="saveInvoice('${id}', '${order.orderType}')" class="w-full bg-blue-700 text-white py-3 rounded-2xl font-bold text-xs mt-3 shadow-lg">সেভ ইনভয়েস</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 uppercase tracking-tighter italic">
+                        ${getStatusButtons(order)}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
-        else if(order.orderType === 'car_rent') {
-            contentHtml = `
-                <div class="bg-blue-50 p-4 rounded-3xl border border-dashed border-blue-200">
-                    <p class="text-xs font-black text-blue-800 uppercase italic">🚗 গাড়ি ভাড়া:</p>
-                    <p class="text-sm font-bold mt-1 text-gray-800">${order.carType || 'গাড়ি নির্দিষ্ট নয়'}</p>
-                    <p class="text-[10px] text-blue-600 mt-1 italic font-bold">যাত্রার স্থান: ${order.pickupLocation} > ${order.dropLocation || 'লোকেশন নেই'}</p>
-                </div>
-            `;
-            buttonsHtml = `
-                <button onclick="updateStatus('${id}', 'car_assigned')" class="bg-indigo-100 text-indigo-700 p-2 rounded-lg font-bold text-[9px]">১. গাড়ি রেডি</button>
-                <button onclick="updateStatus('${id}', 'completed')" class="bg-green-600 text-white p-2 rounded-lg font-bold text-[9px]">২. ট্রিপ শেষ</button>
-            `;
-        }
-        else if(order.orderType === 'blood') {
-            contentHtml = `
-                <div class="bg-red-50 p-4 rounded-3xl border border-dashed border-red-200 text-red-700">
-                    <p class="text-xs font-black uppercase italic">🩸 রক্তের অনুরোধ:</p>
-                    <p class="text-xl font-black mt-1">${order.bloodGroup}</p>
-                    <p class="text-[10px] font-bold mt-1">হাসপাতাল: ${order.hospital}</p>
-                </div>
-            `;
-            buttonsHtml = `
-                <button onclick="updateStatus('${id}', 'finding_donor')" class="bg-red-100 text-red-700 p-2 rounded-lg font-bold text-[9px]">১. ডোনার খুঁজছি</button>
-                <button onclick="updateStatus('${id}', 'completed')" class="bg-gray-800 text-white p-2 rounded-lg font-bold text-[9px]">২. ডোনার কনফার্ম</button>
-            `;
-        }
-
-        card.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <span class="bg-slate-100 px-3 py-1 rounded-full text-[9px] font-black uppercase italic tracking-tighter text-gray-500 italic">${order.orderType}</span>
-                <span class="text-[9px] font-black text-white bg-green-500 px-3 py-1 rounded-full uppercase italic">${order.status}</span>
-            </div>
-
-            <div class="mb-6 p-4 bg-slate-50 rounded-3xl border border-gray-100">
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="bg-gray-800 text-white p-2 rounded-xl text-xs">👤</div>
-                    <div><h3 class="text-sm font-black text-gray-800">${order.customerName}</h3><p class="text-[11px] font-bold text-blue-600">${order.customerPhone}</p></div>
-                </div>
-            </div>
-
-            <div class="mb-6">${contentHtml}</div>
-
-            ${order.orderType !== 'blood' ? `
-                <div class="grid grid-cols-3 gap-2 mb-6">
-                    <div class="bg-slate-50 p-2 rounded-2xl text-center">
-                        <label class="text-[8px] font-bold text-gray-400 block uppercase italic">ডেলিভারি</label>
-                        <input type="number" id="del-${id}" class="w-full bg-transparent text-sm font-bold text-center" value="${order.deliveryCharge || 0}">
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-2xl text-center">
-                        <label class="text-[8px] font-bold text-gray-400 block uppercase italic">প্ল্যাটফর্ম</label>
-                        <input type="number" id="plat-${id}" class="w-full bg-transparent text-sm font-bold text-center" value="${order.platformFee || 20}">
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-2xl text-center">
-                        <label class="text-[8px] font-bold text-gray-400 block uppercase italic">বিল/ভাড়া</label>
-                        <input type="number" id="sub-${id}" class="w-full bg-transparent text-sm font-bold text-center text-blue-700" value="${order.subTotal || 0}">
-                    </div>
-                </div>
-                <button onclick="confirmInvoice('${id}')" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-bold mb-6 text-xs shadow-lg active:scale-95">সেভ ইনভয়েস</button>
-            ` : ''}
-
-            <div class="grid grid-cols-2 gap-2 uppercase tracking-tighter italic">
-                <button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-200 p-2 rounded-lg font-bold text-[9px]">ভেরিফাই</button>
-                ${buttonsHtml}
-                <button onclick="updateStatus('${id}', 'completed')" class="bg-gray-800 text-white p-2 rounded-lg font-bold col-span-2 py-3 mt-2 text-xs">খিদমত সম্পন্ন</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
 
         function getBorderColor(type) {
-            const colors = { shopping: 'border-green-600', parcel: 'border-orange-500', car_rent: 'border-blue-600', home_service: 'border-purple-600', blood: 'border-red-600' };
-            return colors[type] || 'border-gray-300';
+            const colors = { shopping: 'border-green-600', parcel: 'border-orange-500', car_rent: 'border-blue-600', blood: 'border-red-600' };
+            return colors[type] || 'border-purple-600';
         }
 
-        function getContentHtml(order) {
+        function getContentBody(order) {
             if(order.orderType === 'shopping') {
                 return order.items.map(item => `
-                    <div class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                        <p class="text-[10px] font-bold text-gray-700 mb-2 italic">📦 ${item}</p>
-                        <div class="flex gap-2">
-                            <input type="number" placeholder="৳ দাম" class="item-price w-24 p-2 rounded-xl bg-blue-50 text-xs font-bold" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
-                            <input type="text" placeholder="নোট" class="item-note flex-1 p-2 rounded-xl bg-gray-50 text-[10px]" data-item="${item}" value="${order.itemNotes?.[item] || ''}">
-                        </div>
+                    <div class="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border">
+                        <span class="text-[10px] flex-1 font-bold italic">📦 ${item}</span>
+                        <input type="number" class="item-price w-16 p-1 bg-blue-50 rounded text-xs text-center font-bold" placeholder="৳" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
                     </div>
                 `).join('');
-            } else if(order.orderType === 'parcel') {
-                return `<div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 italic">
-                    <p class="text-[11px] font-bold text-orange-800">📦 পার্সেল টাইপ: ${order.parcelType}</p>
-                    <p class="text-[10px] text-orange-600 mt-1 font-semibold">বিবরণ: ${order.items[0]}</p>
-                    <p class="text-[10px] text-orange-600 font-bold mt-2">ডেলিভারি ঠিকানা: ${order.customerAddress}</p>
-                    <div class="mt-2 text-[9px] font-black bg-white px-2 py-1 rounded-full w-max border border-orange-200 uppercase">🔒 OTP: ${order.otp}</div>
-                </div>`;
-            } else if(order.orderType === 'car_rent') {
-                return `<div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 italic">
-                    <p class="text-[11px] font-bold text-blue-800">🚗 কার বুকিং: ${order.carType}</p>
-                    <p class="text-[10px] text-blue-600 font-bold mt-1">লোকেশন: ${order.pickupLocation} > ${order.dropLocation}</p>
-                </div>`;
-            } else if(order.orderType === 'home_service') {
-                return `<div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 italic">
-                    <p class="text-[11px] font-bold text-purple-800">🛠️ সার্ভিস: ${order.serviceType}</p>
-                    <p class="text-[10px] text-purple-600 mt-1">সমস্যা: ${order.items[0]}</p>
-                </div>`;
             }
-            return '';
+            if(order.orderType === 'car_rent') return `<p class="text-xs font-bold text-blue-600 bg-blue-50 p-3 rounded-xl italic">🚗 গাড়ি: ${order.carType}<br>রুট: ${order.pickupLocation} > ${order.dropLocation}</p>`;
+            if(order.orderType === 'parcel') return `<p class="text-xs font-bold text-orange-600 bg-orange-50 p-3 rounded-xl italic">📦 পার্সেল: ${order.parcelType}<br>বিবরণ: ${order.items[0]}<br>🔒 OTP: ${order.otp}</p>`;
+            return `<p class="text-xs font-bold text-gray-600 bg-gray-50 p-3 rounded-xl italic">তথ্য: ${order.items ? order.items[0] : 'নেই'}</p>`;
         }
 
-        function getInvoicePanel(order) {
+        function getInvoiceInputs(order) {
             const id = order.id;
-            return `
-                <div class="grid grid-cols-3 gap-2 p-4 bg-slate-50 rounded-3xl mb-4 border border-dashed border-gray-200">
-                    <div class="text-center">
-                        <label class="text-[8px] font-bold text-gray-400 uppercase italic">ডেলিভারি/সার্ভিস</label>
-                        <input type="number" id="del-${id}" class="w-full bg-transparent text-center text-sm font-black text-gray-800" value="${order.deliveryCharge || 70}">
-                    </div>
-                    <div class="text-center">
-                        <label class="text-[8px] font-bold text-gray-400 uppercase italic">প্ল্যাটফর্ম</label>
-                        <input type="number" id="plat-${id}" class="w-full bg-transparent text-center text-sm font-black text-gray-800" value="${order.platformFee || 20}">
-                    </div>
-                    <div class="text-center">
-                        <label class="text-[8px] font-bold text-gray-400 uppercase italic">আইটেম/রেন্ট</label>
-                        <input type="number" id="sub-${id}" class="w-full bg-transparent text-center text-sm font-black text-blue-700" value="${order.subTotal || 0}">
-                    </div>
-                </div>
-                <button onclick="saveInvoice('${id}')" class="w-full bg-blue-700 text-white py-3 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all mb-4">ইনভয়েস আপডেট করুন</button>
-            `;
-        }
-
-        function getControlButtons(order) {
-            const id = order.id;
-            // পার্সেল ওটিপি বাটন আলাদা
-            const completeBtn = order.orderType === 'parcel' 
-                ? `<button onclick="verifyOtp('${id}', ${order.otp})" class="bg-green-600 text-white p-2 rounded-lg font-bold col-span-2 py-3 mt-2">১০. পার্সেল ডেলিভারি (Verify OTP)</button>`
-                : `<button onclick="updateStatus('${id}', 'completed')" class="bg-green-600 text-white p-2 rounded-lg font-bold col-span-2 py-3 mt-2 italic tracking-widest uppercase">১০. খিদমত সম্পন্ন</button>`;
-
             if(order.orderType === 'shopping') {
-                return `<button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-100 p-2 rounded-lg font-bold text-[9px]">১. যাচাই</button>
-                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="bg-purple-100 p-2 rounded-lg font-bold text-[9px]">২. সহকারী রেডি</button>
-                        <button onclick="updateStatus('${id}', 'shopping')" class="bg-amber-100 p-2 rounded-lg font-bold text-[9px]">৩. কেনাকাটা</button>
-                        <button onclick="updateStatus('${id}', 'delivery_started')" class="bg-orange-100 p-2 rounded-lg font-bold text-[9px]">৪. রওয়ানা</button>
-                        ${completeBtn}`;
-            } else if(order.orderType === 'parcel') {
-                return `<button onclick="updateStatus('${id}', 'rider_assigned')" class="bg-orange-100 p-2 rounded-lg font-bold text-[9px]">১. রাইডার নিযুক্ত</button>
-                        <button onclick="updateStatus('${id}', 'picked')" class="bg-blue-100 p-2 rounded-lg font-bold text-[9px]">২. পার্সেল সংগ্রহ</button>
-                        <button onclick="updateStatus('${id}', 'in_transit')" class="bg-indigo-100 p-2 rounded-lg font-bold text-[9px]">৩. পথে আছে</button>
-                        <button onclick="updateStatus('${id}', 'near_location')" class="bg-teal-100 p-2 rounded-lg font-bold text-[9px]">৪. লোকেশনের কাছে</button>
-                        ${completeBtn}`;
-            } else if(order.orderType === 'blood') {
-                return `<button onclick="updateStatus('${id}', 'verifying')" class="bg-red-50 text-red-600 p-2 rounded-lg font-bold text-[9px]">যাচাই চলছে</button>
-                        <button onclick="updateStatus('${id}', 'finding_donor')" class="bg-red-100 text-red-700 p-2 rounded-lg font-bold text-[9px]">ডোনার খুঁজছি</button>
-                        <button onclick="updateStatus('${id}', 'donor_ready')" class="bg-red-600 text-white p-2 rounded-lg font-bold text-[9px]">ডোনার রেডি</button>
-                        <button onclick="updateStatus('${id}', 'completed')" class="bg-gray-800 text-white p-2 rounded-lg font-bold text-[9px]">ডোনার পৌঁছেছে</button>`;
+                return `<div class="grid grid-cols-3 gap-2 text-center">
+                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">ডেলিভারি</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.deliveryCharge || 70}"></div>
+                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">প্ল্যাটফর্ম</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.platformFee || 20}"></div>
+                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">আইটেম</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center bg-transparent text-blue-700" value="${order.subTotal || 0}"></div>
+                </div>`;
             }
-            return `<button onclick="updateStatus('${id}', 'verifying')" class="bg-slate-100 p-2 rounded-lg font-bold text-[9px]">যাচাই</button>${completeBtn}`;
+            if(order.orderType === 'car_rent') {
+                return `<input type="text" id="driver-${id}" class="w-full p-2 rounded-xl text-[10px] bg-white border mb-2" placeholder="ড্রাইভারের নাম ও নাম্বার" value="${order.riderName || ''}">
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div><label class="text-[8px] font-bold block">গাড়ি ভাড়া</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center" value="${order.subTotal || ''}"></div>
+                    <div><label class="text-[8px] font-bold block">সার্ভিস চার্জ</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center" value="${order.deliveryCharge || 100}"></div>
+                </div>`;
+            }
+            if(order.orderType === 'parcel') {
+                return `<input type="text" id="rider-${id}" class="w-full p-2 rounded-xl text-[10px] bg-white border mb-2" placeholder="রাইডারের নাম ও ফোন" value="${order.riderName || ''}">
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div><label class="text-[8px] font-bold block">ডেলিভারি চার্জ</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center" value="${order.deliveryCharge || 60}"></div>
+                    <div><label class="text-[8px] font-bold block">অন্যান্য</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center" value="${order.platformFee || 10}"></div>
+                </div>`;
+            }
+            return `<input type="number" id="sub-${id}" class="w-full p-3 rounded-2xl text-xs font-black bg-white border" placeholder="মোট বিল/ভিজিট ফি" value="${order.subTotal || ''}">`;
         }
 
-        // --- ফাংশনালিটি ---
+        function getStatusButtons(order) {
+            const id = order.id;
+            const b = (s, txt, cls) => `<button onclick="updateStatus('${id}', '${s}')" class="p-2 rounded-xl font-bold text-[9px] ${cls}">${txt}</button>`;
+            
+            if(order.orderType === 'shopping') {
+                return `
+                    ${b('verifying', '১. যাচাই', 'bg-slate-200')} ${b('invoice_ready', '২. ইনভয়েস', 'bg-blue-100')}
+                    ${b('finding_assistant', '৩. সহকারী', 'bg-indigo-100')} ${b('assistant_assigned', '৪. সহকারী রেডি', 'bg-purple-100')}
+                    ${b('at_store', '৫. দোকানে', 'bg-yellow-100')} ${b('shopping', '৬. কেনাকাটা', 'bg-amber-100')}
+                    ${b('packing', '৭. প্যাকিং', 'bg-pink-100')} ${b('delivery_started', '৮. রওয়ানা', 'bg-orange-100')}
+                    ${b('at_location', '৯. লোকেশন', 'bg-teal-100')} ${b('completed', '১০. সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3 mt-2')}
+                `;
+            }
+            if(order.orderType === 'parcel') {
+                return `
+                    ${b('rider_assigned', '১. রাইডার রেডি', 'bg-blue-100')} ${b('picked', '২. পার্সেল পিক', 'bg-orange-100')}
+                    ${b('in_transit', '৩. পথে আছে', 'bg-amber-100')} <button onclick="verifyOtp('${id}', ${order.otp})" class="bg-green-600 text-white p-2 rounded-xl text-[9px] font-bold shadow-lg">৪. ডেলিভারি (OTP)</button>
+                `;
+            }
+            if(order.orderType === 'car_rent') {
+                return `${b('car_assigned', '১. গাড়ি রেডি', 'bg-blue-100')} ${b('on_way', '২. পথে আছে', 'bg-orange-100')} ${b('completed', '৩. ট্রিপ শেষ', 'bg-green-600 text-white col-span-2 py-3 mt-2')}`;
+            }
+            if(order.orderType === 'blood') {
+                return `${b('finding_donor', '১. ডোনার খুঁজছি', 'bg-red-50 text-red-700')} ${b('completed', '২. রক্তদান সফল', 'bg-red-600 text-white')}`;
+            }
+            return b('completed', 'খিদমত সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3');
+        }
 
-        window.saveInvoice = async (id) => {
-            const card = event.target.closest('.bg-white');
-            const delCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-            const platFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-            let subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
-
-            const updateData = {
-                deliveryCharge: delCharge,
-                platformFee: platFee,
-                subTotal: subTotal,
-                status: "invoice_ready"
-            };
-
-            // শপিং হলে আইটেম প্রাইস আপডেট
-            if(currentFilter === 'shopping' || card.innerHTML.includes('shopping')) {
-                const priceInputs = card.querySelectorAll('.item-price');
-                const noteInputs = card.querySelectorAll('.item-note');
-                const itemPrices = {};
-                const itemNotes = {};
-                let calcSubTotal = 0;
-
-                priceInputs.forEach((input, index) => {
-                    const itemName = input.dataset.item;
-                    const price = parseFloat(input.value) || 0;
-                    itemPrices[itemName] = price;
-                    itemNotes[itemName] = noteInputs[index].value || "";
-                    calcSubTotal += price;
+        window.saveInvoice = async (id, type) => {
+            const updateData = { status: "invoice_ready" };
+            if(type === 'shopping') {
+                const prices = {}; let sub = 0;
+                document.querySelectorAll(`[data-item]`).forEach(inp => {
+                    const p = parseFloat(inp.value) || 0;
+                    prices[inp.dataset.item] = p; sub += p;
                 });
-                updateData.itemPrices = itemPrices;
-                updateData.itemNotes = itemNotes;
-                updateData.subTotal = calcSubTotal;
-            }
-
-            try {
-                await updateDoc(doc(db, "orders", id), updateData);
-                alert("ইনভয়েস আপডেট হয়েছে!");
-            } catch (e) { alert("Error!"); }
-        };
-
-        window.updateStatus = async (id, status) => {
-            try { await updateDoc(doc(db, "orders", id), { status: status }); } 
-            catch (e) { alert("Failed!"); }
-        };
-
-        window.verifyOtp = async (id, correctOtp) => {
-            const input = prompt("কাস্টমার থেকে ৪ ডিজিট ওটিপি নিয়ে এখানে দিন:");
-            if(input == correctOtp) {
-                await updateDoc(doc(db, "orders", id), { status: "completed" });
-                alert("পার্সেল ডেলিভারি সফল!");
+                updateData.itemPrices = prices; updateData.subTotal = sub;
+                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+                updateData.platformFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+            } else if(type === 'car_rent') {
+                updateData.riderName = document.getElementById(`driver-${id}`).value;
+                updateData.subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
+                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+            } else if(type === 'parcel') {
+                updateData.riderName = document.getElementById(`rider-${id}`).value;
+                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+                updateData.platformFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
             } else {
-                alert("ভুল ওটিপি! ফ্রড এলার্ট!");
+                updateData.subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
             }
+            await updateDoc(doc(db, "orders", id), updateData);
+            alert("ইনভয়েস সেভ হয়েছে!");
         };
 
-        document.getElementById('adminSearch').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allOrders.filter(o => 
-                (o.customerName && o.customerName.toLowerCase().includes(term)) || 
-                (o.customerPhone && o.customerPhone.includes(term))
-            );
-            renderOrders(filtered);
-        });
+        window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
+
+        window.verifyOtp = async (id, otp) => {
+            const input = prompt("কাস্টমারের OTP কোডটি দিন:");
+            if(input == otp) { await updateDoc(doc(db, "orders", id), { status: "completed" }); alert("সফল!"); }
+            else alert("ভুল OTP!");
+        };
     </script>
 </body>
 </html>
