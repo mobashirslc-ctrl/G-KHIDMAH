@@ -202,23 +202,25 @@ if(document.getElementById('displayCharges')){
         }
 
         // কুপন অ্যাপ্লাই ফিক্সড (গ্লোবাল করা হলো)
-        window.applyCoupon = async () => {
-            const codeInput = document.getElementById('couponInput');
-            const code = codeInput.value.trim().toUpperCase();
-            const orderId = localStorage.getItem('activeOrderId');
-            const msg = document.getElementById('couponMsg');
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            if(code === "G20") {
-                try {
-                    await updateDoc(doc(db, "orders", orderId), { discount: 20 });
-                    msg.innerText = "২০ টাকা ডিসকাউন্ট সফল!";
-                    msg.className = "text-[10px] mt-1 text-green-600 block font-bold";
-                } catch (e) { alert("Error!"); }
-            } else {
-                msg.innerText = "ভুল কুপন কোড!";
-                msg.className = "text-[10px] mt-1 text-red-500 block";
-            }
-        };
+window.applyCoupon = async () => {
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    const orderId = localStorage.getItem('activeOrderId');
+    
+    // Firebase থেকে কুপনটি খুঁজে দেখা
+    const couponRef = doc(db, "coupons", code);
+    const couponSnap = await getDoc(couponRef);
+
+    if (couponSnap.exists()) {
+        const discountAmount = couponSnap.data().amount;
+        await updateDoc(doc(db, "orders", orderId), { discount: discountAmount });
+        alert(`অভিনন্দন! ৳${discountAmount} ডিসকাউন্ট পাওয়া গেছে।`);
+    } else {
+        alert("ভুল কুপন কোড!");
+    }
+};
+
 
         window.confirmOrderPayment = async () => {
             const orderId = localStorage.getItem('activeOrderId');
