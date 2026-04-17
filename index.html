@@ -42,15 +42,15 @@
 
         <div id="trackingSection" class="hidden space-y-6">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
-                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">🔍</div>
+                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
                 
                 <p class="text-[10px] uppercase tracking-[0.2em] text-green-600 font-black italic mb-2" id="stepCounter">ধাপ: ১/১০</p>
-                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">যাচাই করা হচ্ছে...</h1>
+                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">ফর্দ গ্রহণ করা হয়েছে...</h1>
 
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 border border-gray-50">
                     <div id="progressBar" class="bg-brand-dark-green h-full rounded-full transition-all duration-1000 progress-glow" style="width: 10%"></div>
                 </div>
-                <p class="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-widest italic">Live Tracking Active</p>
+                <p class="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-widest italic">Live Tracking System</p>
             </div>
 
             <div id="couponSection" class="hidden bg-white p-6 rounded-[2rem] shadow-xl border border-dashed border-green-200">
@@ -105,6 +105,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ১০টি ধাপের পূর্ণাঙ্গ কনফিগারেশন
         const statusConfig = {
             "pending": { step: "১/১০", msg: "ফর্দ পেয়েছি", icon: "📋", progress: 10 },
             "verifying": { step: "২/১০", msg: "যাচাই চলছে", icon: "🔍", progress: 20 },
@@ -131,7 +132,8 @@
                 const docRef = await addDoc(collection(db, "orders"), {
                     customerName: name, customerPhone: phone, customerAddress: addr,
                     items: list.split('\n').filter(i => i.trim() !== ""),
-                    status: "pending", createdAt: serverTimestamp(),
+                    status: "pending", // এখন ১ নম্বর ধাপ থেকে শুরু হবে
+                    createdAt: serverTimestamp(),
                     subTotal: 0, deliveryCharge: 70, platformFee: 20, discount: 0,
                     itemPrices: {}, itemNotes: {}
                 });
@@ -171,6 +173,7 @@
                 document.getElementById('progressBar').style.width = config.progress + "%";
                 document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
+                // যদি ধাপ ৩ বা তার বেশি হয়, তবেই ইনভয়েস ও কুপন দেখাবে
                 if(data.status !== "pending" && data.status !== "verifying") {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     document.getElementById('couponSection').classList.remove('hidden');
@@ -178,7 +181,6 @@
                     const prices = data.itemPrices || {};
                     const notes = data.itemNotes || {};
                     
-                    // উন্নত ইনভয়েস আইটেম ডিজাইন (মিসিং আইটেমসহ)
                     document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => {
                         const isMissing = notes[item] === "Missing";
                         const price = prices[item] || 0;
@@ -193,7 +195,6 @@
                             </div>`;
                     }).join('');
 
-                    // সব ফি যোগ করে ক্যালকুলেশন
                     const total = (data.subTotal || 0) + (data.deliveryCharge || 0) + (data.platformFee || 0) - (data.discount || 0);
                     
                     document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
@@ -205,6 +206,10 @@
                         document.getElementById('discountRow').classList.remove('hidden');
                         document.getElementById('discountDisplay').innerText = `-৳${data.discount}`;
                     }
+                } else {
+                    // পেন্ডিং বা ভেরিফায়িং অবস্থায় ইনভয়েস হাইড থাকবে
+                    document.getElementById('invoiceBox').classList.add('hidden');
+                    document.getElementById('couponSection').classList.add('hidden');
                 }
 
                 if(data.status === "completed") {
