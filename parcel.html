@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G KHIDMAH | পার্সেল ও ডেলিভারি</title>
+    <title>G KHIDMAH | পার্সেল ডেলিভারি</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -15,14 +15,14 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-10">
 
-    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-between px-6">
         <div class="flex items-center gap-2">
             <img src="logo.png" alt="Logo" class="h-8 w-auto" onerror="this.src='https://ui-avatars.com/api/?name=G+K&background=16a34a&color=fff'">
             <h1 class="text-xl font-bold brand-green uppercase italic tracking-tighter">G KHIDMAH</h1>
         </div>
-        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-100 uppercase italic">নতুন পার্সেল</button>
+        <button onclick="resetOrder()" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-100 uppercase italic">নতুন পার্সেল</button>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
@@ -30,7 +30,7 @@
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div class="text-center mb-6">
                 <div class="text-5xl mb-2">📦</div>
-                <h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল তথ্য দিন</h2>
+                <h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল ডেলিভারি</h2>
             </div>
             
             <div class="space-y-3">
@@ -39,25 +39,25 @@
                 <input type="text" id="pickupAddr" placeholder="পিকআপ ঠিকানা (যেখান থেকে নিব)" class="input-style">
                 <input type="text" id="deliveryAddr" placeholder="ডেলিভারি ঠিকানা (যেখানে দিব)" class="input-style">
                 
-                <select id="parcelType" class="input-style text-gray-500">
-                    <option value="" disabled selected>পার্সেলের ধরন সিলেক্ট করুন</option>
-                    <option>জরুরি ডকুমেন্ট (Legal/Doc)</option>
-                    <option>হোমমেড খাবার (Food)</option>
-                    <option>গিফট বা উপহার (Gift)</option>
-                    <option>অন্যান্য (Others)</option>
+                <select id="parcelType" class="input-style text-gray-600">
+                    <option value="" disabled selected>পার্সেলের ধরন</option>
+                    <option value="ডকুমেন্ট/ফাইল">জরুরি ডকুমেন্ট (File/Doc)</option>
+                    <option value="হোমমেড খাবার">হোমমেড খাবার (Food)</option>
+                    <option value="গিফট আইটেম">গিফট বা উপহার (Gift)</option>
+                    <option value="অন্যান্য">অন্যান্য পার্সেল</option>
                 </select>
 
-                <textarea id="parcelNote" rows="3" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold shadow-inner" placeholder="পার্সেলের বিবরণ (যেমন: কি কি আছে, ওজন বা জরুরি নির্দেশ)..."></textarea>
+                <textarea id="parcelNote" rows="3" class="w-full border-2 border-green-50 p-4 rounded-3xl focus:border-green-300 outline-none text-sm font-semibold shadow-inner" placeholder="পার্সেলের বিবরণ (যেমন: কি আছে, ওজন বা কোনো জরুরি নোট)..."></textarea>
             </div>
 
-            <button id="submitBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">ডেলিভারি রিকোয়েস্ট পাঠান</button>
+            <button id="submitBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg transition-all">কনফার্ম ডেলিভারি</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
                 <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
                 <p id="stepCounter" class="text-[10px] uppercase text-green-600 font-black italic mb-2">ধাপ: ১/১০</p>
-                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">অনুরোধ গ্রহণ করা হয়েছে...</h1>
+                <h1 id="trackMessage" class="text-xl font-black brand-green leading-tight italic uppercase mb-6">অনুরোধ পাঠানো হয়েছে...</h1>
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1">
                     <div id="progressBar" class="bg-brand-dark-green h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
                 </div>
@@ -65,10 +65,9 @@
 
             <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
                 <div class="p-6 bg-slate-50 border-b border-dashed border-gray-200 text-center">
-                    <h3 class="text-sm font-black brand-green uppercase italic tracking-tighter">অফিসিয়াল ডেলিভারি রশিদ</h3>
+                    <h3 class="text-sm font-black brand-green uppercase italic tracking-tighter">ডেলিভারি রশিদ</h3>
                 </div>
-                <div class="p-6 space-y-4 font-semibold text-sm" id="itemsDisplay">
-                    </div>
+                <div class="p-6 space-y-3 font-semibold text-sm" id="itemsDisplay"></div>
                 <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
                     <div class="flex justify-between text-xs font-bold text-gray-500"><span>ডেলিভারি চার্জ:</span><span id="subTotalDisplay">৳০</span></div>
                     <div class="flex justify-between text-xs font-bold text-gray-500"><span>প্ল্যাটফর্ম ফি:</span><span>৳২০</span></div>
@@ -82,4 +81,126 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let lastStatus = "";
+
+        // পার্সেল ট্র্যাকিং কনফিগারেশন
+        const parcelStatus = {
+            "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
+            "verifying": { step: "২/১০", msg: "ঠিকানা যাচাই চলছে", icon: "🔍", progress: 20 },
+            "invoice_ready": { step: "৩/১০", msg: "চার্জ নির্ধারণ করা হয়েছে", icon: "📄", progress: 30 },
+            "rider_assigned": { step: "৪/১০", msg: "রাইডার নিযুক্ত হয়েছে", icon: "🛵", progress: 45 },
+            "on_way_to_pickup": { step: "৫/১০", msg: "রাইডার পিকআপে আসছে", icon: "📍", progress: 55 },
+            "picked": { step: "৬/১০", msg: "পার্সেল রিসিভড", icon: "📦", progress: 65 },
+            "in_transit": { step: "৭/১০", msg: "পার্সেল পথে আছে", icon: "🚚", progress: 80 },
+            "delivered": { step: "সফল", msg: "ডেলিভারি সম্পন্ন", icon: "🎉", progress: 100 }
+        };
+
+        // সাবমিট বাটন লজিক
+        const submitBtn = document.getElementById('submitBtn');
+        if(submitBtn) {
+            submitBtn.onclick = async function() {
+                const name = document.getElementById('custName').value.trim();
+                const phone = document.getElementById('custPhone').value.trim();
+                const pAddr = document.getElementById('pickupAddr').value.trim();
+                const dAddr = document.getElementById('deliveryAddr').value.trim();
+                const type = document.getElementById('parcelType').value;
+                const note = document.getElementById('parcelNote').value.trim();
+
+                if(!name || !phone || !pAddr || !dAddr || !type) {
+                    alert("দয়া করে সবগুলো ঘর পূরণ করুন!");
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerText = "পাঠানো হচ্ছে...";
+
+                try {
+                    const docRef = await addDoc(collection(db, "orders"), {
+                        customerName: name,
+                        customerPhone: phone,
+                        pickupLocation: pAddr,
+                        customerAddress: dAddr,
+                        parcelType: type,
+                        items: [note],
+                        orderType: "parcel",
+                        status: "pending",
+                        createdAt: serverTimestamp(),
+                        subTotal: 0,
+                        deliveryCharge: 70,
+                        platformFee: 20
+                    });
+
+                    localStorage.setItem('activeOrderId', docRef.id);
+                    initTracking();
+                } catch (e) {
+                    console.error("Error: ", e);
+                    alert("ব্যর্থ হয়েছে! আবার চেষ্টা করুন।");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "কনফার্ম ডেলিভারি";
+                }
+            };
+        }
+
+        // ট্র্যাকিং লজিক
+        function initTracking() {
+            const orderId = localStorage.getItem('activeOrderId');
+            if(!orderId) return;
+
+            document.getElementById('orderSection').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+
+            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+                const data = snapshot.data();
+                if(!data) return;
+
+                // সাউন্ড বাজানোর লজিক
+                if(lastStatus !== "" && lastStatus !== data.status) {
+                    document.getElementById('notifySound').play().catch(() => {});
+                }
+                lastStatus = data.status;
+
+                // UI আপডেট
+                const config = parcelStatus[data.status] || parcelStatus["pending"];
+                document.getElementById('statusIcon').innerText = config.icon;
+                document.getElementById('trackMessage').innerText = config.msg;
+                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+                document.getElementById('progressBar').style.width = config.progress + "%";
+
+                // ইনভয়েস আপডেট
+                if(data.status !== "pending" && data.status !== "verifying") {
+                    document.getElementById('invoiceBox').classList.remove('hidden');
+                    document.getElementById('itemsDisplay').innerHTML = `
+                        <div class="flex justify-between"><span>সার্ভিস:</span><span class="brand-green">${data.parcelType}</span></div>
+                        <div class="text-[10px] text-gray-400 italic font-normal">বিস্তারিত: ${data.items[0]}</div>
+                    `;
+                    document.getElementById('subTotalDisplay').innerText = `৳${data.subTotal || 0}`;
+                    document.getElementById('grandTotalDisplay').innerText = `৳${(data.subTotal || 0) + 90}`;
+                }
+            });
+        }
+
+        window.resetOrder = () => {
+            if(confirm("আপনি কি নতুন অর্ডার করতে চান?")) {
+                localStorage.removeItem('activeOrderId');
+                location.reload();
+            }
+        };
+
+        window.onload = initTracking;
+    </script>
+</body>
+</html>
