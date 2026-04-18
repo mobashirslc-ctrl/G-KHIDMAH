@@ -53,7 +53,19 @@
                 <h2 id="chargeDisplay" class="text-4xl font-black text-green-800 mb-4">৳০</h2>
                 <button id="confirmChargeBtn" class="w-full bg-green-700 text-white py-3 rounded-xl font-black uppercase shadow-lg active:scale-95">কনফার্ম ও রাইডার কল করুন</button>
             </div>
+            
+<div class="space-y-4 p-6 bg-white rounded-3xl shadow-sm">
+    <h3 class="font-bold text-gray-700">প্রেরকের তথ্য (Sender)</h3>
+    <input type="text" placeholder="আপনার নাম" class="w-full p-4 bg-gray-50 rounded-2xl">
+    <input type="tel" placeholder="আপনার মোবাইল নাম্বার" class="w-full p-4 bg-gray-50 rounded-2xl">
 
+    <hr class="border-dashed my-4">
+
+    <h3 class="font-bold text-gray-700">প্রাপকের তথ্য (Receiver)</h3>
+    <input type="text" id="receiverName" placeholder="প্রাপকের নাম" class="w-full p-4 bg-gray-50 rounded-2xl" required>
+    <input type="tel" id="receiverPhone" placeholder="প্রাপকের মোবাইল নাম্বার" class="w-full p-4 bg-gray-50 rounded-2xl" required>
+    <textarea placeholder="বিস্তারিত ঠিকানা" class="w-full p-4 bg-gray-50 rounded-2xl"></textarea>
+</div>
             <div id="riderCard" class="hidden bg-white p-5 rounded-[2rem] shadow-xl border border-gray-100 flex items-center gap-4">
                 <img id="riderPic" src="" class="w-16 h-16 rounded-full object-cover border-2 border-green-500 shadow-sm">
                 <div class="flex-1">
