@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-KHIDMAH | পার্টনার পোর্টাল</title>
+    <title>G-KHIDMAH | পার্টনার প্যানেল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> 
@@ -15,12 +15,12 @@
 
     <div id="authSection" class="max-w-md mx-auto mt-20 p-8 bg-white rounded-[2.5rem] shadow-2xl border mx-4">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-black text-blue-900 italic uppercase tracking-tighter">G-KHIDMAH</h1>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Partner Control Center</p>
+            <h1 class="text-3xl font-black text-blue-900 italic uppercase">G-KHIDMAH</h1>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Partner Login</p>
         </div>
-        <div id="loginBox" class="space-y-4">
-            <input type="tel" id="loginPhone" placeholder="আপনার রেজিস্টার্ড মোবাইল নম্বর" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 outline-none font-bold focus:border-blue-600 transition-all">
-            <button id="loginBtn" onclick="loginPartner()" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">প্যানেলে প্রবেশ করুন</button>
+        <div class="space-y-4">
+            <input type="tel" id="loginPhone" placeholder="রেজিস্টার্ড মোবাইল নম্বর" class="w-full p-4 rounded-2xl bg-slate-50 border-2 outline-none font-bold focus:border-blue-900">
+            <button onclick="loginPartner()" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">লগইন করুন</button>
         </div>
     </div>
 
@@ -29,34 +29,29 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 id="pNameDisplay" class="text-xl font-black italic">লোড হচ্ছে...</h1>
-                    <p id="pServiceType" class="text-[9px] uppercase font-bold opacity-60 tracking-widest"></p>
+                    <p id="pServiceType" class="text-[10px] font-bold opacity-60"></p>
                 </div>
-                <button onclick="location.reload()" class="bg-red-500/20 hover:bg-red-500 text-red-200 text-[10px] px-4 py-2 rounded-xl font-bold transition-all">লগআউট</button>
+                <button onclick="location.reload()" class="bg-red-500 text-white text-[10px] px-4 py-2 rounded-xl font-bold">লগআউট</button>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white/10 p-4 rounded-2xl border border-white/10">
-                    <p class="text-[9px] uppercase font-bold opacity-70 mb-1">আমার ইনকাম</p>
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
+                    <p class="text-[9px] uppercase font-bold opacity-70">আমার আয় (Net)</p>
                     <h2 id="walletBalance" class="text-xl font-black text-green-400 font-mono">৳০.০০</h2>
                 </div>
-                <div class="bg-white/10 p-4 rounded-2xl border border-white/10 text-right">
-                    <p class="text-[9px] uppercase font-bold opacity-70 mb-1">অ্যাডমিন ডিউ</p>
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
+                    <p class="text-[9px] uppercase font-bold opacity-70 text-red-300">অ্যাডমিন ডিউ (Admin)</p>
                     <h2 id="adminDue" class="text-xl font-black text-red-400 font-mono">৳০.০০</h2>
                 </div>
             </div>
         </header>
 
-        <div id="orderContainer" class="space-y-4">
-            <div class="text-center py-20">
-                <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-900 border-t-transparent rounded-full mb-4"></div>
-                <p class="text-gray-400 font-bold text-sm">অর্ডার চেক করা হচ্ছে...</p>
-            </div>
-        </div>
+        <div id="orderContainer" class="space-y-4"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -66,153 +61,83 @@
             messagingSenderId: "780745438049",
             appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         let currentPartner = null;
 
         window.loginPartner = async () => {
             const phone = document.getElementById('loginPhone').value.trim();
-            if(!phone) return alert("নম্বর লিখুন!");
+            const docSnap = await getDoc(doc(db, "partners", phone));
 
-            const loginBtn = document.getElementById('loginBtn');
-            loginBtn.innerText = "চেক করা হচ্ছে...";
-            loginBtn.disabled = true;
-
-            try {
-                const docRef = doc(db, "partners", phone);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(!data.isActive) {
-                        alert("আপনার অ্যাকাউন্ট সাময়িকভাবে বন্ধ আছে। অ্যাডমিনের সাথে যোগাযোগ করুন।");
-                        location.reload();
-                        return;
-                    }
-                    
-                    currentPartner = { id: docSnap.id, ...data };
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('dashboardSection').classList.remove('hidden');
-                    document.getElementById('pNameDisplay').innerText = data.name;
-                    document.getElementById('pServiceType').innerText = `Category: ${data.serviceType}`;
-                    
-                    initDashboard();
-                } else {
-                    alert("এই নম্বরে কোনো পার্টনার অ্যাকাউন্ট নেই!");
-                    loginBtn.innerText = "প্যানেলে প্রবেশ করুন";
-                    loginBtn.disabled = false;
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                // --- অটো ব্লক লজিক (১২ AM এর চেক) ---
+                const now = new Date();
+                const due = data.wallet?.adminDue || 0;
+                
+                // যদি ডিউ ০ এর বেশি থাকে এবং অ্যাডমিন তাকে একটিভ না রাখে
+                if(!data.isActive || (due > 0 && now.getHours() >= 0 && data.lastDueUpdate !== now.toLocaleDateString())) {
+                   alert("আপনার ডিউ পেমেন্ট পেন্ডিং থাকায় অ্যাকাউন্টটি সাময়িকভাবে ব্লক করা হয়েছে। দয়া করে অ্যাডমিনের সাথে যোগাযোগ করুন।");
+                   return;
                 }
-            } catch (err) {
-                console.error(err);
-                alert("এরর: " + err.message);
-                loginBtn.disabled = false;
+
+                currentPartner = { id: docSnap.id, ...data };
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('pNameDisplay').innerText = data.name;
+                document.getElementById('pServiceType').innerText = `বিভাগ: ${data.serviceType}`;
+                initDashboard();
+            } else {
+                alert("ভুল নম্বর!");
             }
         };
 
         function initDashboard() {
-            // ১. ওয়ালেট রিয়েলটাইম আপডেট
             onSnapshot(doc(db, "partners", currentPartner.id), (snap) => {
-                if(snap.exists()){
-                    const pData = snap.data();
-                    document.getElementById('walletBalance').innerText = `৳${(pData.wallet?.totalEarning || 0).toFixed(2)}`;
-                    document.getElementById('adminDue').innerText = `৳${(pData.wallet?.adminDue || 0).toFixed(2)}`;
-                    currentPartner.wallet = pData.wallet;
-                    currentPartner.commission = pData.commission;
-                }
+                const d = snap.data();
+                document.getElementById('walletBalance').innerText = `৳${(d.wallet?.totalEarning || 0).toFixed(2)}`;
+                document.getElementById('adminDue').innerText = `৳${(d.wallet?.adminDue || 0).toFixed(2)}`;
+                currentPartner.wallet = d.wallet;
+                currentPartner.commission = d.commission;
             });
 
-            // ২. অর্ডার লোড (ইনডেক্স এরর এড়াতে সিম্পল কোয়েরি ও ক্লায়েন্ট ফিল্টার)
-            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                // পার্টনারের নিজের ক্যাটাগরির অর্ডার ফিল্টার
-                const filtered = allOrders.filter(o => o.serviceType === currentPartner.serviceType && o.status !== "completed");
-                renderOrders(filtered);
-            });
-        }
-
-        function renderOrders(orders) {
-            const container = document.getElementById('orderContainer');
-            if(orders.length === 0) {
-                container.innerHTML = `<div class="bg-white p-10 rounded-3xl text-center shadow-sm border border-dashed border-blue-200">
-                    <p class="text-gray-400 font-bold">বর্তমানে কোনো নতুন অর্ডার নেই</p>
-                </div>`;
-                return;
-            }
-
-            container.innerHTML = "";
-            orders.forEach(order => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-[2rem] shadow-md border-l-8 border-blue-900 mb-4 animate-in fade-in duration-300";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="bg-blue-100 text-blue-900 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">${order.status || 'নতুন'}</span>
-                        <span class="text-[9px] font-bold text-gray-300 font-mono">#${order.id.slice(-6)}</span>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                        <p class="text-[10px] text-gray-400 leading-tight mt-1 font-semibold">${order.customerAddress}</p>
-                    </div>
-
-                    <div class="bg-blue-50/50 p-4 rounded-2xl mb-4 border border-blue-100/50">
-                        <p class="text-[10px] font-black text-blue-900 uppercase mb-2">সার্ভিস ডিটেইলস:</p>
-                        <p class="text-[11px] font-bold text-slate-700">${Array.isArray(order.items) ? order.items.join(', ') : 'সার্ভিস রিকোয়েস্ট'}</p>
-                    </div>
-
-                    <div class="flex gap-2 mb-4">
-                        <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="মোট বিল (৳)" class="flex-1 p-3 rounded-xl border-2 border-slate-50 bg-slate-50 text-xs font-black outline-none focus:bg-white focus:border-blue-900 transition-all">
-                        <button onclick="saveBill('${order.id}')" class="bg-slate-800 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95">Save</button>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="updateStatus('${order.id}', 'confirmed')" class="py-3 rounded-xl text-[9px] font-black uppercase bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all">Confirm</button>
-                        <button onclick="completeOrder('${order.id}', ${order.subTotal || 0})" class="py-3 rounded-xl text-[9px] font-black uppercase bg-green-600 text-white shadow-lg shadow-green-200 active:scale-95 transition-all">Complete & Earn</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // --- ফাংশনস ---
-        window.saveBill = async (id) => {
-            const val = parseFloat(document.getElementById(`bill-${id}`).value) || 0;
-            if(val <= 0) return alert("সঠিক বিল ইনপুট দিন!");
-            await updateDoc(doc(db, "orders", id), { subTotal: val });
-            alert("বিল সেভ হয়েছে!");
-        };
-
-        window.updateStatus = async (id, s) => {
-            await updateDoc(doc(db, "orders", id), { status: s });
-            alert("স্ট্যাটাস আপডেট হয়েছে!");
-        };
-
-        window.completeOrder = async (orderId, subTotal) => {
-            if(!subTotal || subTotal <= 0) return alert("অর্ডার কমপ্লিট করার আগে বিল সেভ করুন!");
-            
-            if(!confirm("আপনি কি নিশ্চিত যে সার্ভিসটি সফলভাবে শেষ হয়েছে?")) return;
-
-            const commRate = currentPartner.commission || 10;
-            const adminAmt = (subTotal * commRate) / 100;
-            const partnerAmt = subTotal - adminAmt;
-
-            try {
-                // ১. অর্ডার স্ট্যাটাস আপডেট
-                await updateDoc(doc(db, "orders", orderId), { status: "completed" });
-
-                // ২. পার্টনার ওয়ালেট আপডেট
-                const pRef = doc(db, "partners", currentPartner.id);
-                await updateDoc(pRef, {
-                    "wallet.totalEarning": (currentPartner.wallet?.totalEarning || 0) + partnerAmt,
-                    "wallet.adminDue": (currentPartner.wallet?.adminDue || 0) + adminAmt
+            onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+                const container = document.getElementById('orderContainer');
+                container.innerHTML = "";
+                snap.forEach(d => {
+                    const o = d.data();
+                    if(o.serviceType === currentPartner.serviceType && o.status !== "completed") {
+                        const card = document.createElement('div');
+                        card.className = "bg-white p-5 rounded-[2rem] shadow-lg mb-4 border-l-8 border-blue-900";
+                        card.innerHTML = `
+                            <h3 class="text-sm font-black">${o.customerName}</h3>
+                            <p class="text-[10px] text-gray-400 mb-4">${o.customerAddress}</p>
+                            <div class="flex gap-2">
+                                <input type="number" id="bill-${d.id}" value="${o.subTotal || ''}" placeholder="মোট বিল" class="flex-1 p-2 rounded-xl bg-slate-50 text-xs font-bold outline-none border">
+                                <button onclick="completeOrder('${d.id}')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase">Complete</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
                 });
+            });
+        }
 
-                alert(`অর্ডার সফল! আপনার আয়: ৳${partnerAmt.toFixed(2)}`);
-            } catch (err) {
-                alert("এরর: " + err.message);
-            }
+        window.completeOrder = async (orderId) => {
+            const bill = parseFloat(document.getElementById(`bill-${orderId}`).value) || 0;
+            if(bill <= 0) return alert("সঠিক বিল দিন!");
+
+            const adminComm = (bill * (currentPartner.commission || 10)) / 100;
+            const partnerEarn = bill - adminComm;
+
+            await updateDoc(doc(db, "orders", orderId), { status: "completed", subTotal: bill });
+            const pRef = doc(db, "partners", currentPartner.id);
+            await updateDoc(pRef, {
+                "wallet.totalEarning": (currentPartner.wallet?.totalEarning || 0) + partnerEarn,
+                "wallet.adminDue": (currentPartner.wallet?.adminDue || 0) + adminComm
+            });
+            alert("কাজ সম্পন্ন হয়েছে!");
         };
     </script>
 </body>
