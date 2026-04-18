@@ -54,6 +54,23 @@
                 </div>
                 <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
+            <a href="parcel.html" onclick="checkLocation(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+    <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
+    <div class="flex-1">
+        <h3 class="font-bold text-gray-800 text-sm">পার্সেল ডেলিভারি</h3>
+        <p class="text-[10px] text-gray-400 font-medium">শহরের যেকোনো প্রান্তে দ্রুত ডেলিভারি</p>
+    </div>
+    <span class="text-gray-300 text-xl">→</span>
+</a>
+
+<a href="home-services.html" onclick="checkLocation(event, 'home-services.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
+    <div class="flex-1">
+        <h3 class="font-bold text-gray-800 text-sm">প্রয়োজনীয় সার্ভিস</h3>
+        <p class="text-[10px] text-gray-400 font-medium">প্লাম্বার, ইলেকট্রিশিয়ান ও এসি মেরামত</p>
+    </div>
+    <span class="text-gray-300 text-xl">→</span>
+</a>
         </div>
 
         <footer class="mt-auto py-10 text-center">
@@ -68,11 +85,39 @@
             
             <div class="space-y-4">
                 <select id="district" onchange="loadThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">জেলা নির্বাচন করুন</option>
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Chattogram">Chattogram</option>
-                    </select>
+    <option value="">জেলা নির্বাচন করুন</option>
+    <option value="Bagerhat">Bagerhat</option> <option value="Bandarban">Bandarban</option>
+    <option value="Barguna">Barguna</option> <option value="Barishal">Barishal</option>
+    <option value="Bhola">Bhola</option> <option value="Bogra">Bogra</option>
+    <option value="Brahmanbaria">Brahmanbaria</option> <option value="Chandpur">Chandpur</option>
+    <option value="Chattogram">Chattogram</option> <option value="Chuadanga">Chuadanga</option>
+    <option value="Cumilla">Cumilla</option> <option value="Cox's Bazar">Cox's Bazar</option>
+    <option value="Dhaka">Dhaka</option> <option value="Dinajpur">Dinajpur</option>
+    <option value="Faridpur">Faridpur</option> <option value="Feni">Feni</option>
+    <option value="Gaibandha">Gaibandha</option> <option value="Gazipur">Gazipur</option>
+    <option value="Gopalganj">Gopalganj</option> <option value="Habiganj">Habiganj</option>
+    <option value="Jamalpur">Jamalpur</option> <option value="Jashore">Jashore</option>
+    <option value="Jhalokati">Jhalokati</option> <option value="Jhenaidah">Jhenaidah</option>
+    <option value="Joypurhat">Joypurhat</option> <option value="Khagrachari">Khagrachari</option>
+    <option value="Khulna">Khulna</option> <option value="Kishoreganj">Kishoreganj</option>
+    <option value="Kurigram">Kurigram</option> <option value="Kushtia">Kushtia</option>
+    <option value="Lakshmipur">Lakshmipur</option> <option value="Lalmonirhat">Lalmonirhat</option>
+    <option value="Madaripur">Madaripur</option> <option value="Magura">Magura</option>
+    <option value="Manikganj">Manikganj</option> <option value="Meherpur">Meherpur</option>
+    <option value="Moulvibazar">Moulvibazar</option> <option value="Munshiganj">Munshiganj</option>
+    <option value="Mymensingh">Mymensingh</option> <option value="Naogaon">Naogaon</option>
+    <option value="Narail">Narail</option> <option value="Narayanganj">Narayanganj</option>
+    <option value="Narsingdi">Narsingdi</option> <option value="Natore">Natore</option>
+    <option value="Netrokona">Netrokona</option> <option value="Nilphamari">Nilphamari</option>
+    <option value="Noakhali">Noakhali</option> <option value="Pabna">Pabna</option>
+    <option value="Panchagarh">Panchagarh</option> <option value="Patuakhali">Patuakhali</option>
+    <option value="Rajbari">Rajbari</option> <option value="Rajshahi">Rajshahi</option>
+    <option value="Rangamati">Rangamati</option> <option value="Rangpur">Rangpur</option>
+    <option value="Satkhira">Satkhira</option> <option value="Shariatpur">Shariatpur</option>
+    <option value="Sherpur">Sherpur</option> <option value="Sirajganj">Sirajganj</option>
+    <option value="Sunamganj">Sunamganj</option> <option value="Sylhet">Sylhet</option>
+    <option value="Tangail">Tangail</option> <option value="Thakurgaon">Thakurgaon</option>
+</select>
 
                 <select id="thana" onchange="loadAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
                     <option value="">আগে জেলা সিলেক্ট করুন</option>
