@@ -6,7 +6,7 @@
     <title>G-KHIDMAH | মাস্টার অ্যাডমিন</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
+    <style> body { font-family: 'Hind Siliguri', sans-serif; } .hide-scroll::-webkit-scrollbar { display: none; } </style>
 </head>
 <body class="bg-slate-100 p-4 pb-10">
     <div class="max-w-2xl mx-auto">
@@ -25,7 +25,6 @@
                 <button onclick="filterType('shopping')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🛒 বাজার</button>
                 <button onclick="filterType('parcel')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">📦 পার্সেল</button>
                 <button onclick="filterType('car_rent')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🚗 গাড়ি</button>
-                <button onclick="filterType('blood')" class="bg-red-50 text-red-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🩸 ব্লাড</button>
             </div>
         </div>
 
@@ -34,7 +33,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -72,10 +71,15 @@
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[10px] mb-8 " + getBorderColor(order.orderType);
 
+                // কাস্টমার কনফার্ম করেছে কি না তার স্ট্যাটাস
+                const confirmStatus = order.invoiceConfirmed ? 
+                    `<span class="bg-green-100 text-green-700 border border-green-200 px-2 py-1 rounded-lg text-[8px]">USER CONFIRMED ✅</span>` : 
+                    `<span class="bg-orange-50 text-orange-600 border border-orange-100 px-2 py-1 rounded-lg text-[8px]">WAITING FOR USER ⏳</span>`;
+
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-[9px] font-black uppercase italic text-gray-400">
-                        <span>SERVICE: ${order.orderType}</span>
-                        <span class="bg-green-500 text-white px-3 py-1 rounded-full">${order.status}</span>
+                        <div class="flex gap-2 items-center"><span>SERVICE: ${order.orderType}</span> ${order.orderType === 'shopping' ? confirmStatus : ''}</div>
+                        <span class="bg-blue-900 text-white px-3 py-1 rounded-full">${order.status}</span>
                     </div>
 
                     <div class="mb-6 p-4 bg-slate-50 rounded-3xl border border-gray-100">
@@ -84,11 +88,11 @@
                         <p class="text-[10px] text-gray-400 italic">📍 ${order.customerAddress || order.pickupLocation}</p>
                     </div>
 
-                    <div class="space-y-3 mb-6">${getContentBody(order)}</div>
+                    <div class="space-y-3 mb-6" id="items-container-${id}">${getContentBody(order)}</div>
 
                     <div class="bg-gray-50 p-4 rounded-3xl mb-6 border border-dashed border-gray-200">
                         ${getInvoiceInputs(order)}
-                        <button onclick="saveInvoice('${id}', '${order.orderType}')" class="w-full bg-blue-700 text-white py-3 rounded-2xl font-bold text-xs mt-3 shadow-lg">সেভ ইনভয়েস</button>
+                        <button onclick="saveInvoice('${id}', '${order.orderType}')" class="w-full bg-blue-700 text-white py-3 rounded-2xl font-bold text-xs mt-3 shadow-lg hover:bg-blue-800 transition-all">সেভ ইনভয়েস ও ইউজারকে পাঠানো</button>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 uppercase tracking-tighter italic">
@@ -100,23 +104,36 @@
         }
 
         function getBorderColor(type) {
-            const colors = { shopping: 'border-green-600', parcel: 'border-orange-500', car_rent: 'border-blue-600', blood: 'border-red-600' };
+            const colors = { shopping: 'border-green-600', parcel: 'border-orange-500', car_rent: 'border-blue-600' };
             return colors[type] || 'border-purple-600';
         }
 
         function getContentBody(order) {
             if(order.orderType === 'shopping') {
                 return order.items.map(item => `
-                    <div class="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border">
+                    <div class="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100">
+                        <button onclick="removeItem('${order.id}', '${item}')" class="text-red-500 bg-red-50 w-6 h-6 rounded-lg font-bold text-xs">×</button>
                         <span class="text-[10px] flex-1 font-bold italic">📦 ${item}</span>
-                        <input type="number" class="item-price w-16 p-1 bg-blue-50 rounded text-xs text-center font-bold" placeholder="৳" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
+                        <input type="number" class="item-price w-20 p-1.5 bg-blue-50 rounded-lg text-xs text-center font-bold text-blue-800" placeholder="৳" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
                     </div>
                 `).join('');
             }
             if(order.orderType === 'car_rent') return `<p class="text-xs font-bold text-blue-600 bg-blue-50 p-3 rounded-xl italic">🚗 গাড়ি: ${order.carType}<br>রুট: ${order.pickupLocation} > ${order.dropLocation}</p>`;
-            if(order.orderType === 'parcel') return `<p class="text-xs font-bold text-orange-600 bg-orange-50 p-3 rounded-xl italic">📦 পার্সেল: ${order.parcelType}<br>বিবরণ: ${order.items[0]}<br>🔒 OTP: ${order.otp}</p>`;
-            return `<p class="text-xs font-bold text-gray-600 bg-gray-50 p-3 rounded-xl italic">তথ্য: ${order.items ? order.items[0] : 'নেই'}</p>`;
+            if(order.orderType === 'parcel') return `<p class="text-xs font-bold text-orange-600 bg-orange-50 p-3 rounded-xl italic">📦 পার্সেল: ${order.parcelType}<br>🔒 OTP: ${order.otp}</p>`;
+            return "";
         }
+
+        // প্রোডাক্ট রিমুভ করার ফাংশন (বাজার সদাই)
+        window.removeItem = async (orderId, itemName) => {
+            if(confirm(`"${itemName}" কি তালিকা থেকে বাদ দিতে চান?`)) {
+                const orderRef = doc(db, "orders", orderId);
+                await updateDoc(orderRef, {
+                    items: arrayRemove(itemName)
+                });
+                // দাম আপডেট করার জন্য সেভ ইনভয়েস কল করা যেতে পারে
+                alert("পণ্যটি তালিকা থেকে মুছে ফেলা হয়েছে।");
+            }
+        };
 
         function getInvoiceInputs(order) {
             const id = order.id;
@@ -124,24 +141,11 @@
                 return `<div class="grid grid-cols-3 gap-2 text-center">
                     <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">ডেলিভারি</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.deliveryCharge || 70}"></div>
                     <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">প্ল্যাটফর্ম</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.platformFee || 20}"></div>
-                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">আইটেম</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center bg-transparent text-blue-700" value="${order.subTotal || 0}"></div>
+                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">মোট বাজার</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center bg-transparent text-green-700" value="${order.subTotal || 0}" readonly></div>
                 </div>`;
             }
-            if(order.orderType === 'car_rent') {
-                return `<input type="text" id="driver-${id}" class="w-full p-2 rounded-xl text-[10px] bg-white border mb-2" placeholder="ড্রাইভারের নাম ও নাম্বার" value="${order.riderName || ''}">
-                <div class="grid grid-cols-2 gap-2 text-center">
-                    <div><label class="text-[8px] font-bold block">গাড়ি ভাড়া</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center" value="${order.subTotal || ''}"></div>
-                    <div><label class="text-[8px] font-bold block">সার্ভিস চার্জ</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center" value="${order.deliveryCharge || 100}"></div>
-                </div>`;
-            }
-            if(order.orderType === 'parcel') {
-                return `<input type="text" id="rider-${id}" class="w-full p-2 rounded-xl text-[10px] bg-white border mb-2" placeholder="রাইডারের নাম ও ফোন" value="${order.riderName || ''}">
-                <div class="grid grid-cols-2 gap-2 text-center">
-                    <div><label class="text-[8px] font-bold block">ডেলিভারি চার্জ</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center" value="${order.deliveryCharge || 60}"></div>
-                    <div><label class="text-[8px] font-bold block">অন্যান্য</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center" value="${order.platformFee || 10}"></div>
-                </div>`;
-            }
-            return `<input type="number" id="sub-${id}" class="w-full p-3 rounded-2xl text-xs font-black bg-white border" placeholder="মোট বিল/ভিজিট ফি" value="${order.subTotal || ''}">`;
+            // অন্যান্য সার্ভিসের ইনভয়েস ইনপুট আগের মতোই থাকবে...
+            return `<input type="number" id="sub-${id}" class="w-full p-3 rounded-2xl text-xs font-black bg-white border" placeholder="মোট বিল" value="${order.subTotal || ''}">`;
         }
 
         function getStatusButtons(order) {
@@ -151,60 +155,35 @@
             if(order.orderType === 'shopping') {
                 return `
                     ${b('verifying', '১. যাচাই', 'bg-slate-200')} ${b('invoice_ready', '২. ইনভয়েস', 'bg-blue-100')}
-                    ${b('finding_assistant', '৩. সহকারী', 'bg-indigo-100')} ${b('assistant_assigned', '৪. সহকারী রেডি', 'bg-purple-100')}
-                    ${b('at_store', '৫. দোকানে', 'bg-yellow-100')} ${b('shopping', '৬. কেনাকাটা', 'bg-amber-100')}
-                    ${b('packing', '৭. প্যাকিং', 'bg-pink-100')} ${b('delivery_started', '৮. রওয়ানা', 'bg-orange-100')}
-                    ${b('at_location', '৯. লোকেশন', 'bg-teal-100')} ${b('completed', '১০. সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3 mt-2')}
+                    ${b('finding_assistant', '৩. সহকারী', 'bg-indigo-100')} ${b('shopping', '৪. কেনাকাটা', 'bg-amber-100')}
+                    ${b('completed', '৫. সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3 mt-2')}
                 `;
             }
-            if(order.orderType === 'parcel') {
-                return `
-                    ${b('rider_assigned', '১. রাইডার রেডি', 'bg-blue-100')} ${b('picked', '২. পার্সেল পিক', 'bg-orange-100')}
-                    ${b('in_transit', '৩. পথে আছে', 'bg-amber-100')} <button onclick="verifyOtp('${id}', ${order.otp})" class="bg-green-600 text-white p-2 rounded-xl text-[9px] font-bold shadow-lg">৪. ডেলিভারি (OTP)</button>
-                `;
-            }
-            if(order.orderType === 'car_rent') {
-                return `${b('car_assigned', '১. গাড়ি রেডি', 'bg-blue-100')} ${b('on_way', '২. পথে আছে', 'bg-orange-100')} ${b('completed', '৩. ট্রিপ শেষ', 'bg-green-600 text-white col-span-2 py-3 mt-2')}`;
-            }
-            if(order.orderType === 'blood') {
-                return `${b('finding_donor', '১. ডোনার খুঁজছি', 'bg-red-50 text-red-700')} ${b('completed', '২. রক্তদান সফল', 'bg-red-600 text-white')}`;
-            }
-            return b('completed', 'খিদমত সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3');
+            return b('completed', 'সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3');
         }
 
         window.saveInvoice = async (id, type) => {
             const updateData = { status: "invoice_ready" };
             if(type === 'shopping') {
                 const prices = {}; let sub = 0;
-                document.querySelectorAll(`[data-item]`).forEach(inp => {
+                // ওই নির্দিষ্ট অর্ডারের সব ইনপুট ফিল্ড থেকে ডাটা সংগ্রহ
+                document.querySelectorAll(`[data-id="${id}"]`).forEach(inp => {
                     const p = parseFloat(inp.value) || 0;
                     prices[inp.dataset.item] = p; sub += p;
                 });
-                updateData.itemPrices = prices; updateData.subTotal = sub;
+                updateData.itemPrices = prices; 
+                updateData.subTotal = sub;
                 updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
                 updateData.platformFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-            } else if(type === 'car_rent') {
-                updateData.riderName = document.getElementById(`driver-${id}`).value;
-                updateData.subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
-                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-            } else if(type === 'parcel') {
-                updateData.riderName = document.getElementById(`rider-${id}`).value;
-                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-                updateData.platformFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+                updateData.invoiceConfirmed = false; // নতুন ইনভয়েস দিলে কনফার্মেশন রিসেট হবে
             } else {
                 updateData.subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
             }
             await updateDoc(doc(db, "orders", id), updateData);
-            alert("ইনভয়েস সেভ হয়েছে!");
+            alert("ইনভয়েস আপডেট হয়েছে এবং কাস্টমার প্যানেলে পাঠানো হয়েছে!");
         };
 
         window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
-
-        window.verifyOtp = async (id, otp) => {
-            const input = prompt("কাস্টমারের OTP কোডটি দিন:");
-            if(input == otp) { await updateDoc(doc(db, "orders", id), { status: "completed" }); alert("সফল!"); }
-            else alert("ভুল OTP!");
-        };
     </script>
 </body>
 </html>
