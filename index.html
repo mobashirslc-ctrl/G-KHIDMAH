@@ -9,7 +9,7 @@
     <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
 <body class="bg-slate-50">
-    <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-8">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-8 pb-10">
         
         <div class="text-center mb-6">
             <div class="bg-green-700 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-200">
@@ -22,40 +22,34 @@
         <div class="w-full px-6 mb-8">
             <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100 flex flex-col items-center">
                 <label class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">বর্তমান সার্ভিস এরিয়া</label>
-                <div id="displayAreaName" class="font-bold text-gray-700 text-center">লোকেশন সিলেক্ট করা নেই</div>
+                <div id="displayAreaName" class="font-bold text-gray-700 text-center italic">লোকেশন সিলেক্ট করা নেই</div>
                 <button onclick="showLocationModal()" class="mt-2 text-[10px] text-green-600 font-bold underline">পরিবর্তন করুন</button>
             </div>
         </div>
 
         <div class="w-full px-6 space-y-4">
-            <a href="shopping.html" onclick="checkLocation(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="#" onclick="handleServiceClick(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
                 <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">বাজার সদাই</h3><p class="text-[10px] text-gray-400">সরাসরি বাজার থেকে আপনার দুয়ারে</p></div>
                 <span class="text-gray-300">→</span>
             </a>
 
-            <a href="car-rent.html" onclick="checkLocation(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="#" onclick="handleServiceClick(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
                 <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">গাড়ি ভাড়া</h3><p class="text-[10px] text-gray-400">লোকাল বা লং ট্রিপ বুক করুন</p></div>
                 <span class="text-gray-300">→</span>
             </a>
 
-            <a href="parcel.html" onclick="checkLocation(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="#" onclick="handleServiceClick(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
                 <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">পার্সেল ডেলিভারি</h3><p class="text-[10px] text-gray-400">শহরের যেকোনো প্রান্তে দ্রুত ডেলিভারি</p></div>
                 <span class="text-gray-300">→</span>
             </a>
 
-            <a href="home-services.html" onclick="checkLocation(event, 'home-services.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="#" onclick="handleServiceClick(event, 'service.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
                 <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">প্রয়োজনীয় সার্ভিস</h3><p class="text-[10px] text-gray-400">প্লাম্বার, ইলেকট্রিশিয়ান ও মেরামত</p></div>
                 <span class="text-gray-300">→</span>
-            </a>
-
-            <a href="ambulance.html" onclick="checkLocation(event, 'ambulance.html')" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
-                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl mr-4 animate-pulse">🚑</div>
-                <div class="flex-1 text-sm text-white"><h3 class="font-bold">অ্যাম্বুলেন্স</h3><p class="text-[10px] text-red-100 italic">সরাসরি যোগাযোগ করুন</p></div>
-                <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
         </div>
     </div>
@@ -64,32 +58,21 @@
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
             <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">আপনার লোকেশন দিন</h2>
             <div class="space-y-4 mt-6">
-                <select id="district" onchange="updateThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                <select id="district" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
                     <option value="">জেলা নির্বাচন করুন</option>
                 </select>
-                <select id="thana" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">থানা নির্বাচন করুন</option>
-                </select>
+                <input type="text" id="areaInput" placeholder="থানা বা এরিয়ার নাম লিখুন" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border-none shadow-inner">
                 <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4">সার্ভিস শুরু করুন</button>
             </div>
         </div>
     </div>
 
     <script>
-        // জেলা এবং থানার ডাটা (সংক্ষিপ্ত উদাহরণ, রিয়েল ডাটা অনেক বড় হয়)
-        const locationData = {
-            "Dhaka": ["Savar", "Dhamrai", "Uttara", "Mirpur", "Gulshan", "Badda"],
-            "Sylhet": ["Zindabazar", "Beanibazar", "Golapganj"],
-            "Chattogram": ["Panchlaish", "Halishahar", "Double Mooring"],
-            // বাকি জেলাগুলো এখানে যুক্ত হবে...
-        };
-
-        // ৬৪ জেলার পূর্ণাঙ্গ লিস্টের জন্য একটি API বা লুপ ব্যবহার করা ভালো
         const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", "Chattogram", "Chuadanga", "Cumilla", "Cox's Bazar", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
+        
+        let targetUrl = '';
 
-        let pendingUrl = '';
-
-        // জেলা লিস্ট লোড করা
+        // জেলা লিস্ট পপুলেট করা
         const districtSelect = document.getElementById('district');
         districts.forEach(d => {
             const opt = document.createElement('option');
@@ -98,59 +81,51 @@
             districtSelect.appendChild(opt);
         });
 
-        function updateThanas() {
-            const district = document.getElementById('district').value;
-            const thanaSelect = document.getElementById('thana');
-            thanaSelect.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
-            
-            // যদি ডাটাবেসে থানা থাকে তবে দেখাবে, না থাকলে ইনপুট বক্স প্রম্পট করবে
-            const thanas = locationData[district] || ["Sadar"]; 
-            thanas.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t;
-                opt.innerText = t;
-                thanaSelect.appendChild(opt);
-            });
-        }
-
         function showLocationModal() {
             document.getElementById('locationModal').classList.remove('hidden');
         }
 
-        function checkLocation(e, url) {
+        // সব সার্ভিসের জন্য এই ১টি ফাংশনই কাজ করবে
+        function handleServiceClick(e, url) {
             e.preventDefault();
-            pendingUrl = url;
-            const savedArea = localStorage.getItem('selectedArea');
-            if (savedArea) {
-                window.location.href = url + "?area=" + savedArea;
+            const savedLocation = localStorage.getItem('userLocation');
+            
+            if (savedLocation) {
+                window.location.href = url + "?area=" + encodeURIComponent(savedLocation);
             } else {
+                targetUrl = url;
                 showLocationModal();
             }
         }
 
         function confirmLocation() {
             const d = document.getElementById('district').value;
-            const t = document.getElementById('thana').value;
+            const a = document.getElementById('areaInput').value;
 
-            if (!d || !t) {
-                alert("সবগুলো তথ্য পূরণ করুন");
+            if (!d || !a) {
+                alert("জেলা এবং থানার নাম সঠিকভাবে দিন");
                 return;
             }
 
-            const fullLocation = d + ", " + t;
-            localStorage.setItem('selectedArea', fullLocation);
+            const locationStr = d + ", " + a;
+            localStorage.setItem('userLocation', locationStr);
             document.getElementById('locationModal').classList.add('hidden');
-            updateDisplay();
-            
-            if (pendingUrl) window.location.href = pendingUrl + "?area=" + encodeURIComponent(fullLocation);
+            updateUI();
+
+            if (targetUrl) {
+                window.location.href = targetUrl + "?area=" + encodeURIComponent(locationStr);
+            }
         }
 
-        function updateDisplay() {
-            const name = localStorage.getItem('selectedArea');
-            if (name) document.getElementById('displayAreaName').innerText = name;
+        function updateUI() {
+            const loc = localStorage.getItem('userLocation');
+            if (loc) {
+                document.getElementById('displayAreaName').innerText = loc;
+                document.getElementById('displayAreaName').classList.remove('italic');
+            }
         }
 
-        window.onload = updateDisplay;
+        window.onload = updateUI;
     </script>
 </body>
 </html>
