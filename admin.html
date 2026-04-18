@@ -8,8 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> 
         body { font-family: 'Hind Siliguri', sans-serif; } 
-        .tab-active { background-color: #1e3a8a; color: white; transform: scale(1.05); }
+        .tab-active { background-color: #1e3a8a; color: white; transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .card-animate { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-100 pb-20">
@@ -22,30 +24,32 @@
                 <h1 class="text-2xl font-black italic uppercase">G-KHIDMAH</h1>
                 <p class="text-[10px] uppercase tracking-widest opacity-70 font-bold">মাস্টার অ্যাডমিন কন্ট্রোল</p>
             </div>
-            <button onclick="showLastOrder()" class="bg-red-500 px-4 py-2 rounded-2xl text-[10px] font-black animate-bounce shadow-lg">🔔 লাস্ট রিকোয়েস্ট</button>
+            <button onclick="showLastOrder()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-2xl text-[10px] font-black animate-pulse shadow-lg transition-all">🔔 লাস্ট রিকোয়েস্ট</button>
         </header>
 
         <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
-            <button id="btn-all" onclick="filterBy('all')" class="tab-active px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md">সব অর্ডার</button>
+            <button id="btn-all" onclick="filterBy('all')" class="tab-active px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md transition-all">সব অর্ডার</button>
             <button id="btn-shopping" onclick="filterBy('shopping')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🛒 বাজার সদাই</button>
             <button id="btn-home_service" onclick="filterBy('home_service')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🛠️ হোম সার্ভিস</button>
             <button id="btn-car_rental" onclick="filterBy('car_rental')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🚗 কার রেন্টাল</button>
             <button id="btn-delivery" onclick="filterBy('delivery')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">📦 ডেলিভারি</button>
         </div>
 
-        <div class="bg-white p-6 rounded-[2rem] shadow-lg mb-8 border-2 border-dashed border-blue-200">
-            <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">👷 টিম মেম্বার যুক্ত করুন</h3>
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-lg mb-8 border-2 border-dashed border-blue-200">
+            <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4 flex items-center gap-2">
+                <span>👷</span> টিম মেম্বার ম্যানেজমেন্ট
+            </h3>
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <input type="text" id="mName" placeholder="নাম" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
-                <input type="tel" id="mPhone" placeholder="মোবাইল" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
+                <input type="tel" id="mPhone" placeholder="মোবাইল নম্বর" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
                 <select id="mType" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
-                    <option value="rider">Rider (বাজার/ডেলিভারি)</option>
+                    <option value="rider">Rider (সদাই/ডেলিভারি)</option>
                     <option value="expert">Expert (হোম সার্ভিস)</option>
                     <option value="driver">Driver (কার রেন্টাল)</option>
                 </select>
-                <input type="text" id="mPhoto" placeholder="ছবির লিংক (URL)" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
+                <input type="text" id="mPhoto" placeholder="ছবির ডিরেক্ট লিঙ্ক" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
             </div>
-            <button onclick="addMember()" class="w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-bold uppercase shadow-lg active:scale-95 transition-all">নতুন মেম্বার সেভ করুন</button>
+            <button onclick="addMember()" class="w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-bold uppercase shadow-lg active:scale-95 transition-all">নতুন মেম্বার যুক্ত করুন</button>
         </div>
 
         <div id="orderContainer" class="space-y-6"></div>
@@ -71,45 +75,43 @@
         let members = [];
         let currentFilter = 'all';
 
-        // সার্ভিস অনুযায়ী ট্র্যাকিং কনফিগ
         const configs = {
-            shopping: { title: "বাজার সদাই", steps: ["pending", "received", "invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"] },
-            home_service: { title: "হোম সার্ভিস", steps: ["expert_finding", "expert_assigned", "work_in_progress", "payment_pending", "completed"] },
-            car_rental: { title: "কার রেন্টাল", steps: ["request_received", "driver_assigned", "car_on_way", "trip_started", "completed"] },
-            delivery: { title: "পার্সেল ডেলিভারি", steps: ["pickup_pending", "rider_assigned", "picked_up", "on_the_way", "delivered", "completed"] }
+            shopping: { title: "বাজার সদাই", color: "border-green-600", steps: ["pending", "received", "invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"] },
+            home_service: { title: "হোম সার্ভিস", color: "border-orange-500", steps: ["expert_finding", "expert_assigned", "work_in_progress", "payment_pending", "completed"] },
+            car_rental: { title: "কার রেন্টাল", color: "border-blue-500", steps: ["request_received", "driver_assigned", "car_on_way", "trip_started", "completed"] },
+            delivery: { title: "পার্সেল ডেলিভারি", color: "border-purple-600", steps: ["pickup_pending", "rider_assigned", "picked_up", "on_the_way", "delivered", "completed"] }
         };
 
         // টিম লোড
         const loadTeam = async () => {
             const snap = await getDocs(collection(db, "team"));
             members = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderOrders();
         };
         loadTeam();
 
-        // নতুন মেম্বার অ্যাড
         window.addMember = async () => {
             const name = document.getElementById('mName').value;
             const phone = document.getElementById('mPhone').value;
             const type = document.getElementById('mType').value;
             const photo = document.getElementById('mPhoto').value || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            if(!name || !phone) return alert("তথ্য দিন");
+            if(!name || !phone) return alert("দয়া করে নাম ও ফোন নম্বর দিন");
             await setDoc(doc(db, "team", Date.now().toString()), { name, phone, type, photo });
-            alert("সফল!"); location.reload();
+            alert("টিম মেম্বার যুক্ত হয়েছে!"); 
+            loadTeam();
         };
 
-        // ক্যাটাগরি ফিল্টার
         window.filterBy = (cat) => {
             currentFilter = cat;
-            document.querySelectorAll('nav button, div button').forEach(b => b.classList.remove('tab-active'));
+            document.querySelectorAll('#btn-all, #btn-shopping, #btn-home_service, #btn-car_rental, #btn-delivery').forEach(b => b.classList.remove('tab-active'));
             document.getElementById('btn-'+cat).classList.add('tab-active');
             renderOrders();
         };
 
-        // রিয়েলটাইম অর্ডার আপডেট
         onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
             const newOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
             if(allOrders.length > 0 && newOrders.length > allOrders.length) {
-                document.getElementById('newOrderSound').play();
+                document.getElementById('newOrderSound').play().catch(e => console.log("Sound enabled after interaction"));
             }
             allOrders = newOrders;
             renderOrders();
@@ -118,43 +120,44 @@
         function renderOrders() {
             const container = document.getElementById('orderContainer');
             container.innerHTML = "";
-            const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.serviceType === currentFilter);
+            const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => (o.serviceType || 'shopping') === currentFilter);
 
             filtered.forEach(order => {
-                const config = configs[order.serviceType || 'shopping'];
+                const type = order.serviceType || 'shopping';
+                const config = configs[type];
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-blue-900 mb-6";
+                card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color} mb-6`;
                 
                 card.innerHTML = `
-                    <div class="flex justify-between mb-4">
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-[9px] font-black uppercase">${config.title}</span>
-                        <span class="text-[9px] font-bold text-gray-400">#${order.id.slice(-5)}</span>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">${config.title}</span>
+                        <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
                     </div>
 
                     <div class="mb-4">
                         <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                        <p class="text-[10px] text-blue-600 font-bold">${order.customerPhone}</p>
-                        <p class="text-[9px] text-gray-500 mt-1">${order.customerAddress}</p>
+                        <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">${order.customerAddress}</p>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-3xl mb-4">
+                    <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100">
                         ${renderOrderSpecifics(order)}
                     </div>
 
                     <div class="flex gap-2 mb-6">
-                        <select id="assign-${order.id}" class="flex-1 bg-white border p-3 rounded-xl text-xs font-bold outline-none">
-                            <option value="">অ্যাসাইন করুন</option>
-                            ${members.filter(m => m.type.includes(order.serviceType === 'shopping' ? 'rider' : order.serviceType === 'car_rental' ? 'driver' : 'expert')).map(m => `
-                                <option value="${m.id}" ${order.assignedPerson?.id === m.id ? 'selected' : ''}>${m.name}</option>
+                        <select id="assign-${order.id}" class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-xs font-bold outline-none focus:border-blue-500">
+                            <option value="">অ্যাসাইন (ফাঁকা)</option>
+                            ${members.map(m => `
+                                <option value="${m.id}" ${order.assignedPerson?.id === m.id ? 'selected' : ''}>${m.name} (${m.type})</option>
                             `).join('')}
                         </select>
-                        <button onclick="assignPerson('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">Set</button>
+                        <button onclick="assignPerson('${order.id}')" class="bg-blue-900 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-90 transition-all">Set</button>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         ${config.steps.map((s, i) => `
-                            <button onclick="updateStatus('${order.id}', '${s}')" class="py-2 px-1 rounded-xl text-[8px] font-black uppercase ${order.status === s ? 'bg-green-600 text-white shadow-md scale-105' : 'bg-gray-100 text-gray-400'}">
-                                ${i+1}. ${s.replace('_', ' ')}
+                            <button onclick="updateStatus('${order.id}', '${s}')" class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all ${order.status === s ? 'bg-blue-900 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}">
+                                ${i+1}. ${s.replace(/_/g, ' ')}
                             </button>
                         `).join('')}
                     </div>
@@ -164,31 +167,40 @@
         }
 
         function renderOrderSpecifics(order) {
-            if(order.serviceType === 'shopping' || !order.serviceType) {
+            const type = order.serviceType || 'shopping';
+            if(type === 'shopping') {
                 return `
                     <div class="space-y-2">
                         ${order.items.map(item => `
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
-                                <button onclick="removeItem('${order.id}', '${item}')" class="text-red-500 font-bold px-2">×</button>
-                                <span class="text-[10px] flex-1 font-bold">${item}</span>
-                                <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-16 p-1 bg-blue-50 rounded text-[10px] text-center font-bold" placeholder="৳">
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-50">
+                                <button onclick="removeItem('${order.id}', '${item}')" class="text-red-400 hover:text-red-600 font-bold px-2">×</button>
+                                <span class="text-[10px] flex-1 font-bold text-slate-700">${item}</span>
+                                <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-16 p-1.5 bg-blue-50 rounded-lg text-[10px] text-center font-bold outline-none" placeholder="৳">
                             </div>
                         `).join('')}
-                        <button onclick="saveShoppingBill('${order.id}')" class="w-full mt-2 bg-green-700 text-white py-2 rounded-xl text-[10px] font-bold uppercase">Save Shopping Bill</button>
+                        <div class="pt-2 flex flex-col gap-2">
+                            <div class="flex gap-2">
+                                <input type="number" id="del-${order.id}" value="${order.deliveryCharge || 70}" placeholder="ডেলিভারি" class="w-1/2 p-2 rounded-lg border text-[10px] font-bold outline-none">
+                                <input type="number" id="plat-${order.id}" value="${order.platformFee || 20}" placeholder="ফি" class="w-1/2 p-2 rounded-lg border text-[10px] font-bold outline-none">
+                            </div>
+                            <button onclick="saveShoppingBill('${order.id}')" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-[10px] font-bold uppercase shadow-md active:scale-95">বিল ও ইনভয়েস আপডেট</button>
+                        </div>
                     </div>`;
             } else {
                 return `
                     <div class="space-y-3">
-                        <p class="text-[10px] font-bold text-gray-600 italic">সার্ভিস ডিটেইলস: ${order.items.join(', ')}</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">সার্ভিস রিকোয়েস্ট:</p>
+                            <span class="text-[10px] font-bold text-blue-900">${order.items.join(', ')}</span>
+                        </div>
                         <div class="flex gap-2">
-                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="মোট বিল (৳)" class="flex-1 p-3 rounded-xl border text-xs font-bold outline-none">
-                            <button onclick="saveServiceBill('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">Set Bill</button>
+                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="মোট বিল (৳)" class="flex-1 p-3 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500">
+                            <button onclick="saveServiceBill('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase active:scale-95">বিল সেভ</button>
                         </div>
                     </div>`;
             }
         }
 
-        // একশন ফাংশনসমূহ
         window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
 
         window.saveShoppingBill = async (id) => {
@@ -197,34 +209,57 @@
                 const p = parseFloat(inp.value) || 0;
                 prices[inp.dataset.item] = p; sub += p;
             });
-            await updateDoc(doc(db, "orders", id), { itemPrices: prices, subTotal: sub, status: "invoice_ready" });
-            alert("বাজারের ইনভয়েস রেডি!");
+            const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+            const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+            
+            await updateDoc(doc(db, "orders", id), { 
+                itemPrices: prices, 
+                subTotal: sub, 
+                deliveryCharge: del, 
+                platformFee: plat,
+                status: "invoice_ready" 
+            });
+            alert("ইনভয়েস আপডেট হয়েছে!");
         };
 
         window.saveServiceBill = async (id) => {
             const val = parseFloat(document.getElementById(`bill-${id}`).value) || 0;
             await updateDoc(doc(db, "orders", id), { subTotal: val, status: "payment_pending" });
-            alert("সার্ভিস বিল সেট হয়েছে!");
+            alert("সার্ভিস বিল আপডেট হয়েছে!");
         };
 
         window.assignPerson = async (id) => {
             const mId = document.getElementById(`assign-${id}`).value;
+            if(!mId) {
+                await updateDoc(doc(db, "orders", id), { assignedPerson: null });
+                return alert("অ্যাসাইন রিমুভ করা হয়েছে");
+            }
             const m = members.find(x => x.id === mId);
-            if(!m) return;
-            await updateDoc(doc(db, "orders", id), { assignedPerson: m, alertMessage: `${m.name} দায়িত্ব নিয়েছেন।`, alertTime: Date.now() });
-            alert("সফলভাবে অ্যাসাইন হয়েছে!");
+            await updateDoc(doc(db, "orders", id), { 
+                assignedPerson: m, 
+                alertMessage: `${m.name} দায়িত্ব নিয়েছেন।`, 
+                alertTime: Date.now() 
+            });
+            alert(`${m.name}-কে দায়িত্ব দেওয়া হয়েছে`);
         };
 
         window.removeItem = async (id, item) => {
-            if(confirm("বাদ দিবেন?")) {
-                await updateDoc(doc(db, "orders", id), { items: arrayRemove(item), alertMessage: `${item} পাওয়া যায়নি।`, alertTime: Date.now() });
+            if(confirm(`আপনি কি "${item}" তালিকা থেকে বাদ দিতে চান?`)) {
+                await updateDoc(doc(db, "orders", id), { 
+                    items: arrayRemove(item), 
+                    alertMessage: `দুঃখিত, ${item} পাওয়া যায়নি।`, 
+                    alertTime: Date.now() 
+                });
             }
         };
 
         window.showLastOrder = () => {
             if(allOrders.length > 0) {
                 const last = allOrders[0];
-                alert(`নতুন রিকোয়েস্ট: ${last.customerName} (${configs[last.serviceType || 'shopping'].title})`);
+                const typeName = configs[last.serviceType || 'shopping'].title;
+                alert(`সর্বশেষ অর্ডার:\nনাম: ${last.customerName}\nসার্ভিস: ${typeName}\nঠিকানা: ${last.customerAddress}`);
+            } else {
+                alert("কোনো অর্ডার নেই");
             }
         };
 
