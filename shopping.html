@@ -224,70 +224,205 @@
 
                     // বাদ দেওয়া আইটেম (কাটা দাগসহ)
                     missing.forEach(item => {
-                        itemsHtml += `
-                            <div class="flex justify-between border-b border-red-50 pb-1 bg-red-50/20 px-1">
-                                <span class="text-red-400 line-through italic">${item}</span>
-                                <span class="text-[9px] text-red-500 font-bold uppercase">বাদ গেছে</span>
-                            </div>`;
-                    });
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-                    document.getElementById('invoiceItemsDisplay').innerHTML = itemsHtml;
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
 
-                    // বিল ক্যালকুলেশন
-                    let sub = 0;
-                    data.items.forEach(item => sub += (parseFloat(prices[item]) || 0));
-                    const disc = data.discount || 0;
-                    const del = data.deliveryCharge || 70;
-                    const plat = data.platformFee || 20;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-                    document.getElementById('subTotalDisplay').innerText = `৳${sub}`;
-                    document.getElementById('delChargeDisplay').innerText = `৳${del}`;
-                    document.getElementById('platFeeDisplay').innerText = `৳${plat}`;
-                    
-                    if(disc > 0) {
-                        document.getElementById('discountRow').classList.remove('hidden');
-                        document.getElementById('discountDisplay').innerText = `-৳${disc}`;
-                    } else {
-                        document.getElementById('discountRow').classList.add('hidden');
-                    }
-                    
-                    document.getElementById('grandTotalDisplay').innerText = `৳${(sub - disc) + del + plat}`;
+    // ১০টি ধাপের কনফিগারেশন (প্রগ্রেস বার সহ)
+    const statusConfig = {
+        "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
+        "received": { step: "২/১০", msg: "খাদেম অর্ডার গ্রহণ করেছে", icon: "✅", progress: 20 },
+        "invoice_ready": { step: "৩/১০", msg: "রশিদ তৈরি হয়েছে", icon: "📄", progress: 30 },
+        "confirmed": { step: "৪/১০", msg: "অর্ডার কনফার্ম", icon: "🤝", progress: 40 },
+        "on_the_way": { step: "৫/১০", msg: "খাদেম বাজারের পথে", icon: "🏍️", progress: 50 },
+        "market_reached": { step: "৬/১০", msg: "বাজারে পৌঁছেছে", icon: "🏬", progress: 60 },
+        "shopping": { step: "৭/১০", msg: "কেনাকাটা চলছে", icon: "🛒", progress: 75 },
+        "packing": { step: "৮/১০", msg: "প্যাকিং হচ্ছে", icon: "📦", progress: 85 },
+        "delivery": { step: "৯/১০", msg: "ডেলিভারি আসছে", icon: "🚚", progress: 95 },
+        "completed": { step: "সফল", msg: "খিদমত সম্পন্ন", icon: "🎉", progress: 100 }
+    };
 
-                    if(data.status === "invoice_ready" && !data.invoiceConfirmed) {
-                        document.getElementById('confirmBox').classList.remove('hidden');
-                    } else {
-                        document.getElementById('confirmBox').classList.add('hidden');
-                    }
-                }
+    let lastAlertTime = 0;
+    let lastKnownStatus = "";
+
+    // ১. অর্ডার পাঠানো
+    document.getElementById('submitOrderBtn').onclick = async () => {
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const addr = document.getElementById('custAddress').value.trim();
+        const list = document.getElementById('orderList').value.trim();
+
+        if(!name || !phone || !addr || !list) return alert("সব তথ্য দিন!");
+
+        document.getElementById('submitOrderBtn').innerText = "অর্ডার যাচ্ছে...";
+        document.getElementById('submitOrderBtn').disabled = true;
+
+        try {
+            const docRef = await addDoc(collection(db, "orders"), {
+                customerName: name,
+                customerPhone: phone,
+                customerAddress: addr,
+                items: list.split('\n').filter(i => i.trim() !== ""),
+                status: "pending",
+                createdAt: serverTimestamp(),
+                subTotal: 0,
+                deliveryCharge: 70,
+                platformFee: 20,
+                discount: 0,
+                invoiceConfirmed: false,
+                missingItems: []
             });
-        };
+            localStorage.setItem('activeOrderId', docRef.id);
+            initTracking();
+        } catch (e) {
+            alert("চেষ্টা করুন আবার!");
+            document.getElementById('submitOrderBtn').innerText = "খাদেমকে লিস্ট পাঠান";
+            document.getElementById('submitOrderBtn').disabled = false;
+        }
+    };
 
-        // কুপন লজিক
-        document.getElementById('applyCouponBtn').onclick = async () => {
-            const id = localStorage.getItem('activeOrderId');
-            const code = document.getElementById('couponInput').value.trim().toUpperCase();
-            if(!code) return;
-            const snap = await getDoc(doc(db, "coupons", code));
-            if(snap.exists()) {
-                await updateDoc(doc(db, "orders", id), { discount: snap.data().amount || 0 });
-                document.getElementById('couponMsg').innerText = "সফল!";
-                document.getElementById('couponMsg').style.color = "green";
-            } else {
-                alert("ভুল কুপন!");
+    // ২. ট্র্যাকিং ফাংশন
+    const initTracking = () => {
+        const orderId = localStorage.getItem('activeOrderId');
+        if(!orderId) return;
+
+        document.getElementById('orderSection').classList.add('hidden');
+        document.getElementById('trackingSection').classList.remove('hidden');
+        document.getElementById('newOrderBtn').classList.remove('hidden');
+
+        onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+            if(!snapshot.exists()) return;
+            const data = snapshot.data();
+
+            // --- ৪০ সেকেন্ড রিংটোন ও ভাইব্রেশন লজিক (Product Missing/Alert) ---
+            if (data.alertTime && data.alertTime > lastAlertTime) {
+                lastAlertTime = data.alertTime;
+                const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3');
+                ringtone.loop = true;
+                ringtone.play().catch(() => {});
+                
+                if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+
+                const autoStop = setTimeout(() => {
+                    ringtone.pause();
+                    ringtone.currentTime = 0;
+                    if (navigator.vibrate) navigator.vibrate(0);
+                }, 40000); // ৪০ সেকেন্ড
+
+                setTimeout(() => { 
+                    alert("⚠️ আপডেট: " + data.alertMessage); 
+                    ringtone.pause(); 
+                    ringtone.currentTime = 0;
+                    if (navigator.vibrate) navigator.vibrate(0);
+                    clearTimeout(autoStop);
+                }, 1000);
             }
-        };
 
-        document.getElementById('confirmInvoiceBtn').onclick = async () => {
-            const id = localStorage.getItem('activeOrderId');
-            await updateDoc(doc(db, "orders", id), { invoiceConfirmed: true, status: "confirmed" });
-            alert("ধন্যবাদ! খিদমত কনফার্ম হয়েছে।");
-        };
+            // --- স্ট্যাটাস চেঞ্জ নোটিফিকেশন সাউন্ড ---
+            if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
+                const notify = document.getElementById('statusSound');
+                if(notify) notify.play().catch(() => {});
+            }
+            lastKnownStatus = data.status;
 
-        document.getElementById('newOrderBtn').onclick = () => {
-            if(confirm("নতুন বাজার?")) { localStorage.removeItem('activeOrderId'); location.reload(); }
-        };
+            // ট্র্যাকিং UI ও প্রগ্রেস বার আপডেট
+            const config = statusConfig[data.status] || statusConfig["pending"];
+            document.getElementById('statusIcon').innerText = config.icon;
+            document.getElementById('trackMessage').innerText = config.msg;
+            document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+            document.getElementById('progressBar').style.width = config.progress + "%";
+            document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-        window.onload = initTracking;
-    </script>
+            // ইনভয়েস ও বিল ক্যালকুলেশন
+            if(["invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"].includes(data.status)) {
+                document.getElementById('invoiceBox').classList.remove('hidden');
+                const prices = data.itemPrices || {};
+                const missing = data.missingItems || [];
+                
+                let itemsHtml = "";
+                data.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="flex justify-between border-b border-gray-100 pb-1">
+                            <span>${item}</span><span class="brand-green font-bold">৳${prices[item] || 0}</span>
+                        </div>`;
+                });
+
+                missing.forEach(item => {
+                    itemsHtml += `
+                        <div class="flex justify-between border-b border-red-50 pb-1 bg-red-50/20 px-1">
+                            <span class="text-red-400 line-through italic">${item}</span>
+                            <span class="text-[9px] text-red-500 font-bold uppercase">বাদ গেছে</span>
+                        </div>`;
+                });
+                document.getElementById('invoiceItemsDisplay').innerHTML = itemsHtml;
+
+                let sub = 0;
+                data.items.forEach(item => sub += (parseFloat(prices[item]) || 0));
+                const disc = data.discount || 0;
+                const del = data.deliveryCharge || 70;
+                const plat = data.platformFee || 20;
+
+                document.getElementById('subTotalDisplay').innerText = `৳${sub}`;
+                document.getElementById('delChargeDisplay').innerText = `৳${del}`;
+                document.getElementById('platFeeDisplay').innerText = `৳${plat}`;
+                
+                if(disc > 0) {
+                    document.getElementById('discountRow').classList.remove('hidden');
+                    document.getElementById('discountDisplay').innerText = `-৳${disc}`;
+                } else {
+                    document.getElementById('discountRow').classList.add('hidden');
+                }
+                
+                document.getElementById('grandTotalDisplay').innerText = `৳${(sub - disc) + del + plat}`;
+
+                if(data.status === "invoice_ready" && !data.invoiceConfirmed) {
+                    document.getElementById('confirmBox').classList.remove('hidden');
+                } else {
+                    document.getElementById('confirmBox').classList.add('hidden');
+                }
+            }
+        });
+    };
+
+    // কুপন লজিক
+    document.getElementById('applyCouponBtn').onclick = async () => {
+        const id = localStorage.getItem('activeOrderId');
+        const code = document.getElementById('couponInput').value.trim().toUpperCase();
+        if(!code) return;
+        const snap = await getDoc(doc(db, "coupons", code));
+        if(snap.exists()) {
+            await updateDoc(doc(db, "orders", id), { discount: snap.data().amount || 0 });
+            document.getElementById('couponMsg').innerText = "সফল!";
+            document.getElementById('couponMsg').style.color = "green";
+        } else {
+            alert("ভুল কুপন!");
+        }
+    };
+
+    document.getElementById('confirmInvoiceBtn').onclick = async () => {
+        const id = localStorage.getItem('activeOrderId');
+        await updateDoc(doc(db, "orders", id), { invoiceConfirmed: true, status: "confirmed" });
+        alert("ধন্যবাদ! খিদমত কনফার্ম হয়েছে।");
+    };
+
+    document.getElementById('newOrderBtn').onclick = () => {
+        if(confirm("নতুন বাজার?")) { localStorage.removeItem('activeOrderId'); location.reload(); }
+    };
+
+    window.onload = initTracking;
+</script>
+
 </body>
 </html>
