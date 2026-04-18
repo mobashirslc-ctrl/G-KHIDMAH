@@ -9,38 +9,41 @@
     <style>body { font-family: 'Hind Siliguri', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-10">
-    <audio id="notifySound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
-    <header class="bg-white shadow-sm p-4 border-b border-green-100 flex items-center justify-between px-6">
-        <h1 class="text-xl font-bold text-green-700 italic">G KHIDMAH SERVICES</h1>
-        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full">নতুন রিকোয়েস্ট</button>
+    <header class="bg-white shadow-sm p-4 border-b border-blue-100 flex items-center justify-between px-6">
+        <h1 class="text-xl font-bold text-blue-900 italic uppercase">G KHIDMAH SERVICES</h1>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs uppercase font-black">নতুন রিকোয়েস্ট</button>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border">
-            <div class="text-center mb-6"><div class="text-5xl mb-2">🛠️</div><h2 class="text-lg font-bold">কি সেবা প্রয়োজন?</h2></div>
+            <div class="text-center mb-6"><div class="text-5xl mb-2">🛠️</div><h2 class="text-lg font-bold">হোম সার্ভিস বুকিং</h2></div>
             <div class="space-y-3">
-                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold">
-                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold">
-                <input type="text" id="custAddress" placeholder="বাসার ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold">
-                <select id="serviceType" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent outline-none font-bold">
+                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold">
+                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold">
+                <input type="text" id="custAddress" placeholder="বাসার ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold">
+                <select id="cat" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent outline-none font-bold">
                     <option value="" disabled selected>সার্ভিস ক্যাটাগরি</option>
                     <option>প্লাম্বার (Plumber)</option>
                     <option>ইলেকট্রিশিয়ান (Electrician)</option>
                     <option>এসি সার্ভিস (AC Service)</option>
                     <option>অন্যান্য</option>
                 </select>
-                <textarea id="serviceNote" rows="3" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none font-semibold" placeholder="সমস্যার বিবরণ দিন..."></textarea>
+                <textarea id="serviceNote" rows="3" class="w-full border-2 border-slate-100 p-4 rounded-3xl outline-none font-semibold" placeholder="কি সমস্যা হয়েছে বিস্তারিত লিখুন..."></textarea>
             </div>
-            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold shadow-lg">সার্ভিস বুক করুন</button>
+            <button id="submitBtn" class="w-full bg-blue-900 text-white mt-5 py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all uppercase">সার্ভিস কনফার্ম করুন</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-4">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-blue-100">
                 <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
-                <h1 id="trackMessage" class="text-xl font-black text-green-700 uppercase">অপেক্ষা করুন...</h1>
+                <h1 id="trackMessage" class="text-xl font-black text-blue-900 uppercase">অপেক্ষা করুন...</h1>
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 mt-4">
-                    <div id="progressBar" class="bg-green-700 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
+                    <div id="progressBar" class="bg-blue-900 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
+                </div>
+                <div id="billBox" class="hidden mt-6 bg-blue-50 p-4 rounded-2xl border-2 border-dashed border-blue-200">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mb-1">প্রাক্কলিত খরচ</p>
+                    <h2 id="totalBill" class="text-3xl font-black text-blue-900">৳0</h2>
                 </div>
             </div>
         </div>
@@ -61,17 +64,26 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        const statusMap = {
+            "expert_finding": { msg: "আপনার জন্য এক্সপার্ট খোঁজা হচ্ছে", progress: "20%" },
+            "expert_assigned": { msg: "এক্সপার্ট নির্ধারিত হয়েছে", progress: "40%" },
+            "work_in_progress": { msg: "কাজ চলছে...", progress: "70%" },
+            "payment_pending": { msg: "কাজ শেষ, পেমেন্ট করুন", progress: "90%" },
+            "completed": { msg: "সফলভাবে সম্পন্ন হয়েছে", progress: "100%" }
+        };
+
         document.getElementById('submitBtn').onclick = async function() {
             const data = {
                 customerName: document.getElementById('custName').value,
                 customerPhone: document.getElementById('custPhone').value,
                 customerAddress: document.getElementById('custAddress').value,
-                serviceType: document.getElementById('serviceType').value,
-                items: [document.getElementById('serviceNote').value],
-                orderType: "home_service",
-                status: "pending",
-                createdAt: serverTimestamp()
+                items: [`${document.getElementById('cat').value}: ${document.getElementById('serviceNote').value}`],
+                serviceType: "home_service", // অ্যাডমিনের সাথে হুবহু মিল
+                status: "expert_finding",
+                createdAt: serverTimestamp(),
+                subTotal: 0
             };
+            if(!data.customerName || !data.customerPhone) return alert("তথ্য পূরণ করুন");
             const docRef = await addDoc(collection(db, "orders"), data);
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
@@ -82,12 +94,18 @@
             if(!orderId) return;
             document.getElementById('orderSection').classList.add('hidden');
             document.getElementById('trackingSection').classList.remove('hidden');
+
             onSnapshot(doc(db, "orders", orderId), (snapshot) => {
                 const data = snapshot.data();
                 if(data) {
-                    document.getElementById('trackMessage').innerText = data.status.toUpperCase();
-                    if(data.status === 'pending') document.getElementById('progressBar').style.width = "20%";
-                    if(data.status === 'completed') document.getElementById('progressBar').style.width = "100%";
+                    const step = statusMap[data.status] || statusMap["expert_finding"];
+                    document.getElementById('trackMessage').innerText = step.msg;
+                    document.getElementById('progressBar').style.width = step.progress;
+                    
+                    if(data.subTotal > 0) {
+                        document.getElementById('billBox').classList.remove('hidden');
+                        document.getElementById('totalBill').innerText = `৳${data.subTotal}`;
+                    }
                 }
             });
         }
