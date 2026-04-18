@@ -6,7 +6,7 @@
     <title>G-KHIDMAH | Your Personal Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Hind Siliguri', sans-serif; } .no-scrollbar::-webkit-scrollbar { display: none; } </style>
+    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
 <body class="bg-slate-50">
     <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-8">
@@ -21,8 +21,8 @@
 
         <div class="w-full px-6 mb-8">
             <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100 flex flex-col items-center">
-                <label class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">বর্তমান সার্ভিস এরিয়া</label>
-                <div id="displayAreaName" class="font-bold text-gray-700">লোকেশন সিলেক্ট করা নেই</div>
+                <label class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">বর্তমান সার্ভিস এরিয়া</label>
+                <div id="displayAreaName" class="font-bold text-gray-700 text-center">লোকেশন সিলেক্ট করা নেই</div>
                 <button onclick="showLocationModal()" class="mt-2 text-[10px] text-green-600 font-bold underline">পরিবর্তন করুন</button>
             </div>
         </div>
@@ -30,187 +30,124 @@
         <div class="w-full px-6 space-y-4">
             <a href="shopping.html" onclick="checkLocation(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-gray-800 text-sm">বাজার সদাই</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">সরাসরি বাজার থেকে আপনার দুয়ারে</p>
-                </div>
-                <span class="text-gray-300 text-xl">→</span>
+                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">বাজার সদাই</h3><p class="text-[10px] text-gray-400">সরাসরি বাজার থেকে আপনার দুয়ারে</p></div>
+                <span class="text-gray-300">→</span>
             </a>
 
             <a href="car-rent.html" onclick="checkLocation(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-gray-800 text-sm">গাড়ি ভাড়া</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">লোকাল বা লং ট্রিপ বুক করুন</p>
-                </div>
-                <span class="text-gray-300 text-xl">→</span>
+                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">গাড়ি ভাড়া</h3><p class="text-[10px] text-gray-400">লোকাল বা লং ট্রিপ বুক করুন</p></div>
+                <span class="text-gray-300">→</span>
+            </a>
+
+            <a href="parcel.html" onclick="checkLocation(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+                <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
+                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">পার্সেল ডেলিভারি</h3><p class="text-[10px] text-gray-400">শহরের যেকোনো প্রান্তে দ্রুত ডেলিভারি</p></div>
+                <span class="text-gray-300">→</span>
+            </a>
+
+            <a href="home-services.html" onclick="checkLocation(event, 'home-services.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+                <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
+                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">প্রয়োজনীয় সার্ভিস</h3><p class="text-[10px] text-gray-400">প্লাম্বার, ইলেকট্রিশিয়ান ও মেরামত</p></div>
+                <span class="text-gray-300">→</span>
             </a>
 
             <a href="ambulance.html" onclick="checkLocation(event, 'ambulance.html')" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl mr-4 animate-pulse">🚑</div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-white text-sm">অ্যাম্বুলেন্স</h3>
-                    <p class="text-[10px] text-red-100 font-medium italic">সরাসরি যোগাযোগ করুন</p>
-                </div>
+                <div class="flex-1 text-sm text-white"><h3 class="font-bold">অ্যাম্বুলেন্স</h3><p class="text-[10px] text-red-100 italic">সরাসরি যোগাযোগ করুন</p></div>
                 <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
-            <a href="parcel.html" onclick="checkLocation(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-    <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
-    <div class="flex-1">
-        <h3 class="font-bold text-gray-800 text-sm">পার্সেল ডেলিভারি</h3>
-        <p class="text-[10px] text-gray-400 font-medium">শহরের যেকোনো প্রান্তে দ্রুত ডেলিভারি</p>
-    </div>
-    <span class="text-gray-300 text-xl">→</span>
-</a>
-
-<a href="home-services.html" onclick="checkLocation(event, 'home-services.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
-    <div class="flex-1">
-        <h3 class="font-bold text-gray-800 text-sm">প্রয়োজনীয় সার্ভিস</h3>
-        <p class="text-[10px] text-gray-400 font-medium">প্লাম্বার, ইলেকট্রিশিয়ান ও এসি মেরামত</p>
-    </div>
-    <span class="text-gray-300 text-xl">→</span>
-</a>
         </div>
-
-        <footer class="mt-auto py-10 text-center">
-            <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Powered by G-Khidmah Team</p>
-        </footer>
     </div>
 
     <div id="locationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
             <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">আপনার লোকেশন দিন</h2>
-            <p class="text-[11px] text-gray-400 text-center mb-6 uppercase tracking-widest">নিকটস্থ পার্টনারের সাথে কানেক্ট হতে সাহায্য করুন</p>
-            
-            <div class="space-y-4">
-                <select id="district" onchange="loadThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-    <option value="">জেলা নির্বাচন করুন</option>
-    <option value="Bagerhat">Bagerhat</option> <option value="Bandarban">Bandarban</option>
-    <option value="Barguna">Barguna</option> <option value="Barishal">Barishal</option>
-    <option value="Bhola">Bhola</option> <option value="Bogra">Bogra</option>
-    <option value="Brahmanbaria">Brahmanbaria</option> <option value="Chandpur">Chandpur</option>
-    <option value="Chattogram">Chattogram</option> <option value="Chuadanga">Chuadanga</option>
-    <option value="Cumilla">Cumilla</option> <option value="Cox's Bazar">Cox's Bazar</option>
-    <option value="Dhaka">Dhaka</option> <option value="Dinajpur">Dinajpur</option>
-    <option value="Faridpur">Faridpur</option> <option value="Feni">Feni</option>
-    <option value="Gaibandha">Gaibandha</option> <option value="Gazipur">Gazipur</option>
-    <option value="Gopalganj">Gopalganj</option> <option value="Habiganj">Habiganj</option>
-    <option value="Jamalpur">Jamalpur</option> <option value="Jashore">Jashore</option>
-    <option value="Jhalokati">Jhalokati</option> <option value="Jhenaidah">Jhenaidah</option>
-    <option value="Joypurhat">Joypurhat</option> <option value="Khagrachari">Khagrachari</option>
-    <option value="Khulna">Khulna</option> <option value="Kishoreganj">Kishoreganj</option>
-    <option value="Kurigram">Kurigram</option> <option value="Kushtia">Kushtia</option>
-    <option value="Lakshmipur">Lakshmipur</option> <option value="Lalmonirhat">Lalmonirhat</option>
-    <option value="Madaripur">Madaripur</option> <option value="Magura">Magura</option>
-    <option value="Manikganj">Manikganj</option> <option value="Meherpur">Meherpur</option>
-    <option value="Moulvibazar">Moulvibazar</option> <option value="Munshiganj">Munshiganj</option>
-    <option value="Mymensingh">Mymensingh</option> <option value="Naogaon">Naogaon</option>
-    <option value="Narail">Narail</option> <option value="Narayanganj">Narayanganj</option>
-    <option value="Narsingdi">Narsingdi</option> <option value="Natore">Natore</option>
-    <option value="Netrokona">Netrokona</option> <option value="Nilphamari">Nilphamari</option>
-    <option value="Noakhali">Noakhali</option> <option value="Pabna">Pabna</option>
-    <option value="Panchagarh">Panchagarh</option> <option value="Patuakhali">Patuakhali</option>
-    <option value="Rajbari">Rajbari</option> <option value="Rajshahi">Rajshahi</option>
-    <option value="Rangamati">Rangamati</option> <option value="Rangpur">Rangpur</option>
-    <option value="Satkhira">Satkhira</option> <option value="Shariatpur">Shariatpur</option>
-    <option value="Sherpur">Sherpur</option> <option value="Sirajganj">Sirajganj</option>
-    <option value="Sunamganj">Sunamganj</option> <option value="Sylhet">Sylhet</option>
-    <option value="Tangail">Tangail</option> <option value="Thakurgaon">Thakurgaon</option>
-</select>
-
-                <select id="thana" onchange="loadAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">আগে জেলা সিলেক্ট করুন</option>
+            <div class="space-y-4 mt-6">
+                <select id="district" onchange="updateThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                    <option value="">জেলা নির্বাচন করুন</option>
                 </select>
-
-                <select id="area" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">আগে থানা সিলেক্ট করুন</option>
+                <select id="thana" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                    <option value="">থানা নির্বাচন করুন</option>
                 </select>
-
-                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4 active:scale-95 transition-all">
-                    সার্ভিস শুরু করুন
-                </button>
+                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4">সার্ভিস শুরু করুন</button>
             </div>
         </div>
     </div>
 
     <script>
-        let pendingServiceUrl = '';
+        // জেলা এবং থানার ডাটা (সংক্ষিপ্ত উদাহরণ, রিয়েল ডাটা অনেক বড় হয়)
+        const locationData = {
+            "Dhaka": ["Savar", "Dhamrai", "Uttara", "Mirpur", "Gulshan", "Badda"],
+            "Sylhet": ["Zindabazar", "Beanibazar", "Golapganj"],
+            "Chattogram": ["Panchlaish", "Halishahar", "Double Mooring"],
+            // বাকি জেলাগুলো এখানে যুক্ত হবে...
+        };
 
-        // স্যাম্পল পার্টনার ডাটাবেস (ভবিষ্যতে ফায়ারবেস থেকে আসবে)
-        const partnerDatabase = [
-            { id: "P-SAVAR-01", district: "Dhaka", thana: "Savar", areaName: "Savar Bus Stand" },
-            { id: "P-UTTARA-01", district: "Dhaka", thana: "Uttara", areaName: "Sector 7" },
-            { id: "P-SYL-01", district: "Sylhet", thana: "Zindabazar", areaName: "Zindabazar Main" }
-        ];
+        // ৬৪ জেলার পূর্ণাঙ্গ লিস্টের জন্য একটি API বা লুপ ব্যবহার করা ভালো
+        const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", "Chattogram", "Chuadanga", "Cumilla", "Cox's Bazar", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
 
-        function checkLocation(event, url) {
-            event.preventDefault();
-            pendingServiceUrl = url;
-            const savedPartner = localStorage.getItem('selectedPartnerId');
+        let pendingUrl = '';
 
-            if (savedPartner) {
-                window.location.href = `${url}?partner=${savedPartner}`;
-            } else {
-                showLocationModal();
-            }
+        // জেলা লিস্ট লোড করা
+        const districtSelect = document.getElementById('district');
+        districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.innerText = d;
+            districtSelect.appendChild(opt);
+        });
+
+        function updateThanas() {
+            const district = document.getElementById('district').value;
+            const thanaSelect = document.getElementById('thana');
+            thanaSelect.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
+            
+            // যদি ডাটাবেসে থানা থাকে তবে দেখাবে, না থাকলে ইনপুট বক্স প্রম্পট করবে
+            const thanas = locationData[district] || ["Sadar"]; 
+            thanas.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.innerText = t;
+                thanaSelect.appendChild(opt);
+            });
         }
 
         function showLocationModal() {
             document.getElementById('locationModal').classList.remove('hidden');
         }
 
-        function loadThanas() {
-            const district = document.getElementById('district').value;
-            const thanaDropdown = document.getElementById('thana');
-            thanaDropdown.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
-            
-            const filteredThanas = [...new Set(partnerDatabase
-                .filter(p => p.district === district)
-                .map(p => p.thana))];
-
-            filteredThanas.forEach(thana => {
-                thanaDropdown.innerHTML += `<option value="${thana}">${thana}</option>`;
-            });
-        }
-
-        function loadAreas() {
-            const thana = document.getElementById('thana').value;
-            const areaDropdown = document.getElementById('area');
-            areaDropdown.innerHTML = '<option value="">এরিয়া নির্বাচন করুন</option>';
-
-            const filteredAreas = partnerDatabase.filter(p => p.thana === thana);
-            filteredAreas.forEach(partner => {
-                areaDropdown.innerHTML += `<option value="${partner.id}">${partner.areaName}</option>`;
-            });
+        function checkLocation(e, url) {
+            e.preventDefault();
+            pendingUrl = url;
+            const savedArea = localStorage.getItem('selectedArea');
+            if (savedArea) {
+                window.location.href = url + "?area=" + savedArea;
+            } else {
+                showLocationModal();
+            }
         }
 
         function confirmLocation() {
-            const areaDropdown = document.getElementById('area');
-            const selectedPartnerId = areaDropdown.value;
-            const selectedAreaName = areaDropdown.options[areaDropdown.selectedIndex].text;
+            const d = document.getElementById('district').value;
+            const t = document.getElementById('thana').value;
 
-            if (!selectedPartnerId) {
-                alert("অনুগ্রহ করে এরিয়া সিলেক্ট করুন");
+            if (!d || !t) {
+                alert("সবগুলো তথ্য পূরণ করুন");
                 return;
             }
 
-            localStorage.setItem('selectedPartnerId', selectedPartnerId);
-            localStorage.setItem('selectedAreaName', selectedAreaName);
-            
+            const fullLocation = d + ", " + t;
+            localStorage.setItem('selectedArea', fullLocation);
             document.getElementById('locationModal').classList.add('hidden');
             updateDisplay();
-
-            if (pendingServiceUrl) {
-                window.location.href = `${pendingServiceUrl}?partner=${selectedPartnerId}`;
-            }
+            
+            if (pendingUrl) window.location.href = pendingUrl + "?area=" + encodeURIComponent(fullLocation);
         }
 
         function updateDisplay() {
-            const name = localStorage.getItem('selectedAreaName');
-            if (name) {
-                document.getElementById('displayAreaName').innerText = name;
-            }
+            const name = localStorage.getItem('selectedArea');
+            if (name) document.getElementById('displayAreaName').innerText = name;
         }
 
         window.onload = updateDisplay;
