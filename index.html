@@ -6,12 +6,12 @@
     <title>G-KHIDMAH | Your Personal Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
+    <style> body { font-family: 'Hind Siliguri', sans-serif; } .no-scrollbar::-webkit-scrollbar { display: none; } </style>
 </head>
 <body class="bg-slate-50">
-    <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-10">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-8">
         
-        <div class="text-center mb-10">
+        <div class="text-center mb-6">
             <div class="bg-green-700 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-200">
                 <span class="text-white font-black text-3xl italic">G</span>
             </div>
@@ -19,52 +19,74 @@
             <p class="text-[9px] uppercase tracking-[0.3em] text-green-600 font-bold">Your Personal Assistant</p>
         </div>
 
-        <div class="w-full px-6 space-y-4">
-            
-            <a href="shopping.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 hover:scale-[0.98] transition-all duration-300">
-                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">বাজার সদাই</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">সরাসরি বাজার থেকে আপনার দুয়ারে</p>
+        <div class="w-full px-6 mb-8">
+            <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100">
+                <label class="text-[10px] font-black text-gray-400 uppercase ml-4 mb-1 block tracking-widest">আপনার কাছের সার্ভিস পয়েন্ট</label>
+                <div class="relative">
+                    <select id="partnerSelect" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm text-gray-700 appearance-none cursor-pointer">
+                        <option value="central">সেন্ট্রাল (ঢাকা মেইন)</option>
+                        <option value="savar_01">সাভার সার্ভিস পয়েন্ট</option>
+                        <option value="uttara_01">উত্তরা সার্ভিস পয়েন্ট</option>
+                        <option value="mirpur_01">মিরপুর সার্ভিস পয়েন্ট</option>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-green-600 font-bold">▼</div>
                 </div>
+                <p class="text-[9px] text-center mt-2 text-green-500 font-bold italic">* এলাকা পরিবর্তন করলে পার্টনার অটো আপডেট হবে</p>
+            </div>
+        </div>
+
+        <div class="w-full px-6 space-y-4">
+            <a href="shopping.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-800 text-sm">বাজার সদাই</h3>
+                    <p class="text-[10px] text-gray-400 font-medium">সরাসরি বাজার থেকে আপনার দুয়ারে</p>
+                </div>
+                <span class="text-gray-300 text-xl">→</span>
             </a>
 
-            <a href="car-rent.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 hover:scale-[0.98] transition-all duration-300">
+            <a href="car-rent.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">গাড়ি ভাড়া</h3>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-800 text-sm">গাড়ি ভাড়া</h3>
                     <p class="text-[10px] text-gray-400 font-medium">লোকাল বা লং ট্রিপ বুক করুন</p>
                 </div>
+                <span class="text-gray-300 text-xl">→</span>
             </a>
 
-            <a href="parcel.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 hover:scale-[0.98] transition-all duration-300">
-                <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">পার্সেল ও গিফট</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">দ্রুত ডেলিভারি ও ট্র্যাকিং</p>
+            <a href="ambulance.html" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl mr-4 animate-pulse">🚑</div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-white text-sm">অ্যাম্বুলেন্স</h3>
+                    <p class="text-[10px] text-red-100 font-medium italic">সরাসরি যোগাযোগ করুন</p>
                 </div>
+                <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
-
-            <a href="service.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 hover:scale-[0.98] transition-all duration-300">
-                <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">হোম সার্ভিস</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">প্লাম্বার বা এসি সার্ভিস</p>
-                </div>
-            </a>
-
-            <a href="blood.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-red-50 hover:scale-[0.98] transition-all duration-300">
-                <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-3xl mr-4">🩸</div>
-                <div>
-                    <h3 class="font-bold text-red-600 text-sm">রক্ত সংগ্রহ</h3>
-                    <p class="text-[10px] text-gray-400 font-medium">জরুরি রক্তদান সেবা</p>
-                </div>
-            </a>
-        </div>
+            </div>
 
         <footer class="mt-auto py-10 text-center">
             <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Powered by G-Khidmah Team</p>
         </footer>
     </div>
+
+    <script>
+        const partnerSelect = document.getElementById('partnerSelect');
+
+        function savePartner() {
+            localStorage.setItem('selectedPartnerId', partnerSelect.value);
+            console.log("Partner Saved: " + partnerSelect.value);
+        }
+
+        partnerSelect.addEventListener('change', savePartner);
+
+        window.onload = () => {
+            const savedPartner = localStorage.getItem('selectedPartnerId');
+            if (savedPartner) {
+                partnerSelect.value = savedPartner;
+            } else {
+                savePartner();
+            }
+        };
+    </script>
 </body>
 </html>
