@@ -102,17 +102,18 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 uppercase italic font-bold text-[8px]">
-                        <button onclick="updateStatus('${id}', 'pending')" class="p-2 rounded-xl bg-slate-100">১. অনুরোধ</button>
-                        <button onclick="updateStatus('${id}', 'verifying')" class="p-2 rounded-xl bg-blue-50 text-blue-600">২. যাচাই</button>
-                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="p-2 rounded-xl bg-indigo-50 text-indigo-600">৩. ইনভয়েস</button>
-                        <button onclick="updateStatus('${id}', 'finding_assistant')" class="p-2 rounded-xl bg-purple-50 text-purple-600">৪. সহকারী</button>
-                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="p-2 rounded-xl bg-pink-50 text-pink-600">৫. সহকারী রেডি</button>
-                        <button onclick="updateStatus('${id}', 'at_store')" class="p-2 rounded-xl bg-yellow-50 text-yellow-600">৬. দোকানে</button>
-                        <button onclick="updateStatus('${id}', 'shopping')" class="p-2 rounded-xl bg-amber-50 text-amber-600">৭. কেনাকাটা</button>
-                        <button onclick="updateStatus('${id}', 'packing')" class="p-2 rounded-xl bg-orange-50 text-orange-600">৮. প্যাকিং</button>
-                        <button onclick="updateStatus('${id}', 'delivery_started')" class="p-2 rounded-xl bg-teal-50 text-teal-600">৯. সহকারী পথে</button>
-                        <button onclick="updateStatus('${id}', 'completed')" class="p-2 rounded-xl bg-green-600 text-white col-span-2 py-3 mt-2 shadow-lg shadow-green-100">১০. খিদমত সম্পন্ন</button>
-                    </div>
+    <button onclick="updateStatus('${id}', 'pending')" class="p-2 rounded-xl bg-slate-100">১. অনুরোধ</button>
+    <button onclick="updateStatus('${id}', 'received')" class="p-2 rounded-xl bg-blue-50 text-blue-600">২. যাচাই (গৃহীত)</button>
+    <button onclick="updateStatus('${id}', 'invoice_ready')" class="p-2 rounded-xl bg-indigo-50 text-indigo-600">৩. ইনভয়েস</button>
+    <button onclick="updateStatus('${id}', 'confirmed')" class="p-2 rounded-xl bg-purple-50 text-purple-600">৪. কনফার্ম</button>
+    <button onclick="updateStatus('${id}', 'on_the_way')" class="p-2 rounded-xl bg-pink-50 text-pink-600">৫. সহকারী পথে</button>
+    <button onclick="updateStatus('${id}', 'market_reached')" class="p-2 rounded-xl bg-yellow-50 text-yellow-600">৬. বাজারে</button>
+    <button onclick="updateStatus('${id}', 'shopping')" class="p-2 rounded-xl bg-amber-50 text-amber-600">৭. কেনাকাটা</button>
+    <button onclick="updateStatus('${id}', 'packing')" class="p-2 rounded-xl bg-orange-50 text-orange-600">৮. প্যাকিং</button>
+    <button onclick="updateStatus('${id}', 'delivery')" class="p-2 rounded-xl bg-teal-50 text-teal-600">৯. ডেলিভারি</button>
+    <button onclick="updateStatus('${id}', 'completed')" class="p-2 rounded-xl bg-green-600 text-white col-span-2 py-3 mt-2 shadow-lg shadow-green-100">১০. খিদমত সম্পন্ন</button>
+</div>
+
                 `;
                 container.appendChild(card);
             });
