@@ -168,44 +168,74 @@
 
         // ২. ট্র্যাকিং ও ইনভয়েস লজিক
         const initTracking = () => {
-            const orderId = localStorage.getItem('activeOrderId');
-            if(!orderId) return;
+    const orderId = localStorage.getItem('activeOrderId');
+    if(!orderId) return;
 
-            document.getElementById('orderSection').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-            document.getElementById('newOrderBtn').classList.remove('hidden');
+    document.getElementById('orderSection').classList.add('hidden');
+    document.getElementById('trackingSection').classList.remove('hidden');
+    document.getElementById('newOrderBtn').classList.remove('hidden');
 
-            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-                if(!snapshot.exists()) return;
-                const data = snapshot.data();
+    onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+        if(!snapshot.exists()) return;
+        const data = snapshot.data();
 
-                // --- রিংটোন ও অ্যালার্ট লজিক ---
-                if (data.alertTime && data.alertTime > lastAlertTime) {
-                    const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
-                    ringtone.loop = true;
-                    ringtone.play().catch(e => console.log("Interaction required"));
-                    
-                    const autoStop = setTimeout(() => { ringtone.pause(); }, 25000); 
+        // --- ১. রিংটোন ও অ্যালার্ট লজিক ---
+        if (data.alertTime && data.alertTime > lastAlertTime) {
+            lastAlertTime = data.alertTime; 
+            const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
+            ringtone.loop = true;
+            ringtone.play().catch(e => console.log("Sound interaction needed"));
 
-                    alert("⚠️ আপডেট: " + data.alertMessage);
-                    ringtone.pause();
-                    clearTimeout(autoStop);
-                    lastAlertTime = data.alertTime;
-                }
+            const autoStop = setTimeout(() => {
+                ringtone.pause();
+                ringtone.currentTime = 0;
+            }, 25000); 
 
-                // স্ট্যাটাস চেঞ্জ সাউন্ড
-                if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
-                    document.getElementById('notifySound').play().catch(() => {});
-                }
-                lastKnownStatus = data.status;
+            setTimeout(() => {
+                alert("⚠️ জি-খিদমাহ আপডেট: " + data.alertMessage);
+                ringtone.pause();
+                ringtone.currentTime = 0;
+                clearTimeout(autoStop);
+            }, 500);
+        }
 
-                // UI আপডেট
-                const config = statusConfig[data.status] || statusConfig["pending"];
-                document.getElementById('statusIcon').innerText = config.icon;
-                document.getElementById('trackMessage').innerText = config.msg;
-                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-                document.getElementById('progressBar').style.width = config.progress + "%";
-                document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
+        // --- ২. অটোমেটিক ইনভয়েস বিল আপডেট লজিক (এটি খুব জরুরি) ---
+        if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
+            document.getElementById('invoiceBox').classList.remove('hidden');
+            const prices = data.itemPrices || {};
+            
+            // আইটেম লিস্ট আপডেট
+            document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-gray-600 font-semibold">${item}</span>
+                    <span class="font-bold brand-green">${prices[item] ? '৳'+prices[item] : '<span class="text-[10px] text-gray-400 italic">...</span>'}</span>
+                </div>
+            `).join('');
+            
+            // নতুন করে সাব-টোটাল ক্যালকুলেট করা
+            let currentSubTotal = 0;
+            data.items.forEach(item => {
+                if(prices[item]) currentSubTotal += parseFloat(prices[item]);
+            });
+
+            const dis = data.discount || 0;
+            const del = data.deliveryCharge || 0;
+            const plat = data.platformFee || 0;
+            const total = (currentSubTotal - dis) + del + plat;
+
+            document.getElementById('subTotalDisplay').innerText = `৳${currentSubTotal}`;
+            document.getElementById('grandTotalDisplay').innerText = `৳${total}`;
+        }
+
+        // --- ৩. স্ট্যাটাস UI আপডেট ---
+        const config = statusConfig[data.status] || statusConfig["pending"];
+        document.getElementById('statusIcon').innerText = config.icon;
+        document.getElementById('trackMessage').innerText = config.msg;
+        document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+        document.getElementById('progressBar').style.width = config.progress + "%";
+        document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
+    });
+};
 
                 // ইনভয়েস রেন্ডারিং
                 if(["invoice_ready", "confirmed", "finding_assistant", "at_store", "shopping", "packing", "delivery_started", "completed"].includes(data.status)) {
