@@ -158,30 +158,64 @@
 
         // ২. ট্র্যাকিং ও ইনভয়েস লজিক
         const initTracking = () => {
-            const orderId = localStorage.getItem('activeOrderId');
-            if(!orderId) return;
+    const orderId = localStorage.getItem('activeOrderId');
+    if(!orderId) return;
 
-            document.getElementById('orderSection').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-            document.getElementById('newOrderBtn').classList.remove('hidden');
+    // এলার্ট চেক করার জন্য এই ভেরিয়েবলটি initTracking এর বাইরে অথবা শুরুতে ডিক্লেয়ার করবেন
+    let lastAlertTime = 0; 
 
-            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-                if(!snapshot.exists()) return;
-                
-                const data = snapshot.data();
+    document.getElementById('orderSection').classList.add('hidden');
+    document.getElementById('trackingSection').classList.remove('hidden');
+    document.getElementById('newOrderBtn').classList.remove('hidden');
 
-                // সাউন্ড নোটিফিকেশন
-                if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
-                    document.getElementById('notifySound').play().catch(() => {});
-                }
-                lastKnownStatus = data.status;
+    onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+        if(!snapshot.exists()) return;
+        
+        const data = snapshot.data();
 
-                const config = statusConfig[data.status] || statusConfig["pending"];
-                document.getElementById('statusIcon').innerText = config.icon;
-                document.getElementById('trackMessage').innerText = config.msg;
-                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-                document.getElementById('progressBar').style.width = config.progress + "%";
-                document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
+        // --- নতুন অ্যালার্ট এবং রিংটোন লজিক (এখানেই বসবে) ---
+        if (data.alertTime && data.alertTime > lastAlertTime) {
+            // ২০-২৫ সেকেন্ড বাজার মতো একটি আকর্ষণীয় রিংটোন
+            const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
+            ringtone.loop = true; // লুপ হবে যাতে অনেকক্ষণ বাজে
+            
+            ringtone.play().catch(e => console.log("Sound interaction required"));
+
+            // ২৫ সেকেন্ড পর নিজে থেকেই বন্ধ হবে
+            const autoStop = setTimeout(() => {
+                ringtone.pause();
+                ringtone.currentTime = 0;
+            }, 25000); 
+
+            // কাস্টমারকে পপআপ ওয়ার্নিং দেখানো
+            alert("⚠️ জি-খিদমাহ আপডেট: " + data.alertMessage);
+
+            // ইউজার যখনই 'OK' চাপবে, সাউন্ড সাথে সাথে থেমে যাবে
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            clearTimeout(autoStop);
+            
+            lastAlertTime = data.alertTime; // এটি গুরুত্বপূর্ণ যাতে একবারই বাজে
+        }
+        // --- অ্যালার্ট লজিক শেষ ---
+
+        // আপনার আগের স্ট্যাটাস এবং সাউন্ড নোটিফিকেশন লজিক
+        if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
+            document.getElementById('notifySound').play().catch(() => {});
+        }
+        lastKnownStatus = data.status;
+
+        // বাকি ট্র্যাকিং কনফিগারেশন...
+        const config = statusConfig[data.status] || statusConfig["pending"];
+        document.getElementById('statusIcon').innerText = config.icon;
+        document.getElementById('trackMessage').innerText = config.msg;
+        document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+        document.getElementById('progressBar').style.width = config.progress + "%";
+        document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
+
+        // ... বাকি কোড
+    });
+};
 
                 // ইনভয়েস কনফিগারেশন
                 if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
