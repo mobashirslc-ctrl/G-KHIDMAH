@@ -28,7 +28,6 @@
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
-        
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 mt-6">
             <div class="text-center mb-6">
                 <div class="text-5xl mb-2">🛒</div>
@@ -42,7 +41,7 @@
                 <textarea id="orderList" rows="6" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold" placeholder="১. চাল ৫ কেজি&#10;২. ডাল ১ কেজি..."></textarea>
             </div>
 
-            <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-100 transition-all flex justify-center items-center gap-2">
+            <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-100 flex justify-center items-center gap-2 transition-all active:scale-95">
                 <span>খাদেমকে লিস্ট পাঠান</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -65,33 +64,18 @@
                     <h3 class="text-sm font-black brand-green uppercase tracking-tighter italic">অফিসিয়াল বাজার রশিদ</h3>
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1" id="orderIdDisplay"></p>
                 </div>
-                
                 <div class="p-6">
                     <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm"></div>
                 </div>
-
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    <div class="flex gap-2">
-                        <input type="text" id="couponInput" placeholder="কুপন কোড" class="flex-1 p-3 rounded-xl bg-white border border-dashed border-green-300 text-xs outline-none uppercase font-bold">
-                        <button id="applyCouponBtn" class="bg-gray-800 text-white px-4 rounded-xl text-[10px] font-bold">Apply</button>
-                    </div>
-                    <p id="couponMsg" class="text-[9px] mt-1 font-bold"></p>
-                </div>
-
-                <div class="px-6 py-5 bg-green-50/30 border-t border-b border-dashed border-green-100 space-y-2">
+                <div class="px-6 py-5 bg-green-50/30 border-t border-dashed border-green-100 space-y-2">
                     <div class="flex justify-between text-xs font-bold text-gray-500"><span>আইটেম বিল:</span><span id="subTotalDisplay">৳০</span></div>
-                    <div id="discountRow" class="hidden flex justify-between text-xs font-bold text-red-500"><span>কুপন ডিসকাউন্ট:</span><span id="discountDisplay">-৳০</span></div>
-                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>ডেলিভারি চার্জ:</span><span id="delChargeDisplay">৳৭০</span></div>
-                    <div class="flex justify-between text-xs font-bold text-gray-500"><span>প্ল্যাটফর্ম ফি:</span><span id="platFeeDisplay">৳২০</span></div>
                     <div class="pt-4 border-t border-green-100 flex justify-between items-center">
                         <span class="text-xs font-black uppercase text-gray-400">মোট বিল:</span>
                         <span id="grandTotalDisplay" class="text-4xl font-black brand-green tracking-tighter">৳০</span>
                     </div>
                 </div>
-
                 <div id="confirmBox" class="p-6 hidden">
-                    <p class="text-[10px] text-center text-orange-600 font-bold mb-3 italic">দয়া করে ইনভয়েসটি চেক করে কনফার্ম করুন</p>
-                    <button id="confirmInvoiceBtn" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all uppercase tracking-tighter">Confirm & Proceed</button>
+                    <button id="confirmInvoiceBtn" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg uppercase tracking-tighter">Confirm & Proceed</button>
                 </div>
             </div>
         </div>
@@ -115,21 +99,16 @@
 
         const statusConfig = {
             "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
-            "verifying": { step: "২/১০", msg: "যাচাই করা হচ্ছে", icon: "🔍", progress: 20 },
             "invoice_ready": { step: "৩/১০", msg: "রশিদ তৈরি হয়েছে", icon: "📄", progress: 30 },
-            "confirmed": { step: "৪/১০", msg: "অর্ডার নিশ্চিত হয়েছে", icon: "🤝", progress: 40 },
-            "finding_assistant": { step: "৫/১০", msg: "সহকারী খোঁজা হচ্ছে", icon: "🏃", progress: 50 },
-            "at_store": { step: "৬/১০", msg: "দোকানে পৌঁছেছে", icon: "🏪", progress: 65 },
+            "confirmed": { step: "৪/১০", msg: "অর্ডার নিশ্চিত", icon: "🤝", progress: 40 },
             "shopping": { step: "৭/১০", msg: "কেনাকাটা চলছে", icon: "🛒", progress: 75 },
-            "packing": { step: "৮/১০", msg: "প্যাকিং করা হচ্ছে", icon: "📦", progress: 85 },
-            "delivery_started": { step: "৯/১০", msg: "ডেলিভারি শুরু হয়েছে", icon: "🚲", progress: 95 },
             "completed": { step: "সফল", msg: "খিদমত সম্পন্ন", icon: "🎉", progress: 100 }
         };
 
+        let lastAlertTime = 0;
         let lastKnownStatus = "";
-        let lastAlertTime = 0; 
 
-        // ১. অর্ডার সাবমিট
+        // ১. অর্ডার পাঠানো
         document.getElementById('submitOrderBtn').onclick = async () => {
             const name = document.getElementById('custName').value.trim();
             const phone = document.getElementById('custPhone').value.trim();
@@ -138,9 +117,8 @@
 
             if(!name || !phone || !addr || !list) return alert("সব তথ্য সঠিকভাবে দিন!");
 
-            const btn = document.getElementById('submitOrderBtn');
-            btn.innerText = "পাঠানো হচ্ছে...";
-            btn.disabled = true;
+            document.getElementById('submitOrderBtn').innerText = "পাঠানো হচ্ছে...";
+            document.getElementById('submitOrderBtn').disabled = true;
 
             try {
                 const docRef = await addDoc(collection(db, "orders"), {
@@ -148,122 +126,66 @@
                     customerPhone: phone,
                     customerAddress: addr,
                     items: list.split('\n').filter(i => i.trim() !== ""),
-                    orderType: "shopping",
                     status: "pending",
                     createdAt: serverTimestamp(),
                     subTotal: 0,
                     deliveryCharge: 70,
                     platformFee: 20,
-                    discount: 0,
                     invoiceConfirmed: false
                 });
                 localStorage.setItem('activeOrderId', docRef.id);
                 initTracking();
-            } catch (e) { 
-                alert("Error connecting to server!");
-                btn.innerText = "খাদেমকে লিস্ট পাঠান";
-                btn.disabled = false;
+            } catch (e) {
+                alert("Error! Please try again.");
+                document.getElementById('submitOrderBtn').innerText = "খাদেমকে লিস্ট পাঠান";
+                document.getElementById('submitOrderBtn').disabled = false;
             }
         };
 
-        // ২. ট্র্যাকিং ও ইনভয়েস লজিক
+        // ২. ট্র্যাকিং লজিক
         const initTracking = () => {
-    const orderId = localStorage.getItem('activeOrderId');
-    if(!orderId) return;
+            const orderId = localStorage.getItem('activeOrderId');
+            if(!orderId) return;
 
-    document.getElementById('orderSection').classList.add('hidden');
-    document.getElementById('trackingSection').classList.remove('hidden');
-    document.getElementById('newOrderBtn').classList.remove('hidden');
+            document.getElementById('orderSection').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+            document.getElementById('newOrderBtn').classList.remove('hidden');
 
-    onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-        if(!snapshot.exists()) return;
-        const data = snapshot.data();
+            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+                if(!snapshot.exists()) return;
+                const data = snapshot.data();
 
-        // --- ১. রিংটোন ও অ্যালার্ট লজিক ---
-        if (data.alertTime && data.alertTime > lastAlertTime) {
-            lastAlertTime = data.alertTime; 
-            const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
-            ringtone.loop = true;
-            ringtone.play().catch(e => console.log("Sound interaction needed"));
+                // অ্যালার্ট ও রিংটোন
+                if (data.alertTime && data.alertTime > lastAlertTime) {
+                    lastAlertTime = data.alertTime;
+                    const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3');
+                    ringtone.loop = true;
+                    ringtone.play().catch(() => {});
+                    setTimeout(() => { alert("⚠️ আপডেট: " + data.alertMessage); ringtone.pause(); }, 500);
+                }
 
-            const autoStop = setTimeout(() => {
-                ringtone.pause();
-                ringtone.currentTime = 0;
-            }, 25000); 
+                // স্ট্যাটাস আপডেট
+                const config = statusConfig[data.status] || statusConfig["pending"];
+                document.getElementById('statusIcon').innerText = config.icon;
+                document.getElementById('trackMessage').innerText = config.msg;
+                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+                document.getElementById('progressBar').style.width = config.progress + "%";
+                document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-            setTimeout(() => {
-                alert("⚠️ জি-খিদমাহ আপডেট: " + data.alertMessage);
-                ringtone.pause();
-                ringtone.currentTime = 0;
-                clearTimeout(autoStop);
-            }, 500);
-        }
-
-        // --- ২. অটোমেটিক ইনভয়েস বিল আপডেট লজিক (এটি খুব জরুরি) ---
-        if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
-            document.getElementById('invoiceBox').classList.remove('hidden');
-            const prices = data.itemPrices || {};
-            
-            // আইটেম লিস্ট আপডেট
-            document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
-                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                    <span class="text-gray-600 font-semibold">${item}</span>
-                    <span class="font-bold brand-green">${prices[item] ? '৳'+prices[item] : '<span class="text-[10px] text-gray-400 italic">...</span>'}</span>
-                </div>
-            `).join('');
-            
-            // নতুন করে সাব-টোটাল ক্যালকুলেট করা
-            let currentSubTotal = 0;
-            data.items.forEach(item => {
-                if(prices[item]) currentSubTotal += parseFloat(prices[item]);
-            });
-
-            const dis = data.discount || 0;
-            const del = data.deliveryCharge || 0;
-            const plat = data.platformFee || 0;
-            const total = (currentSubTotal - dis) + del + plat;
-
-            document.getElementById('subTotalDisplay').innerText = `৳${currentSubTotal}`;
-            document.getElementById('grandTotalDisplay').innerText = `৳${total}`;
-        }
-
-        // --- ৩. স্ট্যাটাস UI আপডেট ---
-        const config = statusConfig[data.status] || statusConfig["pending"];
-        document.getElementById('statusIcon').innerText = config.icon;
-        document.getElementById('trackMessage').innerText = config.msg;
-        document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-        document.getElementById('progressBar').style.width = config.progress + "%";
-        document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
-    });
-};
-
-                // ইনভয়েস রেন্ডারিং
-                if(["invoice_ready", "confirmed", "finding_assistant", "at_store", "shopping", "packing", "delivery_started", "completed"].includes(data.status)) {
+                // বিল ও ইনভয়েস
+                if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     const prices = data.itemPrices || {};
-                    
                     document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
-                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                            <span class="text-gray-600 font-semibold">${item}</span>
-                            <span class="font-bold brand-green">${prices[item] ? '৳'+prices[item] : '<span class="text-[10px] text-gray-400 italic">Pending</span>'}</span>
-                        </div>
+                        <div class="flex justify-between border-b pb-2"><span>${item}</span><span class="brand-green">৳${prices[item] || 0}</span></div>
                     `).join('');
                     
-                    const sub = data.subTotal || 0;
-                    const dis = data.discount || 0;
-                    const del = data.deliveryCharge || 0;
-                    const plat = data.platformFee || 0;
+                    let sub = 0;
+                    data.items.forEach(item => sub += (parseFloat(prices[item]) || 0));
+                    const total = sub + (data.deliveryCharge || 70) + (data.platformFee || 20);
                     
                     document.getElementById('subTotalDisplay').innerText = `৳${sub}`;
-                    if(dis > 0) {
-                        document.getElementById('discountRow').classList.remove('hidden');
-                        document.getElementById('discountDisplay').innerText = `-৳${dis}`;
-                    } else {
-                        document.getElementById('discountRow').classList.add('hidden');
-                    }
-                    document.getElementById('delChargeDisplay').innerText = `৳${del}`;
-                    document.getElementById('platFeeDisplay').innerText = `৳${plat}`;
-                    document.getElementById('grandTotalDisplay').innerText = `৳${(sub - dis) + del + plat}`;
+                    document.getElementById('grandTotalDisplay').innerText = `৳${total}`;
 
                     if(data.status === "invoice_ready" && !data.invoiceConfirmed) {
                         document.getElementById('confirmBox').classList.remove('hidden');
@@ -274,32 +196,13 @@
             });
         };
 
-        // ৩. ইনভয়েস কনফার্ম করা
         document.getElementById('confirmInvoiceBtn').onclick = async () => {
-            const orderId = localStorage.getItem('activeOrderId');
-            await updateDoc(doc(db, "orders", orderId), { invoiceConfirmed: true, status: "confirmed" });
-            alert("রশিদ নিশ্চিত করা হয়েছে!");
-        };
-
-        // ৪. কুপন লজিক
-        document.getElementById('applyCouponBtn').onclick = async () => {
-            const orderId = localStorage.getItem('activeOrderId');
-            const code = document.getElementById('couponInput').value.trim().toUpperCase();
-            const couponSnap = await getDoc(doc(db, "coupons", code));
-            if(couponSnap.exists()) {
-                await updateDoc(doc(db, "orders", orderId), { discount: couponSnap.data().amount || 0 });
-                document.getElementById('couponMsg').innerText = "কুপন কোড যুক্ত হয়েছে!";
-                document.getElementById('couponMsg').style.color = "green";
-            } else {
-                alert("ভুল কুপন!");
-            }
+            const id = localStorage.getItem('activeOrderId');
+            await updateDoc(doc(db, "orders", id), { invoiceConfirmed: true, status: "confirmed" });
         };
 
         document.getElementById('newOrderBtn').onclick = () => {
-            if(confirm("নতুন বাজার লিস্ট করতে চান?")) {
-                localStorage.removeItem('activeOrderId');
-                location.reload();
-            }
+            if(confirm("নতুন বাজার করতে চান?")) { localStorage.removeItem('activeOrderId'); location.reload(); }
         };
 
         window.onload = initTracking;
