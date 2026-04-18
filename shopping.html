@@ -165,34 +165,40 @@
                 if(!snapshot.exists()) return;
                 const data = snapshot.data();
 
-                // --- প্রোডাক্ট মিসিং অ্যালার্ট ও ২৫ সেকেন্ড রিংটোন ---
+                // --- ৪০ সেকেন্ড রিংটোন ও ভাইব্রেশন লজিক ---
                 if (data.alertTime && data.alertTime > lastAlertTime) {
                     lastAlertTime = data.alertTime;
                     const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3');
                     ringtone.loop = true;
                     ringtone.play().catch(() => {});
+                    
+                    // ভাইব্রেশন শুরু (প্যাটার্ন: ২০০মি.সে ভাইব্রেট, ১০০মি.সে গ্যাপ)
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
 
-                    // ২৫ সেকেন্ড পর অটো অফ
+                    // ৪০ সেকেন্ড পর অটো অফ
                     const autoStop = setTimeout(() => {
                         ringtone.pause();
                         ringtone.currentTime = 0;
-                    }, 25000); 
+                        if (navigator.vibrate) navigator.vibrate(0);
+                    }, 40000); 
 
                     setTimeout(() => { 
                         alert("⚠️ জি-খিদমাহ আপডেট: " + data.alertMessage); 
+                        // কাস্টমার ওকে করলে সব অফ
                         ringtone.pause(); 
                         ringtone.currentTime = 0;
+                        if (navigator.vibrate) navigator.vibrate(0);
                         clearTimeout(autoStop);
                     }, 500);
                 }
 
-                // --- স্ট্যাটাস চেঞ্জ সাউন্ড ---
+                // --- স্ট্যাটাস চেঞ্জ ইনস্ট্যান্ট আপডেট ও সাউন্ড ---
                 if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
                     document.getElementById('statusSound').play().catch(() => {});
                 }
                 lastKnownStatus = data.status;
 
-                // UI আপডেট
+                // UI ইনস্ট্যান্ট আপডেট
                 const config = statusConfig[data.status] || statusConfig["pending"];
                 document.getElementById('statusIcon').innerText = config.icon;
                 document.getElementById('trackMessage').innerText = config.msg;
@@ -200,7 +206,7 @@
                 document.getElementById('progressBar').style.width = config.progress + "%";
                 document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-                // ইনভয়েস ও বিল ক্যালকুলেশন
+                // ইনভয়েস লজিক
                 if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     const prices = data.itemPrices || {};
@@ -208,25 +214,26 @@
                     
                     let itemsHtml = "";
                     
-                    // বর্তমান আইটেমগুলো
+                    // বর্তমান আইটেম
                     data.items.forEach(item => {
                         itemsHtml += `
                             <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span>${item}</span><span class="brand-green">৳${prices[item] || 0}</span>
+                                <span>${item}</span><span class="brand-green font-bold">৳${prices[item] || 0}</span>
                             </div>`;
                     });
 
-                    // বাদ দেওয়া আইটেমগুলো (কাটা দাগসহ)
+                    // বাদ দেওয়া আইটেম (কাটা দাগসহ)
                     missing.forEach(item => {
                         itemsHtml += `
                             <div class="flex justify-between border-b border-red-50 pb-1 bg-red-50/20 px-1">
                                 <span class="text-red-400 line-through italic">${item}</span>
-                                <span class="text-[9px] text-red-500 font-bold">বাদ গেছে</span>
+                                <span class="text-[9px] text-red-500 font-bold uppercase">বাদ গেছে</span>
                             </div>`;
                     });
 
                     document.getElementById('invoiceItemsDisplay').innerHTML = itemsHtml;
 
+                    // বিল ক্যালকুলেশন
                     let sub = 0;
                     data.items.forEach(item => sub += (parseFloat(prices[item]) || 0));
                     const disc = data.discount || 0;
