@@ -20,23 +20,15 @@
         </div>
 
         <div class="w-full px-6 mb-8">
-            <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100">
-                <label class="text-[10px] font-black text-gray-400 uppercase ml-4 mb-1 block tracking-widest">আপনার কাছের সার্ভিস পয়েন্ট</label>
-                <div class="relative">
-                    <select id="partnerSelect" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm text-gray-700 appearance-none cursor-pointer">
-                        <option value="central">সেন্ট্রাল (ঢাকা মেইন)</option>
-                        <option value="savar_01">সাভার সার্ভিস পয়েন্ট</option>
-                        <option value="uttara_01">উত্তরা সার্ভিস পয়েন্ট</option>
-                        <option value="mirpur_01">মিরপুর সার্ভিস পয়েন্ট</option>
-                    </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-green-600 font-bold">▼</div>
-                </div>
-                <p class="text-[9px] text-center mt-2 text-green-500 font-bold italic">* এলাকা পরিবর্তন করলে পার্টনার অটো আপডেট হবে</p>
+            <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100 flex flex-col items-center">
+                <label class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">বর্তমান সার্ভিস এরিয়া</label>
+                <div id="displayAreaName" class="font-bold text-gray-700">লোকেশন সিলেক্ট করা নেই</div>
+                <button onclick="showLocationModal()" class="mt-2 text-[10px] text-green-600 font-bold underline">পরিবর্তন করুন</button>
             </div>
         </div>
 
         <div class="w-full px-6 space-y-4">
-            <a href="shopping.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="shopping.html" onclick="checkLocation(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
                 <div class="flex-1">
                     <h3 class="font-bold text-gray-800 text-sm">বাজার সদাই</h3>
@@ -45,7 +37,7 @@
                 <span class="text-gray-300 text-xl">→</span>
             </a>
 
-            <a href="car-rent.html" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+            <a href="car-rent.html" onclick="checkLocation(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
                 <div class="flex-1">
                     <h3 class="font-bold text-gray-800 text-sm">গাড়ি ভাড়া</h3>
@@ -54,7 +46,7 @@
                 <span class="text-gray-300 text-xl">→</span>
             </a>
 
-            <a href="ambulance.html" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
+            <a href="ambulance.html" onclick="checkLocation(event, 'ambulance.html')" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl mr-4 animate-pulse">🚑</div>
                 <div class="flex-1">
                     <h3 class="font-bold text-white text-sm">অ্যাম্বুলেন্স</h3>
@@ -62,31 +54,121 @@
                 </div>
                 <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
-            </div>
+        </div>
 
         <footer class="mt-auto py-10 text-center">
             <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Powered by G-Khidmah Team</p>
         </footer>
     </div>
 
-    <script>
-        const partnerSelect = document.getElementById('partnerSelect');
+    <div id="locationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
+            <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">আপনার লোকেশন দিন</h2>
+            <p class="text-[11px] text-gray-400 text-center mb-6 uppercase tracking-widest">নিকটস্থ পার্টনারের সাথে কানেক্ট হতে সাহায্য করুন</p>
+            
+            <div class="space-y-4">
+                <select id="district" onchange="loadThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                    <option value="">জেলা নির্বাচন করুন</option>
+                    <option value="Dhaka">Dhaka</option>
+                    <option value="Sylhet">Sylhet</option>
+                    <option value="Chattogram">Chattogram</option>
+                    </select>
 
-        function savePartner() {
-            localStorage.setItem('selectedPartnerId', partnerSelect.value);
-            console.log("Partner Saved: " + partnerSelect.value);
+                <select id="thana" onchange="loadAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                    <option value="">আগে জেলা সিলেক্ট করুন</option>
+                </select>
+
+                <select id="area" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                    <option value="">আগে থানা সিলেক্ট করুন</option>
+                </select>
+
+                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4 active:scale-95 transition-all">
+                    সার্ভিস শুরু করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingServiceUrl = '';
+
+        // স্যাম্পল পার্টনার ডাটাবেস (ভবিষ্যতে ফায়ারবেস থেকে আসবে)
+        const partnerDatabase = [
+            { id: "P-SAVAR-01", district: "Dhaka", thana: "Savar", areaName: "Savar Bus Stand" },
+            { id: "P-UTTARA-01", district: "Dhaka", thana: "Uttara", areaName: "Sector 7" },
+            { id: "P-SYL-01", district: "Sylhet", thana: "Zindabazar", areaName: "Zindabazar Main" }
+        ];
+
+        function checkLocation(event, url) {
+            event.preventDefault();
+            pendingServiceUrl = url;
+            const savedPartner = localStorage.getItem('selectedPartnerId');
+
+            if (savedPartner) {
+                window.location.href = `${url}?partner=${savedPartner}`;
+            } else {
+                showLocationModal();
+            }
         }
 
-        partnerSelect.addEventListener('change', savePartner);
+        function showLocationModal() {
+            document.getElementById('locationModal').classList.remove('hidden');
+        }
 
-        window.onload = () => {
-            const savedPartner = localStorage.getItem('selectedPartnerId');
-            if (savedPartner) {
-                partnerSelect.value = savedPartner;
-            } else {
-                savePartner();
+        function loadThanas() {
+            const district = document.getElementById('district').value;
+            const thanaDropdown = document.getElementById('thana');
+            thanaDropdown.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
+            
+            const filteredThanas = [...new Set(partnerDatabase
+                .filter(p => p.district === district)
+                .map(p => p.thana))];
+
+            filteredThanas.forEach(thana => {
+                thanaDropdown.innerHTML += `<option value="${thana}">${thana}</option>`;
+            });
+        }
+
+        function loadAreas() {
+            const thana = document.getElementById('thana').value;
+            const areaDropdown = document.getElementById('area');
+            areaDropdown.innerHTML = '<option value="">এরিয়া নির্বাচন করুন</option>';
+
+            const filteredAreas = partnerDatabase.filter(p => p.thana === thana);
+            filteredAreas.forEach(partner => {
+                areaDropdown.innerHTML += `<option value="${partner.id}">${partner.areaName}</option>`;
+            });
+        }
+
+        function confirmLocation() {
+            const areaDropdown = document.getElementById('area');
+            const selectedPartnerId = areaDropdown.value;
+            const selectedAreaName = areaDropdown.options[areaDropdown.selectedIndex].text;
+
+            if (!selectedPartnerId) {
+                alert("অনুগ্রহ করে এরিয়া সিলেক্ট করুন");
+                return;
             }
-        };
+
+            localStorage.setItem('selectedPartnerId', selectedPartnerId);
+            localStorage.setItem('selectedAreaName', selectedAreaName);
+            
+            document.getElementById('locationModal').classList.add('hidden');
+            updateDisplay();
+
+            if (pendingServiceUrl) {
+                window.location.href = `${pendingServiceUrl}?partner=${selectedPartnerId}`;
+            }
+        }
+
+        function updateDisplay() {
+            const name = localStorage.getItem('selectedAreaName');
+            if (name) {
+                document.getElementById('displayAreaName').innerText = name;
+            }
+        }
+
+        window.onload = updateDisplay;
     </script>
 </body>
 </html>
