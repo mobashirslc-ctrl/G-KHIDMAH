@@ -3,74 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G KHIDMAH | গাড়ি ভাড়া</title>
+    <title>G KHIDMAH | কার রেন্টাল</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Hind Siliguri', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-10">
-    <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-green-100 flex items-center justify-between px-6">
-        <div class="flex items-center gap-2">
-            <div class="bg-green-700 w-8 h-8 rounded-lg flex items-center justify-center text-white font-black italic">G</div>
-            <h1 class="text-xl font-bold text-green-700 uppercase italic">G KHIDMAH</h1>
-        </div>
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-blue-100 flex items-center justify-between px-6">
+        <h1 class="text-xl font-bold text-blue-900 uppercase italic">G KHIDMAH</h1>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-black bg-blue-50 text-blue-900 px-3 py-1 rounded-full">নতুন ট্রিপ</button>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div class="text-center mb-6"><div class="text-5xl mb-2">🚗</div><h2 class="text-lg font-bold">ভাড়ার তথ্য দিন</h2></div>
             <div class="space-y-3">
-                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm transition-all">
-                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm transition-all">
-                <input type="text" id="pickup" placeholder="পিকআপ পয়েন্ট" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm transition-all">
-                <input type="text" id="destination" placeholder="গন্তব্য" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none font-bold text-sm transition-all">
-                <textarea id="carNote" rows="2" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none font-semibold text-sm" placeholder="গাড়ির ধরন ও বিশেষ নির্দেশ..."></textarea>
+                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
+                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
+                <input type="text" id="pickup" placeholder="পিকআপ পয়েন্ট" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
+                <input type="text" id="destination" placeholder="গন্তব্য" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
+                <textarea id="carNote" rows="2" class="w-full border-2 border-slate-100 p-4 rounded-3xl outline-none font-semibold text-sm" placeholder="গাড়ির ধরন (যেমন: হাইস, প্রাইভেট কার)"></textarea>
             </div>
-            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">বুকিং রিকোয়েস্ট পাঠান</button>
+            <button id="submitBtn" class="w-full bg-blue-900 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg uppercase">বুকিং রিকোয়েস্ট পাঠান</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
-                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
-                <h1 id="trackMessage" class="text-xl font-black text-green-700 italic uppercase leading-tight">অনুরোধ গ্রহণ করা হয়েছে...</h1>
-                
-                <div id="liveLocation" class="hidden mt-4 py-2 px-4 bg-orange-50 border border-orange-100 rounded-full inline-block">
-                    <p class="text-[11px] text-orange-600 font-bold animate-pulse" id="currentLocText">📍 লোকেশন আপডেট হচ্ছে...</p>
-                </div>
-
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-blue-100">
+                <div id="statusIcon" class="text-7xl mb-4 animate-bounce">🔍</div>
+                <h1 id="trackMessage" class="text-xl font-black text-blue-900 italic uppercase leading-tight">অনুরোধ পাঠানো হয়েছে...</h1>
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 mt-6">
-                    <div id="progressBar" class="bg-green-700 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
+                    <div id="progressBar" class="bg-blue-900 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
                 </div>
             </div>
 
-            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-xl border border-gray-100 p-6">
-                <h3 class="text-center text-xs font-black text-gray-400 uppercase mb-4 tracking-widest">ভাড়া নির্ধারণ</h3>
-                <div class="flex justify-between items-center py-2">
-                    <span class="font-bold text-gray-500">নির্ধারিত ভাড়া:</span>
-                    <span id="rentDisplay" class="text-3xl font-black text-green-700">৳০</span>
+            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-xl border border-blue-100 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold text-gray-500">ভাড়া নির্ধারণ:</span>
+                    <span id="rentDisplay" class="text-3xl font-black text-blue-900">৳0</span>
                 </div>
-                <button id="confirmBookingBtn" class="hidden w-full bg-green-700 text-white mt-4 py-3 rounded-xl font-bold shadow-lg">গাড়ি কনফার্ম করুন</button>
-            </div>
-<div class="p-6 bg-white rounded-3xl shadow-sm space-y-4">
-    <h3 class="font-bold text-gray-700">বুকিং শিডিউল</h3>
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="text-[10px] uppercase font-bold text-gray-400">তারিখ</label>
-            <input type="date" class="w-full p-4 bg-gray-50 rounded-2xl text-sm">
-        </div>
-        <div>
-            <label class="text-[10px] uppercase font-bold text-gray-400">সময়</label>
-            <input type="time" class="w-full p-4 bg-gray-50 rounded-2xl text-sm">
-        </div>
-    </div>
-</div>
-            <div id="driverCard" class="hidden bg-white p-5 rounded-[2rem] border border-green-100 shadow-xl space-y-4">
-                <div class="flex items-center gap-4">
-                    <img id="driverPic" src="" class="w-20 h-20 rounded-2xl object-cover border-2 border-green-500 shadow-md">
-                    <div class="flex-1">
-                        <h4 id="driverName" class="font-bold text-gray-800 text-lg">ড্রাইভার তথ্য</h4>
-                        <p id="carModel" class="text-[10px] text-gray-400 font-bold uppercase italic">Model: Loading...</p>
-                        <a id="driverCall" href="#" class="inline-block mt-2 bg-green-600 text-white px-4 py-1 rounded-full text-[10px] font-bold">📞 Call Driver</a>
+                <div id="driverInfo" class="hidden mt-4 pt-4 border-t flex items-center gap-4">
+                    <div class="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">👨🏻‍✈️</div>
+                    <div>
+                        <h4 id="driverName" class="font-black text-blue-900 text-sm">ড্রাইভার তথ্য</h4>
+                        <a id="driverCall" href="#" class="text-[10px] font-bold text-green-600 uppercase">📞 কল করুন</a>
                     </div>
                 </div>
             </div>
@@ -79,7 +55,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -93,23 +69,23 @@
         const db = getFirestore(app);
 
         const statusConfig = {
-            "pending": { msg: "গাড়ি খোঁজা হচ্ছে", icon: "🔍", progress: 15 },
-            "invoice_ready": { msg: "ভাড়া পাঠানো হয়েছে", icon: "📄", progress: 30 },
-            "confirmed": { msg: "কনফার্ম! ড্রাইভার আসছে", icon: "✅", progress: 50 },
-            "on_way": { msg: "গাড়ি আপনার দিকে আসছে", icon: "🚗", progress: 70 },
-            "at_pickup": { msg: "গাড়ি লোকেশনে পৌঁছেছে", icon: "📍", progress: 85 },
-            "trip_started": { msg: "যাত্রা শুরু হয়েছে", icon: "🛣️", progress: 92 },
-            "completed": { msg: "সফলভাবে ট্রিপ শেষ", icon: "🎉", progress: 100 }
+            "request_received": { msg: "গাড়ি খোঁজা হচ্ছে...", icon: "🔍", progress: "20%" },
+            "driver_assigned": { msg: "ড্রাইভার নির্ধারিত হয়েছে", icon: "✅", progress: "45%" },
+            "car_on_way": { msg: "গাড়ি আপনার দিকে আসছে", icon: "🚗", progress: "70%" },
+            "trip_started": { msg: "আপনার যাত্রা শুরু হয়েছে", icon: "🛣️", progress: "90%" },
+            "completed": { msg: "ট্রিপ শেষ! ধন্যবাদ", icon: "🎉", progress: "100%" }
         };
 
         document.getElementById('submitBtn').onclick = async () => {
             const docRef = await addDoc(collection(db, "orders"), {
                 customerName: document.getElementById('custName').value,
                 customerPhone: document.getElementById('custPhone').value,
-                pickupLocation: document.getElementById('pickup').value,
-                destination: document.getElementById('destination').value,
+                customerAddress: `পিকআপ: ${document.getElementById('pickup').value} | গন্তব্য: ${document.getElementById('destination').value}`,
                 items: [document.getElementById('carNote').value],
-                orderType: "car_rent", status: "pending", createdAt: serverTimestamp(), rentCharge: 0
+                serviceType: "car_rental", // অ্যাডমিনের সাথে মিল
+                status: "request_received",
+                createdAt: serverTimestamp(),
+                subTotal: 0
             });
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
@@ -123,42 +99,22 @@
 
             onSnapshot(doc(db, "orders", orderId), (snapshot) => {
                 const data = snapshot.data();
-                if(!data) return;
+                if(data) {
+                    const conf = statusConfig[data.status] || statusConfig["request_received"];
+                    document.getElementById('statusIcon').innerText = conf.icon;
+                    document.getElementById('trackMessage').innerText = conf.msg;
+                    document.getElementById('progressBar').style.width = conf.progress;
 
-                const config = statusConfig[data.status] || statusConfig["pending"];
-                document.getElementById('statusIcon').innerText = config.icon;
-                document.getElementById('trackMessage').innerText = config.msg;
-                document.getElementById('progressBar').style.width = config.progress + "%";
-
-                // অ্যাডমিন লাইভ লোকেশন আপডেট
-                if(data.currentLoc) {
-                    document.getElementById('liveLocation').classList.remove('hidden');
-                    document.getElementById('currentLocText').innerText = `📍 ${data.currentLoc}`;
-                } else {
-                    document.getElementById('liveLocation').classList.add('hidden');
-                }
-
-                // ইনভয়েস লজিক
-                if(data.rentCharge > 0) {
-                    document.getElementById('invoiceBox').classList.remove('hidden');
-                    document.getElementById('rentDisplay').innerText = `৳${data.rentCharge}`;
-                    if(data.status === "invoice_ready") {
-                        document.getElementById('confirmBookingBtn').classList.remove('hidden');
-                        document.getElementById('confirmBookingBtn').onclick = async () => {
-                            await updateDoc(doc(db, "orders", orderId), { status: "confirmed" });
-                        };
-                    } else {
-                        document.getElementById('confirmBookingBtn').classList.add('hidden');
+                    if(data.subTotal > 0) {
+                        document.getElementById('invoiceBox').classList.remove('hidden');
+                        document.getElementById('rentDisplay').innerText = `৳${data.subTotal}`;
                     }
-                }
 
-                // ড্রাইভার ডিটেইলস
-                if(["confirmed", "on_way", "at_pickup", "trip_started"].includes(data.status)) {
-                    document.getElementById('driverCard').classList.remove('hidden');
-                    document.getElementById('driverName').innerText = data.driverName || "ড্রাইভার বরাদ্দ হচ্ছে...";
-                    document.getElementById('driverPic').src = data.driverPic || "https://ui-avatars.com/api/?name=Driver";
-                    document.getElementById('carModel').innerText = `মডেল: ${data.carModel || 'সাদা কালার'}`;
-                    document.getElementById('driverCall').href = `tel:${data.driverPhone}`;
+                    if(data.assignedPerson) {
+                        document.getElementById('driverInfo').classList.remove('hidden');
+                        document.getElementById('driverName').innerText = data.assignedPerson.name;
+                        document.getElementById('driverCall').href = `tel:${data.assignedPerson.phone}`;
+                    }
                 }
             });
         }
