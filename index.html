@@ -9,65 +9,124 @@
     <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
 </head>
 <body class="bg-slate-50">
-    <div class="max-w-md mx-auto min-h-screen flex flex-col items-center pt-8 pb-10">
-        
-        <div class="text-center mb-6">
-            <div class="bg-green-700 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-200">
-                <span class="text-white font-black text-3xl italic">G</span>
-            </div>
-            <h1 class="text-2xl font-black italic text-gray-800 tracking-tighter uppercase">G KHIDMAH</h1>
-            <p class="text-[9px] uppercase tracking-[0.3em] text-green-600 font-bold">Your Personal Assistant</p>
-        </div>
+   <div class="w-full px-6 space-y-4">
+    <a href="#" onclick="handleServiceClick(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
+        <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">বাজার সদাই</h3><p class="text-[10px] text-gray-400">সরাসরি বাজার থেকে আপনার দুয়ারে</p></div>
+        <span class="text-gray-300">→</span>
+    </a>
 
-        <div class="w-full px-6 mb-8">
-            <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-green-100 flex flex-col items-center">
-                <label class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">বর্তমান সার্ভিস এরিয়া</label>
-                <div id="displayAreaName" class="font-bold text-gray-700 text-center italic">লোকেশন সিলেক্ট করা নেই</div>
-                <button onclick="showLocationModal()" class="mt-2 text-[10px] text-green-600 font-bold underline">পরিবর্তন করুন</button>
-            </div>
-        </div>
+    <a href="#" onclick="handleServiceClick(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
+        <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">গাড়ি ভাড়া</h3><p class="text-[10px] text-gray-400">লোকাল বা লং ট্রিপ বুক করুন</p></div>
+        <span class="text-gray-300">→</span>
+    </a>
 
-        <div class="w-full px-6 space-y-4">
-            <a href="#" onclick="handleServiceClick(event, 'shopping.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛒</div>
-                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">বাজার সদাই</h3><p class="text-[10px] text-gray-400">সরাসরি বাজার থেকে আপনার দুয়ারে</p></div>
-                <span class="text-gray-300">→</span>
-            </a>
+    <a href="#" onclick="handleServiceClick(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
+        <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">পার্সেল ডেলিভারি</h3><p class="text-[10px] text-gray-400">দ্রুত ও নিরাপদ ডেলিভারি</p></div>
+        <span class="text-gray-300">→</span>
+    </a>
 
-            <a href="#" onclick="handleServiceClick(event, 'car-rent.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mr-4">🚗</div>
-                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">গাড়ি ভাড়া</h3><p class="text-[10px] text-gray-400">লোকাল বা লং ট্রিপ বুক করুন</p></div>
-                <span class="text-gray-300">→</span>
-            </a>
+    <a href="#" onclick="handleServiceClick(event, 'home-services.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
+        <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">প্রয়োজনীয় সার্ভিস</h3><p class="text-[10px] text-gray-400">মেরামত ও রক্ষণাবেক্ষণ সেবা</p></div>
+        <span class="text-gray-300">→</span>
+    </a>
 
-            <a href="#" onclick="handleServiceClick(event, 'parcel.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-                <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-3xl mr-4">📦</div>
-                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">পার্সেল ডেলিভারি</h3><p class="text-[10px] text-gray-400">শহরের যেকোনো প্রান্তে দ্রুত ডেলিভারি</p></div>
-                <span class="text-gray-300">→</span>
-            </a>
+    <a href="#" onclick="handleServiceClick(event, 'blood.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center text-3xl mr-4">🩸</div>
+        <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">রক্তের প্রয়োজন</h3><p class="text-[10px] text-gray-400">জরুরী রক্তদাতার সন্ধান</p></div>
+        <span class="text-gray-300">→</span>
+    </a>
 
-            <a href="#" onclick="handleServiceClick(event, 'service.html')" class="flex items-center p-5 bg-white rounded-[2rem] shadow-sm border border-gray-100 active:scale-95 transition-all">
-                <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-3xl mr-4">🛠️</div>
-                <div class="flex-1 text-sm"><h3 class="font-bold text-gray-800">প্রয়োজনীয় সার্ভিস</h3><p class="text-[10px] text-gray-400">প্লাম্বার, ইলেকট্রিশিয়ান ও মেরামত</p></div>
-                <span class="text-gray-300">→</span>
-            </a>
-        </div>
-    </div>
+    <a href="#" onclick="handleServiceClick(event, 'ambulance.html')" class="flex items-center p-5 bg-red-600 rounded-[2rem] shadow-lg shadow-red-100 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl mr-4">🚑</div>
+        <div class="flex-1 text-sm text-white"><h3 class="font-bold">অ্যাম্বুলেন্স</h3><p class="text-[10px] text-red-100 italic">সরাসরি যোগাযোগ করুন</p></div>
+        <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
+    </a>
+</div>
 
-    <div id="locationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
-            <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">আপনার লোকেশন দিন</h2>
-            <div class="space-y-4 mt-6">
-                <select id="district" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">জেলা নির্বাচন করুন</option>
-                </select>
-                <input type="text" id="areaInput" placeholder="থানা বা এরিয়ার নাম লিখুন" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border-none shadow-inner">
-                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4">সার্ভিস শুরু করুন</button>
-            </div>
+<div id="locationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
+        <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">সার্ভিস এরিয়া</h2>
+        <div class="space-y-4 mt-6">
+            <select id="district" onchange="loadPartnerAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border-none">
+                <option value="">জেলা নির্বাচন করুন</option>
+            </select>
+            <select id="thana" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border-none">
+                <option value="">আগে জেলা সিলেক্ট করুন</option>
+            </select>
+            <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4">নিশ্চিত করুন</button>
         </div>
     </div>
+</div>
 
-    <script>
+<script>
+    const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", "Chattogram", "Chuadanga", "Cumilla", "Cox's Bazar", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
+
+    // এখানে আপনার অনবোর্ড করা পার্টনারদের এরিয়া যোগ করুন
+    const partnerData = {
+        "Dhaka": ["Uttara Sector 7", "Uttara Sector 10", "Mirpur 10", "Gulshan 2"],
+        "Sylhet": ["Zindabazar", "Amberkhana"],
+        "Chattogram": ["Agrabad", "GEC Circle"]
+    };
+
+    let targetUrl = '';
+
+    // Initialize Districts
+    const distSelect = document.getElementById('district');
+    districts.forEach(d => {
+        let opt = document.createElement('option');
+        opt.value = d;
+        opt.innerText = d;
+        distSelect.appendChild(opt);
+    });
+
+    function loadPartnerAreas() {
+        const selectedDist = document.getElementById('district').value;
+        const thanaSelect = document.getElementById('thana');
+        thanaSelect.innerHTML = '<option value="">এরিয়া নির্বাচন করুন</option>';
+
+        if (partnerData[selectedDist]) {
+            partnerData[selectedDist].forEach(area => {
+                let opt = document.createElement('option');
+                opt.value = area;
+                opt.innerText = area;
+                thanaSelect.appendChild(opt);
+            });
+        } else {
+            let opt = document.createElement('option');
+            opt.innerText = "এই জেলায় বর্তমানে সার্ভিস নেই";
+            thanaSelect.appendChild(opt);
+        }
+    }
+
+    function handleServiceClick(e, url) {
+        e.preventDefault();
+        targetUrl = url;
+        const savedLoc = localStorage.getItem('userLocation');
+        if (savedLoc) {
+            window.location.href = url + "?area=" + encodeURIComponent(savedLoc);
+        } else {
+            document.getElementById('locationModal').classList.remove('hidden');
+        }
+    }
+
+    function confirmLocation() {
+        const d = document.getElementById('district').value;
+        const t = document.getElementById('thana').value;
+
+        if (!d || !t || t === "এই জেলায় বর্তমানে সার্ভিস নেই") {
+            alert("সঠিক লোকেশন নির্বাচন করুন");
+            return;
+        }
+
+        const loc = d + ", " + t;
+        localStorage.setItem('userLocation', loc);
+        window.location.href = targetUrl + "?area=" + encodeURIComponent(loc);
+    }
+</script>
         const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", "Chattogram", "Chuadanga", "Cumilla", "Cox's Bazar", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
         
         let targetUrl = '';
