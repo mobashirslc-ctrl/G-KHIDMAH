@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Hind Siliguri', sans-serif; } .hide-scroll::-webkit-scrollbar { display: none; } </style>
 </head>
-<body class="bg-slate-100 p-4 pb-10">
+<body class="bg-slate-100 p-4 pb-20">
     <div class="max-w-2xl mx-auto">
         <header class="bg-blue-900 text-white p-6 rounded-3xl shadow-xl mb-8 flex justify-between items-center">
             <div>
@@ -18,13 +18,12 @@
             <div id="activeCount" class="bg-blue-700 px-4 py-2 rounded-2xl text-xs font-bold italic text-white tracking-tighter">অর্ডার চেক করা হচ্ছে...</div>
         </header>
 
-        <div class="space-y-4 mb-8">
-            <input type="text" id="adminSearch" placeholder="নাম বা মোবাইল নম্বর দিয়ে খুঁজুন..." class="w-full p-4 rounded-2xl border-0 shadow-lg outline-none focus:ring-2 focus:ring-blue-400 font-bold text-sm">
-            <div class="flex gap-2 overflow-x-auto pb-2 hide-scroll text-[10px] font-bold uppercase italic">
-                <button onclick="filterType('all')" class="bg-blue-900 text-white px-4 py-2 rounded-full whitespace-nowrap">সব অর্ডার</button>
-                <button onclick="filterType('shopping')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🛒 বাজার</button>
-                <button onclick="filterType('parcel')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">📦 পার্সেল</button>
-                <button onclick="filterType('car_rent')" class="bg-white text-gray-600 px-4 py-2 rounded-full shadow-sm border whitespace-nowrap">🚗 গাড়ি</button>
+        <div class="bg-white p-6 rounded-[2rem] shadow-lg mb-8 border-2 border-dashed border-blue-200">
+            <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">🎫 কুপন সেটআপ (অফার)</h3>
+            <div class="flex gap-2">
+                <input type="text" id="newCouponCode" placeholder="কোড (যেমন: SAVE50)" class="flex-1 p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold uppercase">
+                <input type="number" id="newCouponAmt" placeholder="টাকা" class="w-20 p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
+                <button onclick="createCoupon()" class="bg-blue-900 text-white px-6 rounded-xl text-xs font-bold">সেভ</button>
             </div>
         </div>
 
@@ -33,7 +32,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, arrayRemove, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -47,140 +46,104 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let allOrders = [];
-        let currentFilter = 'all';
-
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snapshot) => {
-            allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderOrders(allOrders);
-        });
-
-        window.filterType = (type) => {
-            currentFilter = type;
-            renderOrders(allOrders);
+        // ১. কুপন তৈরি করার ফাংশন
+        window.createCoupon = async () => {
+            const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
+            const amt = parseFloat(document.getElementById('newCouponAmt').value);
+            if(!code || !amt) return alert("কোড এবং টাকা উভয়ই দিন");
+            
+            await setDoc(doc(db, "coupons", code), { amount: amt });
+            alert("কুপন কোড এখন লাইভ!");
+            document.getElementById('newCouponCode').value = '';
+            document.getElementById('newCouponAmt').value = '';
         };
 
-        function renderOrders(orders) {
+        // ২. অর্ডার রেন্ডারিং
+        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snapshot) => {
             const container = document.getElementById('adminOrders');
-            const filtered = currentFilter === 'all' ? orders : orders.filter(o => o.orderType === currentFilter);
-            document.getElementById('activeCount').innerText = `${filtered.length}টি অর্ডার`;
+            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            document.getElementById('activeCount').innerText = `${orders.length}টি অর্ডার`;
             container.innerHTML = "";
 
-            filtered.forEach((order) => {
+            orders.forEach((order) => {
                 const id = order.id;
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[10px] mb-8 " + getBorderColor(order.orderType);
+                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[10px] mb-8 border-green-600";
 
-                // কাস্টমার কনফার্ম করেছে কি না তার স্ট্যাটাস
-                const confirmStatus = order.invoiceConfirmed ? 
-                    `<span class="bg-green-100 text-green-700 border border-green-200 px-2 py-1 rounded-lg text-[8px]">USER CONFIRMED ✅</span>` : 
-                    `<span class="bg-orange-50 text-orange-600 border border-orange-100 px-2 py-1 rounded-lg text-[8px]">WAITING FOR USER ⏳</span>`;
+                const confirmTag = order.invoiceConfirmed ? 
+                    `<span class="bg-green-600 text-white px-2 py-1 rounded text-[8px] animate-pulse">CONFIRMED ✅</span>` : 
+                    `<span class="bg-gray-100 text-gray-400 px-2 py-1 rounded text-[8px]">PENDING ⏳</span>`;
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-[9px] font-black uppercase italic text-gray-400">
-                        <div class="flex gap-2 items-center"><span>SERVICE: ${order.orderType}</span> ${order.orderType === 'shopping' ? confirmStatus : ''}</div>
-                        <span class="bg-blue-900 text-white px-3 py-1 rounded-full">${order.status}</span>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[9px] font-black text-gray-400 uppercase italic">ID: #${id.slice(-5)}</span>
+                        ${order.orderType === 'shopping' ? confirmTag : ''}
                     </div>
 
-                    <div class="mb-6 p-4 bg-slate-50 rounded-3xl border border-gray-100">
-                        <h3 class="text-sm font-black text-gray-800">👤 ${order.customerName}</h3>
-                        <p class="text-[11px] font-bold text-blue-600">${order.customerPhone}</p>
-                        <p class="text-[10px] text-gray-400 italic">📍 ${order.customerAddress || order.pickupLocation}</p>
+                    <div class="mb-4 bg-slate-50 p-4 rounded-3xl border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
+                        <p class="text-[10px] text-blue-600 font-bold">${order.customerPhone}</p>
                     </div>
 
-                    <div class="space-y-3 mb-6" id="items-container-${id}">${getContentBody(order)}</div>
-
-                    <div class="bg-gray-50 p-4 rounded-3xl mb-6 border border-dashed border-gray-200">
-                        ${getInvoiceInputs(order)}
-                        <button onclick="saveInvoice('${id}', '${order.orderType}')" class="w-full bg-blue-700 text-white py-3 rounded-2xl font-bold text-xs mt-3 shadow-lg hover:bg-blue-800 transition-all">সেভ ইনভয়েস ও ইউজারকে পাঠানো</button>
+                    <div class="space-y-2 mb-6" id="items-${id}">
+                        ${order.items.map(item => `
+                            <div class="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100">
+                                <button onclick="removeItem('${id}', '${item}')" class="text-red-500 bg-red-50 w-7 h-7 rounded-lg font-black text-lg">×</button>
+                                <span class="text-[10px] flex-1 font-bold italic">${item}</span>
+                                <input type="number" class="item-price w-20 p-1 bg-blue-50 rounded-lg text-xs text-center font-bold" placeholder="৳" data-id="${id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
+                            </div>
+                        `).join('')}
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 uppercase tracking-tighter italic">
-                        ${getStatusButtons(order)}
+                    <div class="bg-gray-50 p-4 rounded-3xl mb-6 grid grid-cols-3 gap-2 text-center">
+                        <div><label class="text-[8px] font-bold block opacity-50">ডেলিভারি</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.deliveryCharge || 70}"></div>
+                        <div><label class="text-[8px] font-bold block opacity-50">প্ল্যাটফর্ম</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.platformFee || 20}"></div>
+                        <button onclick="saveInvoice('${id}')" class="bg-blue-900 text-white text-[9px] font-bold rounded-xl py-2">সেভ বিল</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 uppercase italic font-bold text-[8px]">
+                        <button onclick="updateStatus('${id}', 'pending')" class="p-2 rounded-xl bg-slate-100">১. অনুরোধ</button>
+                        <button onclick="updateStatus('${id}', 'verifying')" class="p-2 rounded-xl bg-blue-50 text-blue-600">২. যাচাই</button>
+                        <button onclick="updateStatus('${id}', 'invoice_ready')" class="p-2 rounded-xl bg-indigo-50 text-indigo-600">৩. ইনভয়েস</button>
+                        <button onclick="updateStatus('${id}', 'finding_assistant')" class="p-2 rounded-xl bg-purple-50 text-purple-600">৪. সহকারী</button>
+                        <button onclick="updateStatus('${id}', 'assistant_assigned')" class="p-2 rounded-xl bg-pink-50 text-pink-600">৫. সহকারী রেডি</button>
+                        <button onclick="updateStatus('${id}', 'at_store')" class="p-2 rounded-xl bg-yellow-50 text-yellow-600">৬. দোকানে</button>
+                        <button onclick="updateStatus('${id}', 'shopping')" class="p-2 rounded-xl bg-amber-50 text-amber-600">৭. কেনাকাটা</button>
+                        <button onclick="updateStatus('${id}', 'packing')" class="p-2 rounded-xl bg-orange-50 text-orange-600">৮. প্যাকিং</button>
+                        <button onclick="updateStatus('${id}', 'delivery_started')" class="p-2 rounded-xl bg-teal-50 text-teal-600">৯. সহকারী পথে</button>
+                        <button onclick="updateStatus('${id}', 'completed')" class="p-2 rounded-xl bg-green-600 text-white col-span-2 py-3 mt-2 shadow-lg shadow-green-100">১০. খিদমত সম্পন্ন</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
-        }
+        });
 
-        function getBorderColor(type) {
-            const colors = { shopping: 'border-green-600', parcel: 'border-orange-500', car_rent: 'border-blue-600' };
-            return colors[type] || 'border-purple-600';
-        }
-
-        function getContentBody(order) {
-            if(order.orderType === 'shopping') {
-                return order.items.map(item => `
-                    <div class="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-                        <button onclick="removeItem('${order.id}', '${item}')" class="text-red-500 bg-red-50 w-6 h-6 rounded-lg font-bold text-xs">×</button>
-                        <span class="text-[10px] flex-1 font-bold italic">📦 ${item}</span>
-                        <input type="number" class="item-price w-20 p-1.5 bg-blue-50 rounded-lg text-xs text-center font-bold text-blue-800" placeholder="৳" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}">
-                    </div>
-                `).join('');
-            }
-            if(order.orderType === 'car_rent') return `<p class="text-xs font-bold text-blue-600 bg-blue-50 p-3 rounded-xl italic">🚗 গাড়ি: ${order.carType}<br>রুট: ${order.pickupLocation} > ${order.dropLocation}</p>`;
-            if(order.orderType === 'parcel') return `<p class="text-xs font-bold text-orange-600 bg-orange-50 p-3 rounded-xl italic">📦 পার্সেল: ${order.parcelType}<br>🔒 OTP: ${order.otp}</p>`;
-            return "";
-        }
-
-        // প্রোডাক্ট রিমুভ করার ফাংশন (বাজার সদাই)
+        // ৩. প্রোডাক্ট বাদ দেওয়ার সাথে ওয়ার্নিং নোটিফিকেশন লজিক
         window.removeItem = async (orderId, itemName) => {
-            if(confirm(`"${itemName}" কি তালিকা থেকে বাদ দিতে চান?`)) {
+            if(confirm(`"${itemName}" কি তালিকা থেকে বাদ দিবেন?`)) {
                 const orderRef = doc(db, "orders", orderId);
                 await updateDoc(orderRef, {
-                    items: arrayRemove(itemName)
+                    items: arrayRemove(itemName),
+                    alertMessage: `দুঃখিত, "${itemName}" স্টকে নেই।`, // ইউজার প্যানেলে সাউন্ড ট্রিগার করবে
+                    alertTime: Date.now() 
                 });
-                // দাম আপডেট করার জন্য সেভ ইনভয়েস কল করা যেতে পারে
-                alert("পণ্যটি তালিকা থেকে মুছে ফেলা হয়েছে।");
             }
         };
 
-        function getInvoiceInputs(order) {
-            const id = order.id;
-            if(order.orderType === 'shopping') {
-                return `<div class="grid grid-cols-3 gap-2 text-center">
-                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">ডেলিভারি</label><input type="number" id="del-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.deliveryCharge || 70}"></div>
-                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">প্ল্যাটফর্ম</label><input type="number" id="plat-${id}" class="w-full text-xs font-black text-center bg-transparent" value="${order.platformFee || 20}"></div>
-                    <div><label class="text-[8px] font-bold block uppercase italic text-gray-400">মোট বাজার</label><input type="number" id="sub-${id}" class="w-full text-xs font-black text-center bg-transparent text-green-700" value="${order.subTotal || 0}" readonly></div>
-                </div>`;
-            }
-            // অন্যান্য সার্ভিসের ইনভয়েস ইনপুট আগের মতোই থাকবে...
-            return `<input type="number" id="sub-${id}" class="w-full p-3 rounded-2xl text-xs font-black bg-white border" placeholder="মোট বিল" value="${order.subTotal || ''}">`;
-        }
-
-        function getStatusButtons(order) {
-            const id = order.id;
-            const b = (s, txt, cls) => `<button onclick="updateStatus('${id}', '${s}')" class="p-2 rounded-xl font-bold text-[9px] ${cls}">${txt}</button>`;
-            
-            if(order.orderType === 'shopping') {
-                return `
-                    ${b('verifying', '১. যাচাই', 'bg-slate-200')} ${b('invoice_ready', '২. ইনভয়েস', 'bg-blue-100')}
-                    ${b('finding_assistant', '৩. সহকারী', 'bg-indigo-100')} ${b('shopping', '৪. কেনাকাটা', 'bg-amber-100')}
-                    ${b('completed', '৫. সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3 mt-2')}
-                `;
-            }
-            return b('completed', 'সম্পন্ন', 'bg-green-600 text-white col-span-2 py-3');
-        }
-
-        window.saveInvoice = async (id, type) => {
-            const updateData = { status: "invoice_ready" };
-            if(type === 'shopping') {
-                const prices = {}; let sub = 0;
-                // ওই নির্দিষ্ট অর্ডারের সব ইনপুট ফিল্ড থেকে ডাটা সংগ্রহ
-                document.querySelectorAll(`[data-id="${id}"]`).forEach(inp => {
-                    const p = parseFloat(inp.value) || 0;
-                    prices[inp.dataset.item] = p; sub += p;
-                });
-                updateData.itemPrices = prices; 
-                updateData.subTotal = sub;
-                updateData.deliveryCharge = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-                updateData.platformFee = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-                updateData.invoiceConfirmed = false; // নতুন ইনভয়েস দিলে কনফার্মেশন রিসেট হবে
-            } else {
-                updateData.subTotal = parseFloat(document.getElementById(`sub-${id}`).value) || 0;
-            }
-            await updateDoc(doc(db, "orders", id), updateData);
-            alert("ইনভয়েস আপডেট হয়েছে এবং কাস্টমার প্যানেলে পাঠানো হয়েছে!");
+        window.saveInvoice = async (id) => {
+            const prices = {}; let sub = 0;
+            document.querySelectorAll(`[data-id="${id}"]`).forEach(inp => {
+                const p = parseFloat(inp.value) || 0;
+                prices[inp.dataset.item] = p; sub += p;
+            });
+            await updateDoc(doc(db, "orders", id), {
+                itemPrices: prices,
+                subTotal: sub,
+                deliveryCharge: parseFloat(document.getElementById(`del-${id}`).value) || 70,
+                platformFee: parseFloat(document.getElementById(`plat-${id}`).value) || 20,
+                status: "invoice_ready"
+            });
+            alert("রশিদ পাঠানো হয়েছে!");
         };
 
         window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
