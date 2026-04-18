@@ -8,10 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> 
         body { font-family: 'Hind Siliguri', sans-serif; } 
-        .active-tab { background-color: #1e3a8a; color: white; border-radius: 1rem; }
+        .tab-active { background-color: #1e3a8a; color: white; transform: scale(1.05); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-slate-100 pb-20">
+
     <audio id="newOrderSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div class="max-w-2xl mx-auto p-4">
@@ -20,37 +22,38 @@
                 <h1 class="text-2xl font-black italic uppercase">G-KHIDMAH</h1>
                 <p class="text-[10px] uppercase tracking-widest opacity-70 font-bold">মাস্টার অ্যাডমিন কন্ট্রোল</p>
             </div>
-            <div id="activeCount" class="bg-blue-700 px-4 py-2 rounded-2xl text-xs font-bold italic">০টি অর্ডার</div>
+            <button onclick="showLastOrder()" class="bg-red-500 px-4 py-2 rounded-2xl text-[10px] font-black animate-bounce shadow-lg">🔔 লাস্ট রিকোয়েস্ট</button>
         </header>
 
-        <nav class="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-4">
-            <button onclick="filterOrders('all')" id="tab-all" class="active-tab px-4 py-2 text-xs font-bold whitespace-nowrap">সব অর্ডার</button>
-            <button onclick="filterOrders('shopping')" id="tab-shopping" class="bg-white px-4 py-2 text-xs font-bold rounded-2xl whitespace-nowrap shadow-sm">🛒 বাজার</button>
-            <button onclick="filterOrders('car_rental')" id="tab-car_rental" class="bg-white px-4 py-2 text-xs font-bold rounded-2xl whitespace-nowrap shadow-sm">🚗 কার রেন্টাল</button>
-            <button onclick="filterOrders('home_service')" id="tab-home_service" class="bg-white px-4 py-2 text-xs font-bold rounded-2xl whitespace-nowrap shadow-sm">🛠️ হোম সার্ভিস</button>
-        </nav>
+        <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
+            <button id="btn-all" onclick="filterBy('all')" class="tab-active px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md">সব অর্ডার</button>
+            <button id="btn-shopping" onclick="filterBy('shopping')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🛒 বাজার সদাই</button>
+            <button id="btn-home_service" onclick="filterBy('home_service')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🛠️ হোম সার্ভিস</button>
+            <button id="btn-car_rental" onclick="filterBy('car_rental')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">🚗 কার রেন্টাল</button>
+            <button id="btn-delivery" onclick="filterBy('delivery')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md text-gray-600">📦 ডেলিভারি</button>
+        </div>
 
         <div class="bg-white p-6 rounded-[2rem] shadow-lg mb-8 border-2 border-dashed border-blue-200">
-            <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">👷 নতুন মেম্বার অ্যাড (Driver/Rider/Expert)</h3>
+            <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">👷 টিম মেম্বার যুক্ত করুন</h3>
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <input type="text" id="mName" placeholder="নাম" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
                 <input type="tel" id="mPhone" placeholder="মোবাইল" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
                 <select id="mType" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
-                    <option value="rider">Rider (বাজার)</option>
-                    <option value="driver">Driver (কার)</option>
-                    <option value="expert">Expert (হোম)</option>
+                    <option value="rider">Rider (বাজার/ডেলিভারি)</option>
+                    <option value="expert">Expert (হোম সার্ভিস)</option>
+                    <option value="driver">Driver (কার রেন্টাল)</option>
                 </select>
-                <input type="text" id="mPhoto" placeholder="ছবির লিঙ্ক (URL)" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
+                <input type="text" id="mPhoto" placeholder="ছবির লিংক (URL)" class="p-3 rounded-xl bg-slate-50 border outline-none text-xs font-bold">
             </div>
-            <button onclick="addMember()" class="w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-bold uppercase">নতুন মেম্বার যুক্ত করুন</button>
+            <button onclick="addMember()" class="w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-bold uppercase shadow-lg active:scale-95 transition-all">নতুন মেম্বার সেভ করুন</button>
         </div>
 
-        <div id="adminOrders" class="space-y-6"></div>
+        <div id="orderContainer" class="space-y-6"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, orderBy, query, setDoc, getDocs, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -64,129 +67,165 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let allOrders = [];
+        let members = [];
         let currentFilter = 'all';
-        let membersList = [];
-        let orderCount = 0;
 
-        // ১. নতুন মেম্বার (Driver/Rider/Expert) যুক্ত করা
+        // সার্ভিস অনুযায়ী ট্র্যাকিং কনফিগ
+        const configs = {
+            shopping: { title: "বাজার সদাই", steps: ["pending", "received", "invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"] },
+            home_service: { title: "হোম সার্ভিস", steps: ["expert_finding", "expert_assigned", "work_in_progress", "payment_pending", "completed"] },
+            car_rental: { title: "কার রেন্টাল", steps: ["request_received", "driver_assigned", "car_on_way", "trip_started", "completed"] },
+            delivery: { title: "পার্সেল ডেলিভারি", steps: ["pickup_pending", "rider_assigned", "picked_up", "on_the_way", "delivered", "completed"] }
+        };
+
+        // টিম লোড
+        const loadTeam = async () => {
+            const snap = await getDocs(collection(db, "team"));
+            members = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        };
+        loadTeam();
+
+        // নতুন মেম্বার অ্যাড
         window.addMember = async () => {
             const name = document.getElementById('mName').value;
             const phone = document.getElementById('mPhone').value;
             const type = document.getElementById('mType').value;
             const photo = document.getElementById('mPhoto').value || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-
-            if(!name || !phone) return alert("তথ্য দিন!");
-            const memberId = Date.now().toString();
-            await setDoc(doc(db, "team", memberId), { name, phone, type, photo });
-            alert("সফলভাবে যুক্ত হয়েছে!");
-            location.reload();
+            if(!name || !phone) return alert("তথ্য দিন");
+            await setDoc(doc(db, "team", Date.now().toString()), { name, phone, type, photo });
+            alert("সফল!"); location.reload();
         };
 
-        // টিম মেম্বারদের লোড করা
-        const loadTeam = async () => {
-            const snap = await getDocs(collection(db, "team"));
-            membersList = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        };
-        loadTeam();
-
-        // ২. ফিল্টার ফাংশন
-        window.filterOrders = (category) => {
-            currentFilter = category;
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab', 'bg-white'));
-            document.getElementById('tab-'+category).classList.add('active-tab');
+        // ক্যাটাগরি ফিল্টার
+        window.filterBy = (cat) => {
+            currentFilter = cat;
+            document.querySelectorAll('nav button, div button').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById('btn-'+cat).classList.add('tab-active');
             renderOrders();
         };
 
-        // ৩. অর্ডার রেন্ডারিং
-        let allOrders = [];
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snapshot) => {
-            allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            // রিংটোন লজিক (যদি নতুন অর্ডার আসে)
-            if (allOrders.length > orderCount && orderCount !== 0) {
-                document.getElementById('newOrderSound').play().catch(e => console.log("Sound Error"));
+        // রিয়েলটাইম অর্ডার আপডেট
+        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+            const newOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(allOrders.length > 0 && newOrders.length > allOrders.length) {
+                document.getElementById('newOrderSound').play();
             }
-            orderCount = allOrders.length;
-            
+            allOrders = newOrders;
             renderOrders();
         });
 
         function renderOrders() {
-            const container = document.getElementById('adminOrders');
+            const container = document.getElementById('orderContainer');
             container.innerHTML = "";
-            
             const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.serviceType === currentFilter);
-            document.getElementById('activeCount').innerText = `${filtered.length}টি অর্ডার`;
 
             filtered.forEach(order => {
-                const id = order.id;
+                const config = configs[order.serviceType || 'shopping'];
                 const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-[2rem] shadow-lg border-l-8 mb-4 border-blue-900";
+                card.className = "bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] border-blue-900 mb-6";
                 
-                // ডাইনামিক স্ট্যাটাস বাটন (বাজারের জন্য এক রকম, গাড়ির জন্য অন্য রকম)
-                let statusButtons = "";
-                if(order.serviceType === 'car_rental') {
-                    statusButtons = `
-                        <button onclick="updateStatus('${id}', 'request_received')" class="p-2 text-[9px] bg-slate-100 rounded-lg font-bold">রিকোয়েস্ট</button>
-                        <button onclick="updateStatus('${id}', 'driver_assigned')" class="p-2 text-[9px] bg-blue-100 text-blue-700 rounded-lg font-bold">ড্রাইভার সেট</button>
-                        <button onclick="updateStatus('${id}', 'trip_started')" class="p-2 text-[9px] bg-green-100 text-green-700 rounded-lg font-bold">ট্রিপ শুরু</button>
-                        <button onclick="updateStatus('${id}', 'completed')" class="p-2 text-[9px] bg-green-900 text-white rounded-lg font-bold">শেষ</button>
-                    `;
-                } else {
-                    statusButtons = `
-                        <button onclick="updateStatus('${id}', 'pending')" class="p-2 text-[8px] bg-slate-100 rounded-lg font-bold">পেন্ডিং</button>
-                        <button onclick="updateStatus('${id}', 'on_the_way')" class="p-2 text-[8px] bg-blue-50 text-blue-600 rounded-lg font-bold">পথে</button>
-                        <button onclick="updateStatus('${id}', 'completed')" class="p-2 text-[8px] bg-green-600 text-white rounded-lg font-bold">সম্পন্ন</button>
-                    `;
-                }
-
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="bg-blue-900 text-white text-[8px] px-3 py-1 rounded-full uppercase font-black tracking-widest">${order.serviceType || 'Shopping'}</div>
-                        <span class="text-[9px] font-bold text-gray-400">#${id.slice(-5)}</span>
+                    <div class="flex justify-between mb-4">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-[9px] font-black uppercase">${config.title}</span>
+                        <span class="text-[9px] font-bold text-gray-400">#${order.id.slice(-5)}</span>
                     </div>
 
                     <div class="mb-4">
                         <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
                         <p class="text-[10px] text-blue-600 font-bold">${order.customerPhone}</p>
-                        <p class="text-[10px] text-gray-500 italic mt-1 leading-tight">${order.customerAddress}</p>
+                        <p class="text-[9px] text-gray-500 mt-1">${order.customerAddress}</p>
                     </div>
 
-                    <div class="bg-slate-50 p-3 rounded-2xl mb-4">
-                        <label class="text-[9px] font-black uppercase text-gray-400 block mb-2">অ্যাসাইন করুন (Rider/Driver/Expert)</label>
-                        <div class="flex gap-2">
-                            <select id="assign-${id}" class="flex-1 bg-white border text-xs p-2 rounded-xl outline-none font-bold">
-                                <option value="">মেম্বার সিলেক্ট করুন</option>
-                                ${membersList.map(m => `<option value="${m.id}" ${order.assignedPerson?.id === m.id ? 'selected' : ''}>${m.name} (${m.type})</option>`).join('')}
-                            </select>
-                            <button onclick="assignPerson('${id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[9px] font-bold">অ্যাসাইন</button>
-                        </div>
-                        ${order.assignedPerson ? `<p class="text-[9px] text-green-600 mt-2 font-bold">অ্যাসাইনড: ${order.assignedPerson.name}</p>` : ''}
+                    <div class="bg-slate-50 p-4 rounded-3xl mb-4">
+                        ${renderOrderSpecifics(order)}
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2 mt-4">${statusButtons}</div>
+                    <div class="flex gap-2 mb-6">
+                        <select id="assign-${order.id}" class="flex-1 bg-white border p-3 rounded-xl text-xs font-bold outline-none">
+                            <option value="">অ্যাসাইন করুন</option>
+                            ${members.filter(m => m.type.includes(order.serviceType === 'shopping' ? 'rider' : order.serviceType === 'car_rental' ? 'driver' : 'expert')).map(m => `
+                                <option value="${m.id}" ${order.assignedPerson?.id === m.id ? 'selected' : ''}>${m.name}</option>
+                            `).join('')}
+                        </select>
+                        <button onclick="assignPerson('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">Set</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        ${config.steps.map((s, i) => `
+                            <button onclick="updateStatus('${order.id}', '${s}')" class="py-2 px-1 rounded-xl text-[8px] font-black uppercase ${order.status === s ? 'bg-green-600 text-white shadow-md scale-105' : 'bg-gray-100 text-gray-400'}">
+                                ${i+1}. ${s.replace('_', ' ')}
+                            </button>
+                        `).join('')}
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // ৪. অ্যাসাইন লজিক
-        window.assignPerson = async (orderId) => {
-            const memberId = document.getElementById(`assign-${orderId}`).value;
-            if(!memberId) return alert("মেম্বার সিলেক্ট করুন!");
-            
-            const member = membersList.find(m => m.id === memberId);
-            await updateDoc(doc(db, "orders", orderId), {
-                assignedPerson: member,
-                alertMessage: `${member.name} আপনার অর্ডারের জন্য দায়িত্ব নিয়েছেন।`,
-                alertTime: Date.now()
+        function renderOrderSpecifics(order) {
+            if(order.serviceType === 'shopping' || !order.serviceType) {
+                return `
+                    <div class="space-y-2">
+                        ${order.items.map(item => `
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                                <button onclick="removeItem('${order.id}', '${item}')" class="text-red-500 font-bold px-2">×</button>
+                                <span class="text-[10px] flex-1 font-bold">${item}</span>
+                                <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-16 p-1 bg-blue-50 rounded text-[10px] text-center font-bold" placeholder="৳">
+                            </div>
+                        `).join('')}
+                        <button onclick="saveShoppingBill('${order.id}')" class="w-full mt-2 bg-green-700 text-white py-2 rounded-xl text-[10px] font-bold uppercase">Save Shopping Bill</button>
+                    </div>`;
+            } else {
+                return `
+                    <div class="space-y-3">
+                        <p class="text-[10px] font-bold text-gray-600 italic">সার্ভিস ডিটেইলস: ${order.items.join(', ')}</p>
+                        <div class="flex gap-2">
+                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="মোট বিল (৳)" class="flex-1 p-3 rounded-xl border text-xs font-bold outline-none">
+                            <button onclick="saveServiceBill('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">Set Bill</button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // একশন ফাংশনসমূহ
+        window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
+
+        window.saveShoppingBill = async (id) => {
+            const prices = {}; let sub = 0;
+            document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
+                const p = parseFloat(inp.value) || 0;
+                prices[inp.dataset.item] = p; sub += p;
             });
-            alert("অ্যাসাইন সম্পন্ন!");
+            await updateDoc(doc(db, "orders", id), { itemPrices: prices, subTotal: sub, status: "invoice_ready" });
+            alert("বাজারের ইনভয়েস রেডি!");
         };
 
-        window.updateStatus = async (id, s) => { 
-            await updateDoc(doc(db, "orders", id), { status: s }); 
-            alert("স্ট্যাটাস আপডেট হয়েছে!");
+        window.saveServiceBill = async (id) => {
+            const val = parseFloat(document.getElementById(`bill-${id}`).value) || 0;
+            await updateDoc(doc(db, "orders", id), { subTotal: val, status: "payment_pending" });
+            alert("সার্ভিস বিল সেট হয়েছে!");
+        };
+
+        window.assignPerson = async (id) => {
+            const mId = document.getElementById(`assign-${id}`).value;
+            const m = members.find(x => x.id === mId);
+            if(!m) return;
+            await updateDoc(doc(db, "orders", id), { assignedPerson: m, alertMessage: `${m.name} দায়িত্ব নিয়েছেন।`, alertTime: Date.now() });
+            alert("সফলভাবে অ্যাসাইন হয়েছে!");
+        };
+
+        window.removeItem = async (id, item) => {
+            if(confirm("বাদ দিবেন?")) {
+                await updateDoc(doc(db, "orders", id), { items: arrayRemove(item), alertMessage: `${item} পাওয়া যায়নি।`, alertTime: Date.now() });
+            }
+        };
+
+        window.showLastOrder = () => {
+            if(allOrders.length > 0) {
+                const last = allOrders[0];
+                alert(`নতুন রিকোয়েস্ট: ${last.customerName} (${configs[last.serviceType || 'shopping'].title})`);
+            }
         };
 
     </script>
