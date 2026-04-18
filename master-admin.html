@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-KHIDMAH | মাস্টার অ্যাডমিন</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Hind Siliguri', sans-serif; } 
+        .tab-active { background-color: #1e3a8a; color: white; transform: scale(1.05); shadow-lg; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .card-animate { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .section-tab { cursor: pointer; border-bottom: 3px solid transparent; }
+        .section-tab.active { border-color: #1e3a8a; color: #1e3a8a; }
+    </style>
+</head>
+<body class="bg-slate-100 pb-20">
+
+    <div class="max-w-2xl mx-auto p-4">
+        <header class="bg-black text-white p-8 rounded-[3rem] shadow-2xl mb-8 flex justify-between items-center border-b-4 border-blue-600">
+            <div>
+                <h1 class="text-3xl font-black italic">MASTER PANEL</h1>
+                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Global Control Center</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] uppercase font-bold opacity-60">Total Collection</p>
+                <h2 id="totalDueCollect" class="text-2xl font-black text-green-400">৳০.০০</h2>
+            </div>
+        </header>
+
+        <div class="flex justify-around bg-white p-4 rounded-3xl shadow-sm mb-8 font-bold text-sm text-gray-400">
+            <div onclick="switchSection('orders')" id="tab-orders" class="section-tab active px-4 py-2">অর্ডারস</div>
+            <div onclick="switchSection('partners')" id="tab-partners" class="section-tab px-4 py-2">পার্টনারস</div>
+            <div onclick="switchSection('settings')" id="tab-settings" class="section-tab px-4 py-2">সেটিংস</div>
+        </div>
+
+        <div id="section-orders">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
+                <button id="btn-all" onclick="filterBy('all')" class="tab-active px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap">সব অর্ডার</button>
+                <button id="btn-shopping" onclick="filterBy('shopping')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap text-gray-600">🛒 বাজার</button>
+                <button id="btn-home_service" onclick="filterBy('home_service')" class="bg-white px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap text-gray-600">🛠️ সার্ভিস</button>
+            </div>
+            <div id="orderContainer" class="space-y-6"></div>
+        </div>
+
+        <div id="section-partners" class="hidden">
+            <h3 class="text-lg font-black text-gray-800 mb-4 italic">👥 পার্টনার লিস্ট ও কমিশন</h3>
+            <div id="partnerList" class="space-y-6"></div>
+        </div>
+
+        <div id="section-settings" class="hidden">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-lg mb-8 border-2 border-dashed border-blue-200">
+                <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">🎫 কুপন কোড সেটআপ</h3>
+                <div class="space-y-3">
+                    <input type="text" id="couponCode" placeholder="CODE (e.g. RAMADAN26)" class="w-full p-4 rounded-2xl bg-slate-50 border text-xs font-bold outline-none">
+                    <input type="number" id="couponDiscount" placeholder="ডিসকাউন্ট পরিমাণ (৳)" class="w-full p-4 rounded-2xl bg-slate-50 border text-xs font-bold outline-none">
+                    <button onclick="saveCoupon()" class="w-full bg-blue-900 text-white py-4 rounded-2xl text-xs font-black uppercase shadow-lg">কুপন সেভ করুন</button>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-lg border-2 border-blue-50">
+                <h3 class="text-sm font-black text-blue-900 uppercase italic mb-4">👷 টিম মেম্বার অ্যাড</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="text" id="mName" placeholder="নাম" class="p-3 rounded-xl bg-slate-50 border text-xs font-bold">
+                    <input type="tel" id="mPhone" placeholder="মোবাইল" class="p-3 rounded-xl bg-slate-50 border text-xs font-bold">
+                </div>
+                <button onclick="addMember()" class="w-full bg-slate-800 text-white py-3 rounded-xl text-xs font-bold uppercase">টিমে যোগ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, getDocs, orderBy, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- সেকশন সুইচিং লজিক ---
+        window.switchSection = (id) => {
+            ['orders', 'partners', 'settings'].forEach(s => {
+                document.getElementById(`section-${s}`).classList.add('hidden');
+                document.getElementById(`tab-${s}`).classList.remove('active');
+            });
+            document.getElementById(`section-${id}`).classList.remove('hidden');
+            document.getElementById(`tab-${id}`).classList.add('active');
+        };
+
+        // --- পার্টনার ম্যানেজমেন্ট লজিক ---
+        onSnapshot(collection(db, "partners"), (snap) => {
+            const container = document.getElementById('partnerList');
+            container.innerHTML = "";
+            let totalDue = 0;
+
+            snap.forEach(d => {
+                const p = d.data();
+                const id = d.id;
+                totalDue += (p.wallet.adminDue || 0);
+
+                const card = document.createElement('div');
+                card.className = `p-6 rounded-[2.5rem] shadow-xl border-t-8 bg-white ${p.isActive ? 'border-blue-900' : 'border-red-500'}`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="font-black text-gray-800 uppercase">${p.name}</h4>
+                            <p class="text-[10px] font-bold text-gray-400">${p.phone} | ${p.serviceType}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-[8px] font-black ${p.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                            ${p.isApproved ? 'APPROVED' : 'PENDING'}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-red-50 p-3 rounded-2xl">
+                            <p class="text-[8px] font-bold text-red-400">ADMIN DUE</p>
+                            <h5 class="text-lg font-black text-red-600">৳${p.wallet.adminDue.toFixed(2)}</h5>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-2xl">
+                            <p class="text-[8px] font-bold text-blue-400">PARTNER EARN</p>
+                            <h5 class="text-lg font-black text-blue-900">৳${p.wallet.totalEarning.toFixed(2)}</h5>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex gap-2 items-center bg-slate-50 p-2 rounded-2xl">
+                            <span class="text-[10px] font-bold text-gray-500 pl-2">Commission %:</span>
+                            <input type="number" id="comm-${id}" value="${p.commission}" class="w-16 p-1 bg-transparent border-b border-blue-200 text-center font-bold outline-none">
+                            <button onclick="updateComm('${id}')" class="bg-blue-900 text-white px-3 py-1 rounded-lg text-[9px] font-bold">SET</button>
+                        </div>
+                        <div class="flex gap-2">
+                            ${!p.isApproved ? `<button onclick="approveP('${id}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-[10px] font-black uppercase">Approve</button>` : ''}
+                            <button onclick="clearDue('${id}')" class="flex-1 bg-orange-500 text-white py-3 rounded-xl text-[10px] font-black uppercase">Clear Due</button>
+                            <button onclick="toggleP('${id}', ${p.isActive})" class="flex-1 ${p.isActive ? 'bg-red-600' : 'bg-blue-600'} text-white py-3 rounded-xl text-[10px] font-black uppercase">${p.isActive ? 'Block' : 'Unblock'}</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('totalDueCollect').innerText = `৳${totalDue.toFixed(2)}`;
+        });
+
+        // পার্টনার অ্যাকশনস
+        window.updateComm = async (id) => {
+            const v = parseFloat(document.getElementById(`comm-${id}`).value);
+            await updateDoc(doc(db, "partners", id), { commission: v });
+            alert("কমিশন আপডেট হয়েছে");
+        };
+        window.approveP = async (id) => { await updateDoc(doc(db, "partners", id), { isApproved: true, isActive: true }); };
+        window.clearDue = async (id) => { if(confirm("পেমেন্ট পেয়েছেন?")) await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0, isActive: true }); };
+        window.toggleP = async (id, stat) => { await updateDoc(doc(db, "partners", id), { isActive: !stat }); };
+
+        // --- কুপন লজিক ---
+        window.saveCoupon = async () => {
+            const code = document.getElementById('couponCode').value;
+            const disc = document.getElementById('couponDiscount').value;
+            if(!code || !disc) return alert("তথ্য দিন");
+            await setDoc(doc(db, "settings", "coupons"), { code: code.toUpperCase(), discount: parseFloat(disc), isActive: true });
+            alert("কুপন কোড সেট হয়েছে!");
+        };
+
+        // --- আপনার আগের অর্ডার লজিক (নিচে যা ছিল সব একই থাকবে) ---
+        // (RenderOrders, UpdateStatus, AssignPerson ইত্যাদি আপনার আগের কোড থেকে এখানে ইনজেক্ট হবে)
+        // নোট: রেন্ডারিং লজিক আগেরটাই ব্যবহার করবেন যাতে ট্র্যাকিং ডিস্টার্ব না হয়।
+    </script>
+</body>
+</html>
