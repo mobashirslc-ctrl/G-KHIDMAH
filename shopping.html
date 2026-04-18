@@ -106,7 +106,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // অ্যাডমিন প্যানেলের বাটনের সাথে হুবহু মিলানো স্ট্যাটাস লিস্ট
         const statusConfig = {
             "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
             "received": { step: "২/১০", msg: "অর্ডার যাচাই করা হচ্ছে", icon: "✅", progress: 20 },
@@ -174,36 +173,40 @@
                 if(!snapshot.exists()) return;
                 const data = snapshot.data();
 
-                // ৪০ সেকেন্ড রিংটোন লজিক
+                // অ্যালার্ট ও সাউন্ড লজিক
                 if (data.alertTime && data.alertTime > lastAlertTime) {
                     lastAlertTime = data.alertTime;
                     const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3');
                     ringtone.loop = true;
                     ringtone.play().catch(() => {});
                     if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
-
                     const autoStop = setTimeout(() => {
                         ringtone.pause();
                         if (navigator.vibrate) navigator.vibrate(0);
                     }, 40000); 
-
                     setTimeout(() => { 
-                        alert("⚠️ আপডেট: " + data.alertMessage); 
+                        alert("⚠️ আপডেট: " + (data.alertMessage || "অর্ডার আপডেট হয়েছে।")); 
                         ringtone.pause(); 
                         if (navigator.vibrate) navigator.vibrate(0);
                         clearTimeout(autoStop);
                     }, 1000);
                 }
 
-                // স্ট্যাটাস চেঞ্জ সাউন্ড
                 if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
                     const notify = document.getElementById('statusSound');
                     if(notify) notify.play().catch(() => {});
                 }
                 lastKnownStatus = data.status;
 
-                // UI আপডেট (অ্যাডমিনের স্ট্যাটাস কী অনুযায়ী)
-                const config = statusConfig[data.status] || statusConfig["pending"];
+                // UI আপডেট (Bulletproof)
+                const rawStatus = (data.status || "pending").toLowerCase().trim();
+                let config = statusConfig[rawStatus] || { 
+                    step: "...", 
+                    msg: "প্রক্রিয়াধীন: " + (data.status || ""), 
+                    icon: "⏳", 
+                    progress: 50 
+                };
+
                 document.getElementById('statusIcon').innerText = config.icon;
                 document.getElementById('trackMessage').innerText = config.msg;
                 document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
@@ -211,23 +214,21 @@
                 document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
                 // ইনভয়েস লজিক
-                const invoiceShownStatuses = ["invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"];
-                if(invoiceShownStatuses.includes(data.status)) {
+                const hideInvoiceList = ["pending", "received"];
+                if(!hideInvoiceList.includes(rawStatus)) {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     const prices = data.itemPrices || {};
                     const missing = data.missingItems || [];
                     
                     let itemsHtml = "";
                     data.items.forEach(item => {
-                        itemsHtml += `
-                            <div class="flex justify-between border-b border-gray-100 pb-1 py-1">
+                        itemsHtml += `<div class="flex justify-between border-b border-gray-100 pb-1 py-1">
                                 <span>${item}</span><span class="brand-green font-bold">৳${prices[item] || 0}</span>
                             </div>`;
                     });
 
                     missing.forEach(item => {
-                        itemsHtml += `
-                            <div class="flex justify-between border-b border-red-50 pb-1 bg-red-50/20 px-2 py-1 rounded">
+                        itemsHtml += `<div class="flex justify-between border-b border-red-50 pb-1 bg-red-50/20 px-2 py-1 rounded">
                                 <span class="text-red-400 line-through italic">${item}</span>
                                 <span class="text-[9px] text-red-500 font-bold uppercase">বাদ গেছে</span>
                             </div>`;
@@ -253,7 +254,7 @@
                     
                     document.getElementById('grandTotalDisplay').innerText = `৳${(sub - disc) + del + plat}`;
 
-                    if(data.status === "invoice_ready" && !data.invoiceConfirmed) {
+                    if(rawStatus === "invoice_ready" && !data.invoiceConfirmed) {
                         document.getElementById('confirmBox').classList.remove('hidden');
                     } else {
                         document.getElementById('confirmBox').classList.add('hidden');
