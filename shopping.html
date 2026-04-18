@@ -157,12 +157,13 @@
         };
 
         // ২. ট্র্যাকিং ও ইনভয়েস লজিক
+        let lastAlertTime = 0; 
         const initTracking = () => {
     const orderId = localStorage.getItem('activeOrderId');
     if(!orderId) return;
 
     // এলার্ট চেক করার জন্য এই ভেরিয়েবলটি initTracking এর বাইরে অথবা শুরুতে ডিক্লেয়ার করবেন
-    let lastAlertTime = 0; 
+    
 
     document.getElementById('orderSection').classList.add('hidden');
     document.getElementById('trackingSection').classList.remove('hidden');
