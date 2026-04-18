@@ -42,7 +42,12 @@
                 <textarea id="orderList" rows="6" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold" placeholder="১. চাল ৫ কেজি&#10;২. ডাল ১ কেজি..."></textarea>
             </div>
 
-            <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-100 transition-all">খিদমত শুরু করুন</button>
+            <button id="submitOrderBtn" class="w-full bg-brand-dark-green text-white mt-5 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-100 transition-all flex justify-center items-center gap-2">
+                <span>খাদেমকে লিস্ট পাঠান</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
@@ -62,8 +67,7 @@
                 </div>
                 
                 <div class="p-6">
-                    <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm">
-                        </div>
+                    <div id="invoiceItemsDisplay" class="space-y-4 font-semibold text-sm"></div>
                 </div>
 
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
@@ -111,13 +115,19 @@
 
         const statusConfig = {
             "pending": { step: "১/১০", msg: "অনুরোধ পেয়েছি", icon: "📋", progress: 10 },
+            "verifying": { step: "২/১০", msg: "যাচাই করা হচ্ছে", icon: "🔍", progress: 20 },
             "invoice_ready": { step: "৩/১০", msg: "রশিদ তৈরি হয়েছে", icon: "📄", progress: 30 },
-            "confirmed": { step: "৪/১০", msg: "আপনি রশিদ কনফার্ম করেছেন", icon: "🤝", progress: 40 },
+            "confirmed": { step: "৪/১০", msg: "অর্ডার নিশ্চিত হয়েছে", icon: "🤝", progress: 40 },
+            "finding_assistant": { step: "৫/১০", msg: "সহকারী খোঁজা হচ্ছে", icon: "🏃", progress: 50 },
+            "at_store": { step: "৬/১০", msg: "দোকানে পৌঁছেছে", icon: "🏪", progress: 65 },
             "shopping": { step: "৭/১০", msg: "কেনাকাটা চলছে", icon: "🛒", progress: 75 },
+            "packing": { step: "৮/১০", msg: "প্যাকিং করা হচ্ছে", icon: "📦", progress: 85 },
+            "delivery_started": { step: "৯/১০", msg: "ডেলিভারি শুরু হয়েছে", icon: "🚲", progress: 95 },
             "completed": { step: "সফল", msg: "খিদমত সম্পন্ন", icon: "🎉", progress: 100 }
         };
 
         let lastKnownStatus = "";
+        let lastAlertTime = 0; 
 
         // ১. অর্ডার সাবমিট
         document.getElementById('submitOrderBtn').onclick = async () => {
@@ -129,7 +139,7 @@
             if(!name || !phone || !addr || !list) return alert("সব তথ্য সঠিকভাবে দিন!");
 
             const btn = document.getElementById('submitOrderBtn');
-            btn.innerText = "অর্ডার প্রসেস হচ্ছে...";
+            btn.innerText = "পাঠানো হচ্ছে...";
             btn.disabled = true;
 
             try {
@@ -151,79 +161,57 @@
                 initTracking();
             } catch (e) { 
                 alert("Error connecting to server!");
-                btn.innerText = "খিদমত শুরু করুন";
+                btn.innerText = "খাদেমকে লিস্ট পাঠান";
                 btn.disabled = false;
             }
         };
 
         // ২. ট্র্যাকিং ও ইনভয়েস লজিক
-        let lastAlertTime = 0; 
         const initTracking = () => {
-    const orderId = localStorage.getItem('activeOrderId');
-    if(!orderId) return;
+            const orderId = localStorage.getItem('activeOrderId');
+            if(!orderId) return;
 
-    // এলার্ট চেক করার জন্য এই ভেরিয়েবলটি initTracking এর বাইরে অথবা শুরুতে ডিক্লেয়ার করবেন
-    
+            document.getElementById('orderSection').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+            document.getElementById('newOrderBtn').classList.remove('hidden');
 
-    document.getElementById('orderSection').classList.add('hidden');
-    document.getElementById('trackingSection').classList.remove('hidden');
-    document.getElementById('newOrderBtn').classList.remove('hidden');
+            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+                if(!snapshot.exists()) return;
+                const data = snapshot.data();
 
-    onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-        if(!snapshot.exists()) return;
-        
-        const data = snapshot.data();
+                // --- রিংটোন ও অ্যালার্ট লজিক ---
+                if (data.alertTime && data.alertTime > lastAlertTime) {
+                    const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
+                    ringtone.loop = true;
+                    ringtone.play().catch(e => console.log("Interaction required"));
+                    
+                    const autoStop = setTimeout(() => { ringtone.pause(); }, 25000); 
 
-        // --- নতুন অ্যালার্ট এবং রিংটোন লজিক (এখানেই বসবে) ---
-        if (data.alertTime && data.alertTime > lastAlertTime) {
-            // ২০-২৫ সেকেন্ড বাজার মতো একটি আকর্ষণীয় রিংটোন
-            const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/1004/1004-preview.mp3'); 
-            ringtone.loop = true; // লুপ হবে যাতে অনেকক্ষণ বাজে
-            
-            ringtone.play().catch(e => console.log("Sound interaction required"));
+                    alert("⚠️ আপডেট: " + data.alertMessage);
+                    ringtone.pause();
+                    clearTimeout(autoStop);
+                    lastAlertTime = data.alertTime;
+                }
 
-            // ২৫ সেকেন্ড পর নিজে থেকেই বন্ধ হবে
-            const autoStop = setTimeout(() => {
-                ringtone.pause();
-                ringtone.currentTime = 0;
-            }, 25000); 
+                // স্ট্যাটাস চেঞ্জ সাউন্ড
+                if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
+                    document.getElementById('notifySound').play().catch(() => {});
+                }
+                lastKnownStatus = data.status;
 
-            // কাস্টমারকে পপআপ ওয়ার্নিং দেখানো
-            alert("⚠️ জি-খিদমাহ আপডেট: " + data.alertMessage);
+                // UI আপডেট
+                const config = statusConfig[data.status] || statusConfig["pending"];
+                document.getElementById('statusIcon').innerText = config.icon;
+                document.getElementById('trackMessage').innerText = config.msg;
+                document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
+                document.getElementById('progressBar').style.width = config.progress + "%";
+                document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
 
-            // ইউজার যখনই 'OK' চাপবে, সাউন্ড সাথে সাথে থেমে যাবে
-            ringtone.pause();
-            ringtone.currentTime = 0;
-            clearTimeout(autoStop);
-            
-            lastAlertTime = data.alertTime; // এটি গুরুত্বপূর্ণ যাতে একবারই বাজে
-        }
-        // --- অ্যালার্ট লজিক শেষ ---
-
-        // আপনার আগের স্ট্যাটাস এবং সাউন্ড নোটিফিকেশন লজিক
-        if (lastKnownStatus !== "" && lastKnownStatus !== data.status) {
-            document.getElementById('notifySound').play().catch(() => {});
-        }
-        lastKnownStatus = data.status;
-
-        // বাকি ট্র্যাকিং কনফিগারেশন...
-        const config = statusConfig[data.status] || statusConfig["pending"];
-        document.getElementById('statusIcon').innerText = config.icon;
-        document.getElementById('trackMessage').innerText = config.msg;
-        document.getElementById('stepCounter').innerText = `ধাপ: ${config.step}`;
-        document.getElementById('progressBar').style.width = config.progress + "%";
-        document.getElementById('orderIdDisplay').innerText = `ID: #${orderId.slice(-6).toUpperCase()}`;
-
-        // ... বাকি কোড
-    });
-};
-
-                // ইনভয়েস কনফিগারেশন
-                if(["invoice_ready", "confirmed", "shopping", "completed"].includes(data.status)) {
+                // ইনভয়েস রেন্ডারিং
+                if(["invoice_ready", "confirmed", "finding_assistant", "at_store", "shopping", "packing", "delivery_started", "completed"].includes(data.status)) {
                     document.getElementById('invoiceBox').classList.remove('hidden');
                     const prices = data.itemPrices || {};
                     
-                    // অটোমেটিক ইনভয়েস আপডেট (অ্যাডমিন কোনো আইটেম বাদ দিলে তা আর এখানে দেখাবে না)
                     document.getElementById('invoiceItemsDisplay').innerHTML = data.items.map(item => `
                         <div class="flex justify-between items-center border-b border-gray-100 pb-2">
                             <span class="text-gray-600 font-semibold">${item}</span>
@@ -240,12 +228,13 @@
                     if(dis > 0) {
                         document.getElementById('discountRow').classList.remove('hidden');
                         document.getElementById('discountDisplay').innerText = `-৳${dis}`;
+                    } else {
+                        document.getElementById('discountRow').classList.add('hidden');
                     }
                     document.getElementById('delChargeDisplay').innerText = `৳${del}`;
                     document.getElementById('platFeeDisplay').innerText = `৳${plat}`;
                     document.getElementById('grandTotalDisplay').innerText = `৳${(sub - dis) + del + plat}`;
 
-                    // কনফার্মেশন বক্স লজিক
                     if(data.status === "invoice_ready" && !data.invoiceConfirmed) {
                         document.getElementById('confirmBox').classList.remove('hidden');
                     } else {
@@ -258,37 +247,21 @@
         // ৩. ইনভয়েস কনফার্ম করা
         document.getElementById('confirmInvoiceBtn').onclick = async () => {
             const orderId = localStorage.getItem('activeOrderId');
-            const btn = document.getElementById('confirmInvoiceBtn');
-            btn.innerText = "কনফার্ম হচ্ছে...";
-            
-            await updateDoc(doc(db, "orders", orderId), {
-                invoiceConfirmed: true,
-                status: "confirmed"
-            });
-            alert("ইনভয়েস সফলভাবে কনফার্ম হয়েছে!");
+            await updateDoc(doc(db, "orders", orderId), { invoiceConfirmed: true, status: "confirmed" });
+            alert("রশিদ নিশ্চিত করা হয়েছে!");
         };
 
         // ৪. কুপন লজিক
         document.getElementById('applyCouponBtn').onclick = async () => {
             const orderId = localStorage.getItem('activeOrderId');
             const code = document.getElementById('couponInput').value.trim().toUpperCase();
-            const msg = document.getElementById('couponMsg');
-
-            if(!code) return;
-
-            // অ্যাডমিন প্যানেল থেকে 'coupons' কালেকশনে কুপন কোড চেক করবে
             const couponSnap = await getDoc(doc(db, "coupons", code));
-            
             if(couponSnap.exists()) {
-                const cData = couponSnap.data();
-                await updateDoc(doc(db, "orders", orderId), {
-                    discount: cData.amount || 0
-                });
-                msg.innerText = "কুপন কোড সফলভাবে যুক্ত হয়েছে!";
-                msg.className = "text-[9px] mt-1 font-bold text-green-600";
+                await updateDoc(doc(db, "orders", orderId), { discount: couponSnap.data().amount || 0 });
+                document.getElementById('couponMsg').innerText = "কুপন কোড যুক্ত হয়েছে!";
+                document.getElementById('couponMsg').style.color = "green";
             } else {
-                msg.innerText = "ভুল কুপন কোড!";
-                msg.className = "text-[9px] mt-1 font-bold text-red-600";
+                alert("ভুল কুপন!");
             }
         };
 
