@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-KHIDMAH | পার্টনার কন্ট্রোল</title>
+    <title>G-KHIDMAH | পার্টনার প্রো</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Hind Siliguri', sans-serif; } </style>
@@ -11,34 +11,43 @@
 <body class="bg-slate-100 pb-20">
 
     <div id="mainContent" class="max-w-2xl mx-auto p-4">
-        <header class="bg-blue-900 text-white p-6 rounded-3xl shadow-xl mb-6">
-            <h1 class="text-xl font-black italic uppercase">G-KHIDMAH PARTNER</h1>
-            <div id="locationStatus" class="mt-2 text-[10px] bg-blue-800 p-2 rounded-lg font-bold">
-                লোকেশন সেট করা নেই ⚠️
-            </div>
-            <button onclick="updatePartnerLocation()" class="mt-3 w-full bg-green-500 py-2 rounded-xl text-xs font-bold uppercase shadow-lg">📍 আমার বর্তমান লোকেশন সেট করুন</button>
+        <div id="notificationBox" class="hidden bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4 rounded-xl shadow-sm">
+            <p id="notifText" class="text-xs font-bold text-yellow-800 italic"></p>
+        </div>
+
+        <header class="bg-blue-900 text-white p-6 rounded-3xl shadow-xl mb-6 relative">
+            <button onclick="handleLogout()" class="absolute top-6 right-6 bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase transition-all border border-red-500/30">Logout 🔒</button>
+            <h1 class="text-xl font-black italic uppercase tracking-tighter">G-KHIDMAH PARTNER</h1>
+            <div id="locationStatus" class="mt-2 text-[10px] bg-blue-800 p-2 rounded-lg font-bold inline-block text-white">লোকেশন লোড হচ্ছে...</div>
+            <button onclick="updatePartnerLocation()" class="mt-4 w-full bg-green-500 hover:bg-green-600 py-3 rounded-2xl text-xs font-black uppercase shadow-lg transition-all active:scale-95">📍 লোকেশন আপডেট করুন</button>
         </header>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-3xl shadow-sm border-b-4 border-blue-500 text-center">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">মোট আয় (Partner Share)</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">মোট আয়</p>
                 <h2 id="pEarning" class="text-xl font-black italic text-blue-900">৳ ০.০০</h2>
             </div>
             <div class="bg-white p-4 rounded-3xl shadow-sm border-b-4 border-red-500 text-center">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">অ্যাডমিন ডিউ (Commission)</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">অ্যাডমিন ডিউ</p>
                 <h2 id="pDue" class="text-xl font-black italic text-red-600">৳ ০.০০</h2>
             </div>
         </div>
 
-        <h3 class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest px-2 text-center">চলমান অর্ডারসমূহ</h3>
-        <div id="orderContainer" class="space-y-4">
-            <p class="text-center text-gray-400 text-xs font-bold py-10 uppercase tracking-widest">অর্ডার লোড হচ্ছে...</p>
+        <h3 class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest px-2">চলমান অর্ডারসমূহ</h3>
+        <div id="orderContainer" class="space-y-4 mb-10">
+            <p class="text-center text-gray-400 text-[10px] py-10 uppercase">অর্ডার লোড হচ্ছে...</p>
+        </div>
+
+        <h3 class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest px-2">পেমেন্ট হিস্ট্রি (শেষ ৫টি)</h3>
+        <div id="historyContainer" class="bg-white rounded-3xl p-4 shadow-sm space-y-3">
+            <p class="text-center text-gray-300 text-[10px]">কোন হিস্ট্রি নেই</p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, orderBy, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, orderBy, getDoc, increment, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -48,119 +57,138 @@
             messagingSenderId: "780745438049",
             appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // ডেমো পার্টনার আইডি (লগইন করা মোবাইল নাম্বার)
-        const partnerPhone = "017XXXXXXXX"; 
+        let currentPartnerPhone = "";
+        let unsubs = []; // সব লিসেনার বন্ধ করার জন্য
 
-        // ১. লোকেশন আপডেট
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentPartnerPhone = user.phoneNumber || localStorage.getItem('partnerPhone');
+                if(!currentPartnerPhone) { window.location.href = "login.html"; return; }
+                loadDashboardData(currentPartnerPhone);
+            } else { window.location.href = "login.html"; }
+        });
+
+        window.handleLogout = () => {
+            if (confirm("লগআউট করতে চান?")) {
+                unsubs.forEach(fn => fn());
+                signOut(auth).then(() => { localStorage.clear(); window.location.href = "login.html"; });
+            }
+        };
+
+        function loadDashboardData(phone) {
+            // ১. প্রোফাইল ও নোটিফিকেশন
+            const u1 = onSnapshot(doc(db, "partners", phone), (snap) => {
+                if(snap.exists()){
+                    const data = snap.data();
+                    document.getElementById('pEarning').innerText = `৳ ${(data.wallet?.totalEarning || 0).toFixed(2)}`;
+                    document.getElementById('pDue').innerText = `৳ ${(data.wallet?.adminDue || 0).toFixed(2)}`;
+                    
+                    // লোকেশন স্ট্যাটাস
+                    const status = document.getElementById('locationStatus');
+                    status.innerText = data.locationSet ? "লোকেশন সেট করা আছে ✅" : "লোকেশন সেট করা নেই ⚠️";
+                    status.className = data.locationSet ? "mt-2 text-[10px] bg-green-700 p-2 rounded-lg font-bold inline-block text-white" : "mt-2 text-[10px] bg-red-600 p-2 rounded-lg font-bold inline-block text-white";
+
+                    // নোটিফিকেশন হ্যান্ডলিং
+                    if(data.notification) {
+                        document.getElementById('notificationBox').classList.remove('hidden');
+                        document.getElementById('notifText').innerText = `📢 ${data.notification}`;
+                    } else {
+                        document.getElementById('notificationBox').classList.add('hidden');
+                    }
+                }
+            });
+
+            // ২. চলমান অর্ডার (createdAt সহ)
+            const qOrders = query(collection(db, "orders"), where("partnerId", "==", phone), where("status", "==", "pending"), orderBy("createdAt", "desc"));
+            const u2 = onSnapshot(qOrders, (snap) => {
+                const container = document.getElementById('orderContainer');
+                container.innerHTML = snap.empty ? `<p class="text-center text-gray-400 text-[10px] py-10">কোন অর্ডার নেই</p>` : "";
+                
+                snap.forEach(d => {
+                    const order = d.data();
+                    const date = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString('bn-BD') : "এখনই";
+                    
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-5 rounded-[2.5rem] shadow-md border-l-8 border-blue-900";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <div>
+                                <span class="text-[8px] bg-blue-50 text-blue-900 px-2 py-1 rounded-full font-black uppercase inline-block">${order.serviceType}</span>
+                                <h3 class="font-black text-sm text-gray-800">${order.customerName}</h3>
+                            </div>
+                            <span class="text-[7px] font-bold text-gray-300 uppercase">${date}</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mb-4 italic">${order.customerAddress}</p>
+                        <button onclick="completeOrder('${d.id}', '${order.serviceType}')" class="w-full bg-green-600 text-white py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">অর্ডার কমপ্লিট করুন</button>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+
+            // ৩. পেমেন্ট হিস্ট্রি (Completed Orders)
+            const qHistory = query(collection(db, "orders"), where("partnerId", "==", phone), where("status", "==", "completed"), orderBy("createdAt", "desc"), limit(5));
+            const u3 = onSnapshot(qHistory, (snap) => {
+                const hContainer = document.getElementById('historyContainer');
+                hContainer.innerHTML = snap.empty ? `<p class="text-center text-gray-300 text-[10px]">কোন রেকর্ড নেই</p>` : "";
+                
+                snap.forEach(d => {
+                    const data = d.data();
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center border-b border-slate-50 pb-2 last:border-0";
+                    div.innerHTML = `
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-700">${data.customerName}</p>
+                            <p class="text-[8px] text-gray-400">${data.serviceType}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-green-600">+৳${(data.billAmount - data.adminCommission).toFixed(0)}</p>
+                            <p class="text-[7px] text-gray-300 uppercase">Paid</p>
+                        </div>
+                    `;
+                    hContainer.appendChild(div);
+                });
+            });
+
+            unsubs.push(u1, u2, u3);
+        }
+
         window.updatePartnerLocation = () => {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    await updateDoc(doc(db, "partners", partnerPhone), {
-                        lat: lat,
-                        lng: lng,
-                        locationSet: true
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    await updateDoc(doc(db, "partners", currentPartnerPhone), {
+                        lat: pos.coords.latitude, lng: pos.coords.longitude, locationSet: true
                     });
-                    alert("লোকেশন আপডেট হয়েছে!");
+                    alert("লোকেশন সফলভাবে আপডেট হয়েছে!");
                 });
-            } else { alert("লোকেশন সাপোর্ট করে না।"); }
+            }
         };
 
-        // ২. প্রোফাইল ডাটা ও ব্যালেন্স লোড (New Wallet Structure)
-        onSnapshot(doc(db, "partners", partnerPhone), (snap) => {
-            if(snap.exists()){
-                const data = snap.data();
-                document.getElementById('pEarning').innerText = `৳ ${(data.wallet?.totalEarning || 0).toFixed(2)}`;
-                document.getElementById('pDue').innerText = `৳ ${(data.wallet?.adminDue || 0).toFixed(2)}`;
-                
-                if(data.locationSet) {
-                    document.getElementById('locationStatus').innerText = "লোকেশন সেট করা আছে ✅";
-                    document.getElementById('locationStatus').classList.replace('bg-blue-800', 'bg-green-700');
-                }
-            }
-        });
-
-        // ৩. অর্ডার কমপ্লিট করার লজিক (Dynamic Commission Calculation)
-        window.completeOrder = async (orderId, serviceType, totalBill) => {
-            if (!totalBill || totalBill <= 0) {
-                const bill = prompt("মোট বিল কত টাকা হয়েছে?");
-                if (!bill) return;
-                totalBill = parseFloat(bill);
-            }
+        window.completeOrder = async (orderId, serviceType) => {
+            const bill = prompt("মোট বিল কত টাকা?");
+            if (!bill || isNaN(bill)) return;
+            const totalBill = parseFloat(bill);
 
             try {
-                // ১. পার্টনারের ডাটা থেকে ওই সার্ভিসের কমিশন রেট আনা
-                const pSnap = await getDoc(doc(db, "partners", partnerPhone));
+                const pSnap = await getDoc(doc(db, "partners", currentPartnerPhone));
                 const pData = pSnap.data();
-                
-                // নির্দিষ্ট সার্ভিসের কমিশন (না থাকলে ডিফল্ট ১০%)
-                const commRate = pData.services[serviceType]?.commission || 10;
-                
-                const adminDueAmount = (totalBill * commRate) / 100;
-                const partnerEarning = totalBill - adminDueAmount;
+                const commRate = pData.services?.[serviceType]?.commission || 10;
+                const adminDue = (totalBill * commRate) / 100;
+                const pEarn = totalBill - adminDue;
 
-                // ২. অর্ডারের স্ট্যাটাস আপডেট
                 await updateDoc(doc(db, "orders", orderId), {
-                    status: 'completed',
-                    billAmount: totalBill,
-                    adminCommission: adminDueAmount
+                    status: 'completed', billAmount: totalBill, adminCommission: adminDue, completedAt: new Date()
                 });
-
-                // ৩. পার্টনারের ওয়ালেট আপডেট (Atomic Increment)
-                await updateDoc(doc(db, "partners", partnerPhone), {
-                    "wallet.adminDue": increment(adminDueAmount),
-                    "wallet.totalEarning": increment(partnerEarning)
+                await updateDoc(doc(db, "partners", currentPartnerPhone), {
+                    "wallet.adminDue": increment(adminDue), "wallet.totalEarning": increment(pEarn)
                 });
-
-                alert(`অর্ডার কমপ্লিট! আপনার আয়: ৳${partnerEarning.toFixed(2)}`);
-            } catch (e) {
-                console.error(e);
-                alert("অর্ডার আপডেট করতে সমস্যা হয়েছে!");
-            }
+                alert("অর্ডার সফলভাবে কমপ্লিট হয়েছে!");
+            } catch (e) { alert("Error: " + e.message); }
         };
-
-        // ৪. এই পার্টনারের অর্ডারগুলো রিয়েলটাইম দেখানো
-        const q = query(collection(db, "orders"), where("partnerId", "==", partnerPhone), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snap) => {
-            const container = document.getElementById('orderContainer');
-            container.innerHTML = "";
-            
-            if (snap.empty) {
-                container.innerHTML = `<p class="text-center text-gray-400 text-[10px] py-10">কোন অর্ডার পাওয়া যায়নি।</p>`;
-                return;
-            }
-
-            snap.forEach(d => {
-                const order = d.data();
-                if (order.status === 'completed') return; // কমপ্লিটেডগুলো দেখাবে না
-
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-[2.5rem] shadow-md border-l-8 border-blue-900 mb-4";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span class="text-[8px] bg-blue-50 text-blue-900 px-2 py-1 rounded-full font-black uppercase mb-1 inline-block">${order.serviceType || 'Service'}</span>
-                            <h3 class="font-black text-sm text-gray-800">${order.customerName}</h3>
-                        </div>
-                        <span class="text-[8px] font-mono text-gray-300">#${d.id.slice(-5)}</span>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mb-4 italic">${order.customerAddress}</p>
-                    
-                    <div class="flex gap-2">
-                        <button onclick="completeOrder('${d.id}', '${order.serviceType}', 0)" 
-                                class="flex-1 bg-green-600 text-white py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">
-                            Complete Order
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        });
     </script>
 </body>
 </html>
