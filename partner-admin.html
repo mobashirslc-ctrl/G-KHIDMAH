@@ -21,15 +21,16 @@
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-3xl shadow-sm border-b-4 border-blue-500 text-center">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">মোট আয়</p>
-                <h2 id="pEarning" class="text-xl font-black italic text-blue-900">৳ 0</h2>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">মোট আয় (Partner Share)</p>
+                <h2 id="pEarning" class="text-xl font-black italic text-blue-900">৳ ০.০০</h2>
             </div>
             <div class="bg-white p-4 rounded-3xl shadow-sm border-b-4 border-red-500 text-center">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">অ্যাডমিন ডিউ</p>
-                <h2 id="pDue" class="text-xl font-black italic text-red-600">৳ 0</h2>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">অ্যাডমিন ডিউ (Commission)</p>
+                <h2 id="pDue" class="text-xl font-black italic text-red-600">৳ ০.০০</h2>
             </div>
         </div>
 
+        <h3 class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest px-2 text-center">চলমান অর্ডারসমূহ</h3>
         <div id="orderContainer" class="space-y-4">
             <p class="text-center text-gray-400 text-xs font-bold py-10 uppercase tracking-widest">অর্ডার লোড হচ্ছে...</p>
         </div>
@@ -37,16 +38,23 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, orderBy, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = { /* আপনার কনফিগ দিন */ };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ডেমো পার্টনার আইডি (লগইন করার পর যা পাবেন)
+        // ডেমো পার্টনার আইডি (লগইন করা মোবাইল নাম্বার)
         const partnerPhone = "017XXXXXXXX"; 
 
-        // ১. লোকেশন আপডেট ফাংশন
+        // ১. লোকেশন আপডেট
         window.updatePartnerLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
@@ -58,19 +66,18 @@
                         lng: lng,
                         locationSet: true
                     });
-                    alert("লোকেশন আপডেট হয়েছে! এখন আপনার রেডিয়াসের অর্ডারগুলো পাবেন।");
+                    alert("লোকেশন আপডেট হয়েছে!");
                 });
-            } else {
-                alert("আপনার ব্রাউজার লোকেশন সাপোর্ট করে না।");
-            }
+            } else { alert("লোকেশন সাপোর্ট করে না।"); }
         };
 
-        // ২. পার্টনার প্রোফাইল ও অর্ডার রিয়েলটাইম লোড
+        // ২. প্রোফাইল ডাটা ও ব্যালেন্স লোড (New Wallet Structure)
         onSnapshot(doc(db, "partners", partnerPhone), (snap) => {
             if(snap.exists()){
                 const data = snap.data();
-                document.getElementById('pEarning').innerText = `৳ ${data.earning || 0}`;
-                document.getElementById('pDue').innerText = `৳ ${data.adminDue || 0}`;
+                document.getElementById('pEarning').innerText = `৳ ${(data.wallet?.totalEarning || 0).toFixed(2)}`;
+                document.getElementById('pDue').innerText = `৳ ${(data.wallet?.adminDue || 0).toFixed(2)}`;
+                
                 if(data.locationSet) {
                     document.getElementById('locationStatus').innerText = "লোকেশন সেট করা আছে ✅";
                     document.getElementById('locationStatus').classList.replace('bg-blue-800', 'bg-green-700');
@@ -78,22 +85,80 @@
             }
         });
 
-        // ৩. এই পার্টনারের জন্য আসা অর্ডারগুলো দেখানো
-        onSnapshot(query(collection(db, "orders"), where("partnerId", "==", partnerPhone), orderBy("createdAt", "desc")), (snap) => {
+        // ৩. অর্ডার কমপ্লিট করার লজিক (Dynamic Commission Calculation)
+        window.completeOrder = async (orderId, serviceType, totalBill) => {
+            if (!totalBill || totalBill <= 0) {
+                const bill = prompt("মোট বিল কত টাকা হয়েছে?");
+                if (!bill) return;
+                totalBill = parseFloat(bill);
+            }
+
+            try {
+                // ১. পার্টনারের ডাটা থেকে ওই সার্ভিসের কমিশন রেট আনা
+                const pSnap = await getDoc(doc(db, "partners", partnerPhone));
+                const pData = pSnap.data();
+                
+                // নির্দিষ্ট সার্ভিসের কমিশন (না থাকলে ডিফল্ট ১০%)
+                const commRate = pData.services[serviceType]?.commission || 10;
+                
+                const adminDueAmount = (totalBill * commRate) / 100;
+                const partnerEarning = totalBill - adminDueAmount;
+
+                // ২. অর্ডারের স্ট্যাটাস আপডেট
+                await updateDoc(doc(db, "orders", orderId), {
+                    status: 'completed',
+                    billAmount: totalBill,
+                    adminCommission: adminDueAmount
+                });
+
+                // ৩. পার্টনারের ওয়ালেট আপডেট (Atomic Increment)
+                await updateDoc(doc(db, "partners", partnerPhone), {
+                    "wallet.adminDue": increment(adminDueAmount),
+                    "wallet.totalEarning": increment(partnerEarning)
+                });
+
+                alert(`অর্ডার কমপ্লিট! আপনার আয়: ৳${partnerEarning.toFixed(2)}`);
+            } catch (e) {
+                console.error(e);
+                alert("অর্ডার আপডেট করতে সমস্যা হয়েছে!");
+            }
+        };
+
+        // ৪. এই পার্টনারের অর্ডারগুলো রিয়েলটাইম দেখানো
+        const q = query(collection(db, "orders"), where("partnerId", "==", partnerPhone), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snap) => {
             const container = document.getElementById('orderContainer');
             container.innerHTML = "";
-            snap.forEach(doc => {
-                const order = doc.data();
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-[2rem] shadow-md border-l-8 border-blue-900">
-                        <div class="flex justify-between items-start mb-2">
+            
+            if (snap.empty) {
+                container.innerHTML = `<p class="text-center text-gray-400 text-[10px] py-10">কোন অর্ডার পাওয়া যায়নি।</p>`;
+                return;
+            }
+
+            snap.forEach(d => {
+                const order = d.data();
+                if (order.status === 'completed') return; // কমপ্লিটেডগুলো দেখাবে না
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-[2.5rem] shadow-md border-l-8 border-blue-900 mb-4";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-[8px] bg-blue-50 text-blue-900 px-2 py-1 rounded-full font-black uppercase mb-1 inline-block">${order.serviceType || 'Service'}</span>
                             <h3 class="font-black text-sm text-gray-800">${order.customerName}</h3>
-                            <span class="text-[8px] bg-blue-100 text-blue-900 px-2 py-1 rounded-full font-bold uppercase">${order.status}</span>
                         </div>
-                        <p class="text-[10px] text-gray-500 font-bold mb-3">${order.customerAddress}</p>
-                        <button onclick="updateStatus('${doc.id}', 'confirmed')" class="w-full bg-blue-900 text-white py-2 rounded-xl text-[10px] font-black uppercase">অর্ডার কনফার্ম করুন</button>
+                        <span class="text-[8px] font-mono text-gray-300">#${d.id.slice(-5)}</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-4 italic">${order.customerAddress}</p>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="completeOrder('${d.id}', '${order.serviceType}', 0)" 
+                                class="flex-1 bg-green-600 text-white py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">
+                            Complete Order
+                        </button>
                     </div>
                 `;
+                container.appendChild(card);
             });
         });
     </script>
