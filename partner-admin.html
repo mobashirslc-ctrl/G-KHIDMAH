@@ -11,14 +11,17 @@
 <body class="bg-slate-100 pb-20">
 
     <div id="loginOverlay" class="fixed inset-0 bg-blue-900 z-50 flex items-center justify-center p-6 hidden">
-        <div class="bg-white p-8 rounded-[3rem] shadow-2xl w-full max-w-sm text-center">
-            <h2 class="text-2xl font-black text-blue-900 mb-2 uppercase italic">Partner Login</h2>
-            <p class="text-xs text-gray-400 mb-6 font-bold">আপনার ফোন নম্বর দিয়ে লগইন করুন</p>
-            <div id="recaptcha-container"></div>
-            <input type="tel" id="phoneNumber" placeholder="+88017XXXXXXXX" class="w-full p-4 rounded-2xl bg-slate-100 mb-4 text-center font-bold outline-none border-2 border-transparent focus:border-blue-500 transition-all">
-            <button onclick="sendOTP()" id="loginBtn" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">OTP পাঠান 🚀</button>
-        </div>
+    <div class="bg-white p-8 rounded-[3rem] shadow-2xl w-full max-w-sm text-center">
+        <h2 class="text-2xl font-black text-blue-900 mb-2 uppercase italic">Partner Access</h2>
+        <p class="text-xs text-gray-400 mb-6 font-bold">আপনার ফোন নম্বর এবং সিক্রেট পিন দিন</p>
+        
+        <input type="tel" id="loginPhone" placeholder="Phone Number (017...)" class="w-full p-4 rounded-2xl bg-slate-100 mb-3 text-center font-bold outline-none border-2 border-transparent focus:border-blue-500 transition-all">
+        
+        <input type="password" id="masterPin" placeholder="Secret PIN" class="w-full p-4 rounded-2xl bg-slate-100 mb-6 text-center font-bold outline-none border-2 border-transparent focus:border-blue-500 transition-all">
+        
+        <button onclick="handlePinLogin()" class="w-full bg-blue-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">প্রবেশ করুন 🚀</button>
     </div>
+</div>
 
     <div id="mainContent" class="max-w-2xl mx-auto p-4 hidden">
         <div id="notificationBox" class="hidden bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4 rounded-xl">
@@ -76,38 +79,66 @@
         let unsubs = [];
 
         // ১. অথেন্টিকেশন লজিক (Single Page)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                currentPartnerPhone = user.phoneNumber;
-                loadDashboardData(currentPartnerPhone);
-            } else {
-                document.getElementById('loginOverlay').classList.remove('hidden');
-                document.getElementById('mainContent').classList.add('hidden');
-            }
-        });
+       const MASTER_PIN = "123456"; 
 
-        // OTP পাঠানোর ফাংশন (Login Section)
-        window.sendOTP = async () => {
-            const phone = document.getElementById('phoneNumber').value;
-            if(!phone.startsWith('+')) return alert("অবশ্যই কান্ট্রি কোড সহ নম্বর দিন! (যেমন: +88017...)");
+// ১. পেজ লোড হওয়ার পর চেক
+window.onload = () => {
+    const savedPartner = localStorage.getItem('partnerPhone');
+    if (savedPartner) {
+        showDashboard(savedPartner);
+    } else {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+};
+
+// ২. ডাটাবেস থেকে পিন যাচাই করে লগইন
+window.handlePinLogin = async () => {
+    const phone = document.getElementById('loginPhone').value.trim();
+    const pin = document.getElementById('masterPin').value.trim();
+
+    if (phone.length < 11) {
+        alert("সঠিক ফোন নম্বর দিন");
+        return;
+    }
+
+    try {
+        // 'partners' কালেকশন থেকে ঐ ফোন নম্বরের ডকুমেন্ট আনা
+        const partnerDocRef = doc(db, "partners", phone);
+        const partnerSnap = await getDoc(partnerDocRef);
+
+        if (partnerSnap.exists()) {
+            const partnerData = partnerSnap.data();
             
-            const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
-            try {
-                const confirmation = await signInWithPhoneNumber(auth, phone, verifier);
-                const code = prompt("আপনার মোবাইলে পাঠানো ৬ ডিজিটের OTP কোডটি দিন:");
-                if(code) await confirmation.confirm(code);
-            } catch (e) { alert("এরর: " + e.message); }
-        };
-
-        window.handleLogout = () => {
-            if (confirm("লগআউট করতে চান?")) {
-                unsubs.forEach(fn => fn());
-                signOut(auth);
+            // ডাটাবেসে 'pin' ফিল্ডের সাথে ইনপুট দেওয়া পিন মিলছে কি না চেক
+            if (partnerData.pin && partnerData.pin.toString() === pin) {
+                localStorage.setItem('partnerPhone', phone);
+                showDashboard(phone);
+            } else {
+                alert("ভুল সিক্রেট পিন! আবার চেষ্টা করুন।");
             }
-        };
+        } else {
+            alert("এই নম্বরটি আমাদের সিস্টেমে নিবন্ধিত নেই।");
+        }
+    } catch (e) {
+        console.error("Login Error:", e);
+        alert("লগইন করতে সমস্যা হচ্ছে। ইন্টারনেট চেক করুন।");
+    }
+};
 
+// ৩. ড্যাশবোর্ড দেখানোর ফাংশন
+function showDashboard(phone) {
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('mainContent').classList.remove('hidden');
+    currentPartnerPhone = phone;
+    loadDashboardData(phone);
+}
+// ৪. লগআউট লজিক
+window.handleLogout = () => {
+    if (confirm("লগআউট করতে চান?")) {
+        localStorage.removeItem('partnerPhone');
+        location.reload();
+    }
+};
         function loadDashboardData(phone) {
             // প্রোফাইল লিসেনার
             const u1 = onSnapshot(doc(db, "partners", phone), (snap) => {
