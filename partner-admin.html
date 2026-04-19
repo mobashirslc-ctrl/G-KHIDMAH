@@ -218,6 +218,40 @@ window.saveShoppingBill = async (id) => {
         alert("সেভ করতে সমস্যা হয়েছে: " + e.message);
     }
 };
+window.removeItem = async (id, item) => {
+    if(confirm(`আপনি কি "${item}" তালিকা থেকে বাদ দিতে চান?`)) {
+        await updateDoc(doc(db, "orders", id), { 
+            items: arrayRemove(item), 
+            alertMessage: `দুঃখিত, "${item}" এই মুহূর্তে স্টকে নেই।`, 
+            alertType: "item_removed", // এটি ইউজার সাইডে রিং বাজাবে
+            alertTime: Date.now() 
+        });
+        alert("আইটেমটি বাদ দেওয়া হয়েছে এবং ইউজারকে জানানো হয়েছে।");
+    }
+};
+
+// শপিং বিল সেভ করার ফাংশন (অ্যাডমিন সাইড)
+window.saveShoppingBill = async (id) => {
+    const prices = {}; 
+    let sub = 0;
+    document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
+        const p = parseFloat(inp.value) || 0;
+        prices[inp.dataset.item] = p; 
+        sub += p;
+    });
+    const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+    const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+    
+    await updateDoc(doc(db, "orders", id), { 
+        itemPrices: prices, 
+        subTotal: sub, 
+        deliveryCharge: del, 
+        platformFee: plat,
+        status: "invoice_ready",
+        alertType: "invoice_updated" // ইনভয়েস আপডেট হলে ইউজারকে নোটিফিকেশন দিবে
+    });
+    alert("ইনভয়েস আপডেট হয়েছে!");
+};
 function renderOrderCard(order, container) {
     const config = configs[order.serviceType] || configs.shopping;
     const card = document.createElement('div');
@@ -276,6 +310,7 @@ window.updateLoc = async () => {
         alert("লোকেশন আপডেট ব্যর্থ!");
     }
 };
+
     </script>
 </body>
 </html>
