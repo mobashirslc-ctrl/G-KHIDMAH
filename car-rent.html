@@ -12,36 +12,57 @@
 
     <header class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-blue-100 flex items-center justify-between px-6">
         <h1 class="text-xl font-bold text-blue-900 uppercase italic">G KHIDMAH</h1>
-        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-black bg-blue-50 text-blue-900 px-3 py-1 rounded-full">নতুন ট্রিপ</button>
+        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-black bg-blue-50 text-blue-900 px-3 py-1 rounded-full text-xs">নতুন ট্রিপ</button>
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-            <div class="text-center mb-6"><div class="text-5xl mb-2">🚗</div><h2 class="text-lg font-bold">ভাড়ার তথ্য দিন</h2></div>
+            <div class="text-center mb-6"><div class="text-5xl mb-2">🚗</div><h2 class="text-lg font-bold">ভাড়ার তথ্য দিন</h2></div>
             <div class="space-y-3">
                 <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
                 <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
-                <input type="text" id="pickup" placeholder="পিকআপ পয়েন্ট" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
+                <input type="text" id="pickup" placeholder="পিকআপ পয়েন্ট" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
                 <input type="text" id="destination" placeholder="গন্তব্য" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-200 outline-none font-bold text-sm transition-all">
-                <textarea id="carNote" rows="2" class="w-full border-2 border-slate-100 p-4 rounded-3xl outline-none font-semibold text-sm" placeholder="গাড়ির ধরন (যেমন: হাইস, প্রাইভেট কার)"></textarea>
+                <textarea id="carNote" rows="2" class="w-full border-2 border-slate-100 p-4 rounded-3xl outline-none font-semibold text-sm" placeholder="গাড়ির ধরন (যেমন: হাইস, প্রাইভেট কার)"></textarea>
             </div>
-            <button id="submitBtn" class="w-full bg-blue-900 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg uppercase">বুকিং রিকোয়েস্ট পাঠান</button>
+            <button id="submitBtn" class="w-full bg-blue-900 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg uppercase">বুকিং রিকোয়েস্ট পাঠান</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-6">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-blue-100">
                 <div id="statusIcon" class="text-7xl mb-4 animate-bounce">🔍</div>
-                <h1 id="trackMessage" class="text-xl font-black text-blue-900 italic uppercase leading-tight">অনুরোধ পাঠানো হয়েছে...</h1>
+                <h1 id="trackMessage" class="text-xl font-black text-blue-900 italic uppercase leading-tight">অনুরোধ পাঠানো হয়েছে...</h1>
                 <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-1 mt-6">
                     <div id="progressBar" class="bg-blue-900 h-full rounded-full transition-all duration-1000" style="width: 10%"></div>
                 </div>
             </div>
 
-            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-xl border border-blue-100 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="font-bold text-gray-500">ভাড়া নির্ধারণ:</span>
-                    <span id="rentDisplay" class="text-3xl font-black text-blue-900">৳0</span>
+            <div id="invoiceBox" class="hidden bg-white rounded-[2rem] shadow-xl border border-blue-100 p-6 space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-sm font-bold text-gray-500">
+                        <span>মূল ভাড়া:</span>
+                        <span id="rentDisplay">৳০</span>
+                    </div>
+                    
+                    <div id="discountRow" class="hidden flex justify-between items-center text-sm font-bold text-red-500">
+                        <span>ডিসকাউন্ট:</span>
+                        <span id="discountDisplay">-৳০</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t">
+                        <span class="font-black text-blue-900 italic">মোট প্রদেয়:</span>
+                        <span id="grandTotalDisplay" class="text-3xl font-black text-blue-900 tracking-tighter">৳০</span>
+                    </div>
                 </div>
+
+                <div id="couponSection" class="bg-blue-50/50 p-4 rounded-2xl border-2 border-dashed border-blue-100">
+                    <div class="flex gap-2">
+                        <input type="text" id="couponInput" placeholder="কুপন কোড" class="flex-1 p-2 rounded-xl border border-blue-200 outline-none text-xs font-bold uppercase">
+                        <button id="applyCouponBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Apply</button>
+                    </div>
+                    <p id="couponMsg" class="text-[9px] mt-1 font-bold hidden"></p>
+                </div>
+
                 <div id="driverInfo" class="hidden mt-4 pt-4 border-t flex items-center gap-4">
                     <div class="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">👨🏻‍✈️</div>
                     <div>
@@ -55,7 +76,7 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -82,8 +103,6 @@
         const pickup = document.getElementById('pickup').value.trim();
         const dest = document.getElementById('destination').value.trim();
         const note = document.getElementById('carNote').value.trim();
-
-        // ১. পার্টনার আইডি নিয়ে আসা (ড্যাশবোর্ডে ডাটা দেখানোর জন্য)
         const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
 
         if(!name || !phone || !pickup || !dest) return alert("অনুগ্রহ করে সব তথ্য পূরণ করুন!");
@@ -99,16 +118,12 @@
             items: [note || "Car Rental Service"],
             serviceType: "car_rental", 
             status: "request_received",
-            
-            // ২. পার্টনার প্যানেলের জন্য আইডি অবজেক্ট
-            assignedPerson: {
-                id: partnerId
-            },
-
+            assignedPerson: { id: partnerId },
             createdAt: serverTimestamp(),
             subTotal: 0,
             deliveryCharge: 0,
-            platformFee: 50, // কার রেন্টালের জন্য আলাদা ফি হতে পারে
+            platformFee: 50,
+            discount: 0,
             invoiceConfirmed: false
         };
 
@@ -117,7 +132,6 @@
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
         } catch (e) {
-            console.error(e);
             alert("দুঃখিত, আবার চেষ্টা করুন।");
             btn.innerText = "বুকিং রিকোয়েস্ট পাঠান";
             btn.disabled = false;
@@ -140,14 +154,23 @@
             document.getElementById('trackMessage').innerText = conf.msg;
             document.getElementById('progressBar').style.width = conf.progress;
 
-            // ভাড়া বা বিল প্রদর্শন
+            // বিলিং এবং কুপন ক্যালকুলেশন
             if(data.subTotal > 0) {
                 document.getElementById('invoiceBox').classList.remove('hidden');
                 document.getElementById('rentDisplay').innerText = `৳${data.subTotal}`;
+                
+                if(data.discount > 0) {
+                    document.getElementById('discountRow').classList.remove('hidden');
+                    document.getElementById('discountDisplay').innerText = `-৳${data.discount}`;
+                    document.getElementById('couponSection').classList.add('hidden');
+                } else {
+                    document.getElementById('couponSection').classList.remove('hidden');
+                }
+
+                const grandTotal = (data.subTotal + (data.platformFee || 0)) - (data.discount || 0);
+                document.getElementById('grandTotalDisplay').innerText = `৳${grandTotal}`;
             }
 
-            // ড্রাইভার তথ্য প্রদর্শন (যদি অ্যাডমিন ড্রাইভার এসাইন করে)
-            // এখানে data.assignedPerson.name/phone ব্যবহার করা হয়েছে যা অ্যাডমিন প্যানেল থেকে আসবে
             if(data.driverName || (data.assignedPerson && data.assignedPerson.name)) {
                 document.getElementById('driverInfo').classList.remove('hidden');
                 document.getElementById('driverName').innerText = data.driverName || data.assignedPerson.name;
@@ -156,6 +179,42 @@
             }
         });
     }
+
+    // কুপন অ্যাপ্লাই লজিক
+    document.getElementById('applyCouponBtn').onclick = async () => {
+        const code = document.getElementById('couponInput').value.trim().toUpperCase();
+        const orderId = localStorage.getItem('activeOrderId');
+        const msg = document.getElementById('couponMsg');
+
+        if(!code || !orderId) return;
+
+        try {
+            const couponRef = doc(db, "coupons", code);
+            const couponSnap = await getDoc(couponRef);
+
+            if (couponSnap.exists() && couponSnap.data().isActive) {
+                const couponData = couponSnap.data();
+                
+                if(couponData.serviceType === "all" || couponData.serviceType === "car_rental") {
+                    await updateDoc(doc(db, "orders", orderId), {
+                        discount: parseFloat(couponData.discount),
+                        couponApplied: code
+                    });
+                    msg.innerText = "অভিনন্দন! ডিসকাউন্ট যোগ হয়েছে।";
+                    msg.className = "text-[9px] mt-1 font-bold text-green-600";
+                } else {
+                    msg.innerText = "এই কুপনটি এই সার্ভিসের জন্য নয়।";
+                    msg.className = "text-[9px] mt-1 font-bold text-red-600";
+                }
+            } else {
+                msg.innerText = "ভুল কুপন কোড!";
+                msg.className = "text-[9px] mt-1 font-bold text-red-600";
+            }
+            msg.classList.remove('hidden');
+        } catch (e) {
+            alert("কুপন কাজ করছে না।");
+        }
+    };
 
     window.onload = initTracking;
 </script>

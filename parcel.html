@@ -24,20 +24,34 @@
         
         <div id="orderSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div class="text-center mb-6"><div class="text-5xl mb-2">📦</div><h2 class="text-lg font-bold text-gray-800 italic uppercase">পার্সেল ডেলিভারি</h2></div>
-            <div class="space-y-3">
-                <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
-                <input type="tel" id="custPhone" placeholder="মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
-                <input type="text" id="pickupAddr" placeholder="পিকআপ ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
-                <input type="text" id="deliveryAddr" placeholder="ডেলিভারি ঠিকানা" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
-                <textarea id="parcelNote" rows="2" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold" placeholder="পার্সেলের বিবরণ..."></textarea>
+            
+            <div class="space-y-6">
+                <div class="space-y-3">
+                    <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">🟢 প্রেরকের তথ্য (Sender)</h3>
+                    <input type="text" id="custName" placeholder="আপনার নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                    <input type="tel" id="custPhone" placeholder="আপনার মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                    <input type="text" id="pickupAddr" placeholder="পিকআপ ঠিকানা (যেখান থেকে পার্সেল নিবে)" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                </div>
+
+                <hr class="border-dashed">
+
+                <div class="space-y-3">
+                    <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">🔴 প্রাপকের তথ্য (Receiver)</h3>
+                    <input type="text" id="receiverName" placeholder="প্রাপকের নাম" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                    <input type="tel" id="receiverPhone" placeholder="প্রাপকের মোবাইল নাম্বার" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                    <input type="text" id="deliveryAddr" placeholder="ডেলিভারি ঠিকানা (গন্তব্য)" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-green-200 outline-none text-sm font-bold">
+                </div>
+
+                <textarea id="parcelNote" rows="2" class="w-full border-2 border-green-50 p-4 rounded-3xl outline-none text-sm font-semibold" placeholder="পার্সেলের বিবরণ (যেমন: ইলেকট্রনিক্স, খাবার ইত্যাদি)"></textarea>
             </div>
-            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">ডেলিভারি রিকোয়েস্ট পাঠান</button>
+            
+            <button id="submitBtn" class="w-full bg-green-700 text-white mt-5 py-4 rounded-2xl font-bold text-lg active:scale-95 shadow-lg">ডেলিভারি রিকোয়েস্ট পাঠান</button>
         </div>
 
         <div id="trackingSection" class="hidden space-y-4">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border border-green-100">
                 <div id="statusIcon" class="text-7xl mb-4 animate-bounce">📋</div>
-                <h1 id="trackMessage" class="text-xl font-black text-green-700 leading-tight uppercase">অনুরোধ পাঠানো হয়েছে...</h1>
+                <h1 id="trackMessage" class="text-xl font-black text-green-700 leading-tight uppercase">অনুরোধ পাঠানো হয়েছে...</h1>
                 
                 <div id="liveStatusBox" class="hidden mt-4 py-2 px-4 bg-orange-50 border border-orange-100 rounded-full inline-block">
                     <p class="text-[11px] text-orange-600 font-bold animate-pulse" id="liveStatusText">📍 লোকেশন আপডেট হচ্ছে...</p>
@@ -48,29 +62,34 @@
                 </div>
             </div>
 
-            <div id="chargeBox" class="hidden bg-white p-6 rounded-[2rem] border-2 border-dashed border-green-200 text-center shadow-lg">
-                <p class="text-xs font-bold text-gray-500 uppercase mb-2">Delivery Charge</p>
-                <h2 id="chargeDisplay" class="text-4xl font-black text-green-800 mb-4">৳০</h2>
+            <div id="chargeBox" class="hidden bg-white p-6 rounded-[2rem] border-2 border-dashed border-green-200 text-center shadow-lg space-y-4">
+                <p class="text-xs font-bold text-gray-500 uppercase">Delivery Bill</p>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm font-bold text-gray-600"><span>ডেলিভারি চার্জ:</span><span id="chargeDisplay">৳০</span></div>
+                    <div id="discountRow" class="hidden flex justify-between text-sm font-bold text-red-500"><span>ডিসকাউন্ট:</span><span id="discountDisplay">-৳০</span></div>
+                    <div class="pt-2 border-t flex justify-between items-center">
+                        <span class="font-black text-green-800 italic text-xl">মোট বিল:</span>
+                        <span id="totalBill" class="text-3xl font-black text-green-800">৳০</span>
+                    </div>
+                </div>
+
+                <div id="couponSection" class="bg-green-50/50 p-4 rounded-2xl border border-green-100">
+                    <div class="flex gap-2">
+                        <input type="text" id="couponInput" placeholder="কুপন কোড" class="flex-1 p-2 rounded-xl border border-green-200 outline-none text-xs font-bold uppercase">
+                        <button id="applyCouponBtn" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Apply</button>
+                    </div>
+                    <p id="couponMsg" class="text-[9px] mt-1 font-bold hidden"></p>
+                </div>
+
                 <button id="confirmChargeBtn" class="w-full bg-green-700 text-white py-3 rounded-xl font-black uppercase shadow-lg active:scale-95">কনফার্ম ও রাইডার কল করুন</button>
             </div>
             
-<div class="space-y-4 p-6 bg-white rounded-3xl shadow-sm">
-    <h3 class="font-bold text-gray-700">প্রেরকের তথ্য (Sender)</h3>
-    <input type="text" placeholder="আপনার নাম" class="w-full p-4 bg-gray-50 rounded-2xl">
-    <input type="tel" placeholder="আপনার মোবাইল নাম্বার" class="w-full p-4 bg-gray-50 rounded-2xl">
-
-    <hr class="border-dashed my-4">
-
-    <h3 class="font-bold text-gray-700">প্রাপকের তথ্য (Receiver)</h3>
-    <input type="text" id="receiverName" placeholder="প্রাপকের নাম" class="w-full p-4 bg-gray-50 rounded-2xl" required>
-    <input type="tel" id="receiverPhone" placeholder="প্রাপকের মোবাইল নাম্বার" class="w-full p-4 bg-gray-50 rounded-2xl" required>
-    <textarea placeholder="বিস্তারিত ঠিকানা" class="w-full p-4 bg-gray-50 rounded-2xl"></textarea>
-</div>
             <div id="riderCard" class="hidden bg-white p-5 rounded-[2rem] shadow-xl border border-gray-100 flex items-center gap-4">
                 <img id="riderPic" src="" class="w-16 h-16 rounded-full object-cover border-2 border-green-500 shadow-sm">
                 <div class="flex-1">
-                    <h4 id="riderName" class="font-bold text-gray-800">রাইডার তথ্য</h4>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Verified Rider</p>
+                    <h4 id="riderName" class="font-bold text-gray-800 text-sm">রাইডার তথ্য</h4>
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Verified Rider</p>
                     <div id="riderNidBox" class="mt-1">
                         <p id="riderNid" class="text-[9px] font-mono text-gray-500 bg-slate-50 px-2 py-0.5 rounded inline-block">NID: Verified</p>
                     </div>
@@ -82,7 +101,7 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -111,12 +130,13 @@
         const phone = document.getElementById('custPhone').value.trim();
         const pAddr = document.getElementById('pickupAddr').value.trim();
         const dAddr = document.getElementById('deliveryAddr').value.trim();
+        const rName = document.getElementById('receiverName').value.trim();
+        const rPhone = document.getElementById('receiverPhone').value.trim();
         const note = document.getElementById('parcelNote').value.trim();
         
-        // ১. পার্টনার আইডি নিয়ে আসা
         const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
 
-        if(!name || !phone || !pAddr || !dAddr) return alert("সব তথ্য পূরণ করুন!");
+        if(!name || !phone || !pAddr || !dAddr || !rName || !rPhone) return alert("প্রেরক ও প্রাপকের সব তথ্য পূরণ করুন!");
 
         const btn = document.getElementById('submitBtn');
         btn.innerText = "অনুরোধ পাঠানো হচ্ছে...";
@@ -126,18 +146,16 @@
             customerName: name, 
             customerPhone: phone, 
             pickupLocation: pAddr,
-            customerAddress: dAddr, 
+            customerAddress: dAddr,
+            receiverName: rName,
+            receiverPhone: rPhone,
             items: [note || "Parcel Delivery"],
-            orderType: "parcel", 
+            serviceType: "parcel", 
             status: "pending", 
-            
-            // ২. পার্টনার প্যানেলের জন্য জরুরি অবজেক্ট
-            assignedPerson: {
-                id: partnerId
-            },
-
+            assignedPerson: { id: partnerId },
             deliveryCharge: 0, 
             platformFee: 20,
+            discount: 0,
             invoiceConfirmed: false,
             createdAt: serverTimestamp()
         };
@@ -147,7 +165,6 @@
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
         } catch (e) {
-            console.error(e);
             alert("দুঃখিত, আবার চেষ্টা করুন।");
             btn.innerText = "ডেলিভারি রিকোয়েস্ট পাঠান";
             btn.disabled = false;
@@ -175,37 +192,31 @@
             document.getElementById('trackMessage').innerText = config.msg;
             document.getElementById('progressBar').style.width = config.progress + "%";
 
-            // লাইভ লোকেশন আপডেট
-            if(data.currentLoc) {
-                document.getElementById('liveStatusBox').classList.remove('hidden');
-                document.getElementById('liveStatusText').innerText = `📍 ${data.currentLoc}`;
-            } else {
-                document.getElementById('liveStatusBox').classList.add('hidden');
-            }
-
-            // চার্জ কনফার্মেশন লজিক
+            // বিল এবং কুপন লজিক
             if(data.deliveryCharge > 0 && data.status === "wait_confirmation") {
                 document.getElementById('chargeBox').classList.remove('hidden');
                 document.getElementById('chargeDisplay').innerText = `৳${data.deliveryCharge}`;
                 
-                document.getElementById('confirmChargeBtn').onclick = async () => {
-                    const btn = document.getElementById('confirmChargeBtn');
-                    btn.innerText = "প্রসেসিং...";
-                    btn.disabled = true;
-                    await updateDoc(doc(db, "orders", orderId), { 
-                        status: "rider_assigned",
-                        invoiceConfirmed: true 
-                    });
-                };
+                if(data.discount > 0) {
+                    document.getElementById('discountRow').classList.remove('hidden');
+                    document.getElementById('discountDisplay').innerText = `-৳${data.discount}`;
+                    document.getElementById('couponSection').classList.add('hidden');
+                } else {
+                    document.getElementById('couponSection').classList.remove('hidden');
+                    document.getElementById('discountRow').classList.add('hidden');
+                }
+
+                const total = (data.deliveryCharge + (data.platformFee || 0)) - (data.discount || 0);
+                document.getElementById('totalBill').innerText = `৳${total}`;
             } else {
                 document.getElementById('chargeBox').classList.add('hidden');
             }
 
-            // রাইডার তথ্য প্রদর্শন
+            // রাইডার তথ্য
             const showRiderStatuses = ["rider_assigned", "at_pickup", "picked", "in_transit", "completed"];
             if(showRiderStatuses.includes(data.status)) {
                 document.getElementById('riderCard').classList.remove('hidden');
-                document.getElementById('riderName').innerText = data.riderName || "রাইডার খোঁজা হচ্ছে...";
+                document.getElementById('riderName').innerText = data.riderName || "রাইডার নিযুক্ত হচ্ছে...";
                 document.getElementById('riderPic').src = data.riderPic || "https://ui-avatars.com/api/?name=Rider";
                 document.getElementById('riderCall').href = data.riderPhone ? `tel:${data.riderPhone}` : "#";
                 document.getElementById('riderNid').innerText = `NID: ${data.riderNid || 'Verified'}`;
@@ -214,6 +225,52 @@
             }
         });
     }
+
+    // কুপন অ্যাপ্লাই বাটন লজিক
+    document.getElementById('applyCouponBtn').onclick = async () => {
+        const code = document.getElementById('couponInput').value.trim().toUpperCase();
+        const orderId = localStorage.getItem('activeOrderId');
+        const msg = document.getElementById('couponMsg');
+
+        if(!code || !orderId) return;
+
+        try {
+            const couponRef = doc(db, "coupons", code);
+            const couponSnap = await getDoc(couponRef);
+
+            if (couponSnap.exists() && couponSnap.data().isActive) {
+                const couponData = couponSnap.data();
+                if(couponData.serviceType === "all" || couponData.serviceType === "parcel") {
+                    await updateDoc(doc(db, "orders", orderId), {
+                        discount: parseFloat(couponData.discount),
+                        couponCode: code
+                    });
+                    msg.innerText = "কুপন ডিসকাউন্ট সফল!";
+                    msg.className = "text-[9px] mt-1 font-bold text-green-600";
+                } else {
+                    msg.innerText = "এই কুপনটি পার্সেলের জন্য নয়।";
+                    msg.className = "text-[9px] mt-1 font-bold text-red-600";
+                }
+            } else {
+                msg.innerText = "ভুল কুপন কোড!";
+                msg.className = "text-[9px] mt-1 font-bold text-red-600";
+            }
+            msg.classList.remove('hidden');
+        } catch (e) {
+            alert("কুপন কাজ করছে না।");
+        }
+    };
+
+    document.getElementById('confirmChargeBtn').onclick = async () => {
+        const orderId = localStorage.getItem('activeOrderId');
+        const btn = document.getElementById('confirmChargeBtn');
+        btn.innerText = "প্রসেসিং...";
+        btn.disabled = true;
+        await updateDoc(doc(db, "orders", orderId), { 
+            status: "rider_assigned",
+            invoiceConfirmed: true 
+        });
+    };
 
     window.onload = initTracking;
 </script>

@@ -41,54 +41,37 @@
         <div id="section-partners" class="hidden">
             <div class="bg-blue-900 p-6 rounded-[2.5rem] shadow-xl mb-8 border-b-4 border-blue-400">
                 <h3 class="text-sm font-black text-white uppercase italic mb-4 text-center">➕ নতুন পার্টনার যোগ করুন</h3>
-                
                 <div class="grid grid-cols-2 gap-3 mb-3">
                     <input type="text" id="pName" placeholder="নাম" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none">
                     <input type="tel" id="pPhone" placeholder="মোবাইল" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none">
                 </div>
-
                 <div class="mb-3">
-                    <input type="number" id="partnerPin" placeholder="পার্টনার সিক্রেট পিন (যেমন: ১২৩৪৫৬)" 
-                    class="w-full p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none">
+                    <input type="number" id="partnerPin" placeholder="পার্টনার সিক্রেট পিন" class="w-full p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none">
                 </div>
-
-                <div class="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10">
+                <div class="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 text-white">
                     <p class="text-[9px] font-black text-blue-300 uppercase mb-3 tracking-widest">Service Access & Commission %</p>
                     <div class="grid grid-cols-1 gap-3">
                         <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
                             <input type="checkbox" id="srv_bajar" class="w-4 h-4 rounded accent-blue-500">
-                            <span class="text-white text-[10px] font-bold flex-1">বাজার (Shopping)</span>
+                            <span class="text-[10px] font-bold flex-1">বাজার (Shopping)</span>
                             <input type="number" id="comm_bajar" placeholder="%" class="w-16 p-2 rounded-lg bg-black/20 text-white text-[10px] border border-white/10 text-center">
                         </div>
                         <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
                             <input type="checkbox" id="srv_car" class="w-4 h-4 rounded accent-blue-500">
-                            <span class="text-white text-[10px] font-bold flex-1">কার রেন্টাল (Car)</span>
+                            <span class="text-[10px] font-bold flex-1">কার রেন্টাল (Car)</span>
                             <input type="number" id="comm_car" placeholder="%" class="w-16 p-2 rounded-lg bg-black/20 text-white text-[10px] border border-white/10 text-center">
-                        </div>
-                        <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                            <input type="checkbox" id="srv_delivery" class="w-4 h-4 rounded accent-blue-500">
-                            <span class="text-white text-[10px] font-bold flex-1">ডেলিভারি (Delivery)</span>
-                            <input type="number" id="comm_delivery" placeholder="%" class="w-16 p-2 rounded-lg bg-black/20 text-white text-[10px] border border-white/10 text-center">
-                        </div>
-                        <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                            <input type="checkbox" id="srv_home" class="w-4 h-4 rounded accent-blue-500">
-                            <span class="text-white text-[10px] font-bold flex-1">হোম সার্ভিস</span>
-                            <input type="number" id="comm_home" placeholder="%" class="w-16 p-2 rounded-lg bg-black/20 text-white text-[10px] border border-white/10 text-center">
                         </div>
                     </div>
                 </div>
-
                 <div class="mb-3 flex gap-2">
-                    <input type="text" id="partnerAddress" placeholder="ঠিকানা (মিরপুর ২, ঢাকা)" class="flex-1 p-4 rounded-xl bg-white/10 text-white border border-white/20 text-[10px] font-bold outline-none">
+                    <input type="text" id="partnerAddress" placeholder="ঠিকানা" class="flex-1 p-4 rounded-xl bg-white/10 text-white border border-white/20 text-[10px] font-bold outline-none">
                     <button onclick="getCoordinates()" class="bg-blue-500 text-white px-4 rounded-xl font-black text-[10px]">খুঁজুন</button>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <input type="number" step="any" id="pLat" placeholder="Lat" class="p-4 rounded-xl bg-white/20 text-white border border-white/20 text-xs font-bold outline-none" readonly>
                     <input type="number" step="any" id="pLng" placeholder="Lng" class="p-4 rounded-xl bg-white/20 text-white border border-white/20 text-xs font-bold outline-none" readonly>
                 </div>
-
-                <button onclick="addNewPartner()" class="w-full bg-white text-blue-900 py-4 rounded-2xl text-xs font-black uppercase shadow-lg active:scale-95 transition-all">পার্টনার সেভ করুন</button>
+                <button onclick="addNewPartner()" class="w-full bg-white text-blue-900 py-4 rounded-2xl text-xs font-black uppercase shadow-lg">পার্টনার সেভ করুন</button>
             </div>
             <div id="partnerList" class="space-y-4"></div>
         </div>
@@ -99,15 +82,23 @@
                 <div class="space-y-3">
                     <input type="text" id="couponCode" placeholder="RAMADAN26" class="w-full p-4 rounded-2xl bg-slate-50 border text-xs font-bold outline-none uppercase">
                     <input type="number" id="couponDiscount" placeholder="ডিসকাউন্ট পরিমাণ (৳)" class="w-full p-4 rounded-2xl bg-slate-50 border text-xs font-bold outline-none">
+                    <select id="couponServiceType" class="w-full p-4 rounded-2xl bg-slate-50 border text-xs font-bold outline-none">
+                        <option value="all">সব সার্ভিসের জন্য</option>
+                        <option value="shopping">বাজার সদাই (Shopping)</option>
+                        <option value="car_rental">কার রেন্টাল (Car)</option>
+                        <option value="delivery">পার্সেল ডেলিভারি (Delivery)</option>
+                        <option value="home_service">হোম সার্ভিস</option>
+                    </select>
                     <button onclick="saveCoupon()" class="w-full bg-blue-900 text-white py-4 rounded-2xl text-xs font-black uppercase shadow-lg">কুপন আপডেট করুন</button>
                 </div>
             </div>
+            <div id="activeCouponsList" class="space-y-3"></div>
         </div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, orderBy, query, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, orderBy, query, deleteDoc, serverTimestamp, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
@@ -120,117 +111,53 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- Geocoding ---
-    window.getCoordinates = async () => {
-        const address = document.getElementById('partnerAddress').value;
-        if (!address) return alert("ঠিকানা লিখুন!");
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
-            const data = await res.json();
-            if (data.length > 0) {
-                document.getElementById('pLat').value = data[0].lat;
-                document.getElementById('pLng').value = data[0].lon;
-                alert("✅ লোকেশন পাওয়া গেছে!");
-            } else {
-                alert("❌ ঠিকানাটি পাওয়া যায়নি।");
-            }
-        } catch (e) { alert("⚠️ এরর হয়েছে!"); }
+    // --- একত্রিত উইন্ডো লোড (সব ইনিশিয়াল কল এখানে থাকবে) ---
+    window.onload = () => {
+        console.log("G-KHIDMAH Master Panel Connected!");
+        showLiveOffers(); 
     };
 
     // --- Tab Switcher ---
     window.switchSection = (id) => {
         ['orders', 'partners', 'settings'].forEach(s => {
-            document.getElementById(`section-${s}`).classList.add('hidden');
-            document.getElementById(`tab-${s}`).classList.remove('active');
+            const sec = document.getElementById(`section-${s}`);
+            const tab = document.getElementById(`tab-${s}`);
+            if(sec) sec.classList.add('hidden');
+            if(tab) tab.classList.remove('active');
         });
         document.getElementById(`section-${id}`).classList.remove('hidden');
         document.getElementById(`tab-${id}`).classList.add('active');
     };
 
-    // --- Add Partner Logic ---
-    window.addNewPartner = async () => {
-        const name = document.getElementById('pName').value.trim();
-        const phone = document.getElementById('pPhone').value.trim();
-        const pin = document.getElementById('partnerPin').value.trim();
-        const lat = parseFloat(document.getElementById('pLat').value);
-        const lng = parseFloat(document.getElementById('pLng').value);
-
-        if(!name || !phone || !pin || isNaN(lat)) return alert("নাম, ফোন, পিন এবং লোকেশন নিশ্চিত করুন!");
-
-        const services = {
-            shopping: { access: document.getElementById('srv_bajar').checked, commission: parseFloat(document.getElementById('comm_bajar').value) || 0 },
-            car_rental: { access: document.getElementById('srv_car').checked, commission: parseFloat(document.getElementById('comm_car').value) || 0 },
-            delivery: { access: document.getElementById('srv_delivery').checked, commission: parseFloat(document.getElementById('comm_delivery').value) || 0 },
-            home_service: { access: document.getElementById('srv_home').checked, commission: parseFloat(document.getElementById('comm_home').value) || 0 }
-        };
-
+    // --- ১. একটিভ কুপন ব্যানার আপডেট ---
+    async function showLiveOffers() {
         try {
-            await setDoc(doc(db, "partners", phone), {
-                name, phone, pin, services, lat, lng,
-                isActive: true,
-                wallet: { totalEarning: 0, adminDue: 0 },
-                createdAt: serverTimestamp()
-            });
-            alert("পার্টনার সফলভাবে যোগ হয়েছে!");
-            location.reload();
-        } catch (e) { alert("Error: " + e.message); }
-    };
+            const q = query(collection(db, "coupons"), where("isActive", "==", true));
+            const querySnapshot = await getDocs(q);
+            const banner = document.getElementById('offerBanner');
+            const title = document.getElementById('promoTitle');
 
-    // --- Partners List Rendering ---
-    onSnapshot(collection(db, "partners"), (snap) => {
-        const container = document.getElementById('partnerList');
-        container.innerHTML = "";
-        let totalDue = 0;
-        snap.forEach(d => {
-            const p = d.data();
-            totalDue += (p.wallet?.adminDue || 0);
-            
-            let allowedSrv = "";
-            if(p.services) {
-                Object.entries(p.services).forEach(([k, v]) => {
-                    if(v.access) allowedSrv += `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[8px] font-bold mr-1 uppercase">${k.split('_')[0]}</span>`;
-                });
+            if (banner && !querySnapshot.empty) {
+                const firstCoupon = querySnapshot.docs[0].data();
+                if(title) title.innerText = firstCoupon.code;
+                const discountBadge = banner.querySelector('div.bg-white\\/20');
+                if(discountBadge) discountBadge.innerText = `৳${firstCoupon.discount} ছাড়!`;
+                banner.classList.remove('hidden');
+            } else if(banner) {
+                banner.classList.add('hidden');
             }
+        } catch (e) { console.error("Offer fetch error:", e); }
+    }
 
-            const card = document.createElement('div');
-            card.className = `p-5 rounded-[2rem] bg-white shadow-lg border-l-8 ${p.isActive ? 'border-green-500' : 'border-red-500'} mb-4`;
-            card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <h4 class="font-black text-gray-800 text-sm">${p.name}</h4>
-                        <div class="flex flex-wrap mt-1">${allowedSrv || 'No Access'}</div>
-                    </div>
-                    <span class="text-[8px] font-black ${p.isActive ? 'text-green-600' : 'text-red-600'}">${p.isActive ? 'ACTIVE' : 'BLOCKED'}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <div class="bg-slate-50 p-2 rounded-xl text-center">
-                        <p class="text-[7px] font-bold text-gray-400 uppercase">Admin Due</p>
-                        <h5 class="text-xs font-black text-red-600">৳${(p.wallet?.adminDue || 0).toFixed(2)}</h5>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-xl text-center">
-                        <p class="text-[7px] font-bold text-gray-400 uppercase">PIN</p>
-                        <h5 class="text-xs font-black text-blue-900">${p.pin || 'N/A'}</h5>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="clearDue('${d.id}')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-[9px] font-bold">Clear Due</button>
-                    <button onclick="toggleP('${d.id}', ${p.isActive})" class="flex-1 ${p.isActive ? 'bg-red-600' : 'bg-blue-900'} text-white py-2 rounded-xl text-[9px] font-bold">${p.isActive ? 'Block' : 'Unblock'}</button>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        document.getElementById('totalDueCollect').innerText = `৳${totalDue.toFixed(2)}`;
-    });
-
-    window.clearDue = async (id) => { if(confirm("পেমেন্ট কি পেয়েছেন?")) await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0 }); };
-    window.toggleP = async (id, s) => { await updateDoc(doc(db, "partners", id), { isActive: !s }); };
-
-    // --- Orders Rendering ---
+    // --- ২. অর্ডার লিস্ট (রিয়েল-টাইম) ---
     onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
         const container = document.getElementById('orderContainer');
+        if(!container) return;
         container.innerHTML = "";
         snap.forEach(d => {
             const order = d.data();
+            const total = ( (order.subTotal || 0) + (order.deliveryCharge || 0) + (order.platformFee || 0) ) - (order.discount || 0);
+
             container.innerHTML += `
                 <div class="bg-white p-5 rounded-[2rem] shadow-md border-l-4 border-blue-900 mb-4">
                     <div class="flex justify-between items-center mb-2">
@@ -238,24 +165,111 @@
                         <span class="text-[8px] text-gray-300 font-mono">#${d.id.slice(-5)}</span>
                     </div>
                     <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                    <p class="text-[9px] text-gray-400 mb-3">${order.customerAddress}</p>
+                    <p class="text-[9px] text-gray-400 mb-2">${order.customerAddress || 'No Address'}</p>
+                    <div class="bg-slate-50 p-3 rounded-2xl text-[9px] font-bold text-gray-600 mb-3">
+                        <p class="text-black font-black mt-1 text-xs">মোট বিল: ৳${total}</p>
+                    </div>
                     <div class="flex gap-2">
-                        <button onclick="updateStatus('${d.id}', 'completed')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase shadow-sm">Complete</button>
+                        <button onclick="updateStatus('${d.id}', 'completed')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase">Complete</button>
                         <button onclick="deleteOrder('${d.id}')" class="bg-red-100 text-red-600 px-4 py-2 rounded-xl text-[8px] font-black uppercase">Delete</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
     });
 
+    // --- ৩. পার্টনার লিস্ট (রিয়েল-টাইম) ---
+    onSnapshot(collection(db, "partners"), (snap) => {
+        const container = document.getElementById('partnerList');
+        if(!container) return;
+        container.innerHTML = '<h4 class="text-[10px] font-black text-gray-400 uppercase mb-3 px-4">রেজিস্টার্ড পার্টনারস</h4>';
+        let totalAdminDue = 0;
+
+        snap.forEach(d => {
+            const p = d.data();
+            const due = p.wallet?.adminDue || 0;
+            totalAdminDue += due;
+
+            let allowedSrv = "";
+            if(p.services) {
+                Object.entries(p.services).forEach(([key, val]) => {
+                    if(val.access) allowedSrv += `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[7px] font-black mr-1 uppercase">${key.split('_')[0]}</span>`;
+                });
+            }
+
+            const card = document.createElement('div');
+            card.className = `p-5 rounded-[2.5rem] bg-white shadow-lg border-l-8 ${p.isActive ? 'border-emerald-500' : 'border-red-500'} mb-4`;
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h4 class="font-black text-gray-800 text-sm">${p.name}</h4>
+                        <p class="text-[9px] text-gray-400 font-bold">${p.phone}</p>
+                        <div class="flex flex-wrap mt-2">${allowedSrv || '<span class="text-[7px] text-red-400 uppercase">No Access</span>'}</div>
+                    </div>
+                    <span class="text-[8px] font-black px-2 py-1 rounded-full ${p.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">${p.isActive ? 'ACTIVE' : 'BLOCKED'}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-50 p-3 rounded-2xl text-center">
+                        <p class="text-[7px] font-bold text-gray-400 uppercase">Admin Due</p>
+                        <h5 class="text-xs font-black text-red-600 font-mono">৳${due.toFixed(2)}</h5>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl text-center">
+                        <p class="text-[7px] font-bold text-gray-400 uppercase">PIN</p>
+                        <h5 class="text-xs font-black text-blue-900">${p.pin || 'N/A'}</h5>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="clearPartnerDue('${d.id}')" class="flex-1 bg-emerald-600 text-white py-3 rounded-2xl text-[9px] font-black uppercase">Clear Due</button>
+                    <button onclick="togglePartnerStatus('${d.id}', ${p.isActive})" class="flex-1 ${p.isActive ? 'bg-red-600' : 'bg-blue-900'} text-white py-3 rounded-2xl text-[9px] font-black uppercase">${p.isActive ? 'Block' : 'Unblock'}</button>
+                </div>`;
+            container.appendChild(card);
+        });
+        document.getElementById('totalDueCollect').innerText = `৳${totalAdminDue.toFixed(2)}`;
+    });
+
+    // --- ৪. হেল্পার ফাংশনস (Global Access) ---
     window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
-    window.deleteOrder = async (id) => { if(confirm("অর্ডারটি মুছে ফেলতে চান?")) await deleteDoc(doc(db, "orders", id)); };
+    window.deleteOrder = async (id) => { if(confirm("মুছে ফেলবেন?")) await deleteDoc(doc(db, "orders", id)); };
+    
+    window.clearPartnerDue = async (id) => {
+        if(confirm("পেমেন্ট কি বুঝে পেয়েছেন?")) await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0 });
+    };
+
+    window.togglePartnerStatus = async (id, currentStatus) => {
+        await updateDoc(doc(db, "partners", id), { isActive: !currentStatus });
+    };
+
     window.saveCoupon = async () => {
-        const code = document.getElementById('couponCode').value.toUpperCase();
+        const code = document.getElementById('couponCode').value.trim().toUpperCase();
         const disc = parseFloat(document.getElementById('couponDiscount').value);
         if(!code || isNaN(disc)) return alert("সঠিক তথ্য দিন");
-        await setDoc(doc(db, "settings", "coupons"), { code, discount: disc });
+        await setDoc(doc(db, "coupons", code), { 
+            code, discount: disc, serviceType: document.getElementById('couponServiceType').value,
+            isActive: true, createdAt: serverTimestamp() 
+        });
         alert("কুপন সেভ হয়েছে!");
+    };
+
+    window.deleteCoupon = async (id) => { if(confirm("মুছে ফেলতে চান?")) await deleteDoc(doc(db, "coupons", id)); };
+
+    window.addNewPartner = async () => {
+        const name = document.getElementById('pName').value.trim();
+        const phone = document.getElementById('pPhone').value.trim();
+        const pin = document.getElementById('partnerPin').value.trim();
+        const lat = parseFloat(document.getElementById('pLat').value) || 0;
+        const lng = parseFloat(document.getElementById('pLng').value) || 0;
+
+        if(!name || !phone || !pin) return alert("সব তথ্য দিন!");
+
+        await setDoc(doc(db, "partners", phone), {
+            name, phone, pin, lat, lng, isActive: true,
+            services: {
+                shopping: { access: document.getElementById('srv_bajar').checked, commission: parseFloat(document.getElementById('comm_bajar').value) || 0 },
+                car_rental: { access: document.getElementById('srv_car').checked, commission: parseFloat(document.getElementById('comm_car').value) || 0 }
+            },
+            wallet: { totalEarning: 0, adminDue: 0 },
+            createdAt: serverTimestamp()
+        });
+        alert("✅ পার্টনার সফলভাবে রেজিস্টার্ড!");
     };
 </script>
 </body>

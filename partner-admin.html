@@ -174,30 +174,28 @@
     };
 
     window.saveShoppingBill = async (id) => {
-        const prices = {}; 
-        let sub = 0;
-        document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
-            const p = parseFloat(inp.value) || 0;
-            prices[inp.dataset.item] = p; 
-            sub += p;
-        });
-        const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-        const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-        
-        if(sub === 0) return alert("দয়া করে পণ্যের দামগুলো বসান।");
-
-        await updateDoc(doc(db, "orders", id), { 
-            itemPrices: prices, 
-            subTotal: sub, 
-            deliveryCharge: del, 
-            platformFee: plat,
-            status: "invoice_ready",
-            alertType: "invoice_updated",
-            alertTime: Date.now()
-        });
-        alert("ইনভয়েস সফলভাবে আপডেট হয়েছে!");
-    };
-
+    const prices = {}; 
+    let sub = 0;
+    document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
+        const p = parseFloat(inp.value) || 0;
+        prices[inp.dataset.item] = p; 
+        sub += p;
+    });
+    
+    // এই অংশটুকু নিশ্চিত করুন
+    const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+    const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+    
+    await updateDoc(doc(db, "orders", id), { 
+        itemPrices: prices, 
+        subTotal: sub, 
+        deliveryCharge: del, 
+        platformFee: plat, // এটি ডাটাবেসে আলাদা থাকবে
+        status: "invoice_ready",
+        alertType: "invoice_updated"
+    });
+    alert("ইনভয়েস আপডেট হয়েছে!");
+};
     window.updateStatus = async (id, s) => {
         try { await updateDoc(doc(db, "orders", id), { status: s }); } 
         catch (e) { alert("স্ট্যাটাস আপডেট হয়নি!"); }
