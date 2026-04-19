@@ -106,148 +106,177 @@
         };
 
         window.handleLogin = async () => {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pin = document.getElementById('loginPin').value.trim();
-            try {
-                const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const dbPin = data.secretCode || data.pin || ""; 
-                    if (dbPin.toString() === pin.toString()) {
-                        const partnerData = { id: docSnap.id, ...data };
-                        localStorage.setItem('gPartnerAuth', JSON.stringify(partnerData));
-                        window.checkAuth();
-                    } else { alert("ভুল পিন!"); }
-                } else { alert("পার্টনার খুঁজে পাওয়া যায়নি!"); }
-            } catch (e) { alert("লগইন এরর!"); }
-        };
+    const phone = document.getElementById('loginPhone').value.trim();
+    const pin = document.getElementById('loginPin').value.trim();
+    
+    if(!phone || !pin) return alert("নম্বর এবং পিন দিন");
 
-        async function loadPartnerData(id) {
-            onSnapshot(doc(db, COLLECTION_NAME, id), (snap) => {
-                if(snap.exists()){
-                    const data = snap.data();
-                    document.getElementById('pName').innerText = data.name || "Partner";
-                    document.getElementById('totalEarn').innerText = data.wallet?.totalEarning || "0.00";
-                    document.getElementById('adminDue').innerText = data.wallet?.adminDue || "0.00";
-                    loadOrders(id);
-                }
-            });
-        }
-
-        function loadOrders(id) {
-            const q = query(collection(db, "orders"), where("assignedPerson.id", "==", id), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                const container = document.getElementById('orderContainer');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const order = { id: d.id, ...d.data() };
-                    if (knownOrderIds.size > 0 && !knownOrderIds.has(order.id)) {
-                        document.getElementById('newOrderSound').play().catch(() => {});
-                    }
-                    knownOrderIds.add(order.id);
-                    renderOrderCard(order, container);
-                });
-            });
-        }
-
-        function renderOrderCard(order, container) {
-            const config = configs[order.serviceType] || configs.shopping;
-            const card = document.createElement('div');
-            card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color}`;
+    try {
+        const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            // ডাটাবেসে পিন যে নামেই থাকুক (pin বা secretCode) সেটি চেক করা হচ্ছে
+            const dbPin = data.pin || data.secretCode || ""; 
             
-            card.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <span class="bg-slate-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-600">${config.title}</span>
-                    <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
-                </div>
-                <div class="mb-4">
-                    <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                    <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone}</p>
-                    <p class="text-[10px] text-gray-400 mt-1">${order.customerAddress || 'ঠিকানা দেওয়া হয়নি'}</p>
-                </div>
+            if (dbPin.toString() === pin.toString()) {
+                const partnerData = { id: docSnap.id, ...data };
+                localStorage.setItem('gPartnerAuth', JSON.stringify(partnerData));
+                window.checkAuth();
+            } else { 
+                alert("ভুল পিন! সঠিক পিন দিন।"); 
+            }
+        } else { 
+            alert("পার্টনার খুঁজে পাওয়া যায়নি!"); 
+        }
+    } catch (e) { 
+        console.error(e);
+        alert("লগইন এরর: " + e.message); 
+    }
+};
 
-                <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100">
-                    ${renderSpecifics(order)}
-                </div>
+async function loadPartnerData(id) {
+    // পার্টনারের প্রোফাইল এবং ওয়ালেট রিয়েলটাইম আপডেট
+    onSnapshot(doc(db, COLLECTION_NAME, id), (snap) => {
+        if(snap.exists()){
+            const data = snap.data();
+            document.getElementById('pName').innerText = data.name || "Partner";
+            // ওয়ালেট ডাটা চেক
+            const wallet = data.wallet || { totalEarning: 0, adminDue: 0 };
+            document.getElementById('totalEarn').innerText = wallet.totalEarning || "0.00";
+            document.getElementById('adminDue').innerText = wallet.adminDue || "0.00";
+            
+            loadOrders(id);
+        }
+    });
+}
 
-                <div class="grid grid-cols-2 gap-2 mt-4">
-                    ${config.steps.map((s, i) => `
-                        <button onclick="updateStatus('${order.id}', '${s}')" class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all ${order.status === s ? 'bg-blue-900 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}">
-                            ${i+1}. ${s.replace(/_/g, ' ')}
-                        </button>
-                    `).join('')}
-                </div>
-            `;
-            container.appendChild(card);
+function loadOrders(id) {
+    const container = document.getElementById('orderContainer');
+    
+    // কোয়েরি লজিক: এখানে composite index প্রয়োজন হবে
+    const q = query(
+        collection(db, "orders"), 
+        where("assignedPerson.id", "==", id), 
+        orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snap) => {
+        container.innerHTML = "";
+        
+        if (snap.empty) {
+            container.innerHTML = `<p class="text-center text-gray-400 text-xs mt-10">কোন চলমান অর্ডার নেই</p>`;
+            return;
         }
 
-        function renderSpecifics(order) {
-            if(order.serviceType === 'shopping') {
-                return `
-                    <div class="space-y-2">
-                        ${(order.items || []).map(item => `
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-50">
-                                <button onclick="removeItem('${order.id}', '${item}')" class="text-red-400 font-bold px-2">×</button>
-                                <span class="text-[10px] flex-1 font-bold text-slate-700">${item}</span>
-                                <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-16 p-1.5 bg-blue-50 rounded-lg text-[10px] text-center font-bold outline-none" placeholder="৳">
-                            </div>
-                        `).join('')}
-                        <div class="pt-2 grid grid-cols-2 gap-2">
-                            <input type="number" id="del-${order.id}" value="${order.deliveryCharge || 70}" class="p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ডেলিভারি">
-                            <input type="number" id="plat-${order.id}" value="${order.platformFee || 20}" class="p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ফি">
-                        </div>
-                        <button onclick="saveShoppingBill('${order.id}')" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase shadow-md mt-2">ইনভয়েস সেভ করুন</button>
-                    </div>`;
-            } else {
-                return `
-                    <div class="space-y-2 text-center">
-                        <p class="text-[10px] font-bold text-blue-900 uppercase">সার্ভিস: ${(order.items || []).join(', ')}</p>
-                        <div class="flex gap-2">
-                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="বিল (৳)" class="flex-1 p-2 rounded-xl border text-xs font-bold outline-none bg-white text-center">
-                            <button onclick="saveServiceBill('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">সেভ</button>
-                        </div>
-                    </div>`;
+        snap.forEach(d => {
+            const order = { id: d.id, ...d.data() };
+            
+            // নতুন অর্ডার আসলে সাউন্ড প্লে করা
+            if (knownOrderIds.size > 0 && !knownOrderIds.has(order.id)) {
+                const sound = document.getElementById('newOrderSound');
+                if(sound) sound.play().catch(e => console.log("Sound play blocked"));
             }
+            knownOrderIds.add(order.id);
+            
+            renderOrderCard(order, container);
+        });
+    }, (error) => {
+        console.error("Order Load Error:", error);
+        if(error.code === 'failed-precondition') {
+            container.innerHTML = `<p class="text-[10px] text-red-500 text-center p-4">Firebase Index প্রয়োজন। কনসোল থেকে লিঙ্কে ক্লিক করে ইনডেক্স তৈরি করুন।</p>`;
         }
+    });
+}
 
-        window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
+// বিল সেভ করার সময় স্ট্যাটাস অটোমেটিক আপডেট করার লজিক
+window.saveShoppingBill = async (id) => {
+    try {
+        const prices = {}; 
+        let sub = 0;
+        const priceInputs = document.querySelectorAll(`input[data-id="${id}"]`);
+        
+        priceInputs.forEach(inp => {
+            const p = parseFloat(inp.value) || 0;
+            prices[inp.dataset.item] = p; 
+            sub += p;
+        });
 
-        window.saveShoppingBill = async (id) => {
-            const prices = {}; let sub = 0;
-            document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
-                const p = parseFloat(inp.value) || 0;
-                prices[inp.dataset.item] = p; sub += p;
-            });
-            const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-            const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-            await updateDoc(doc(db, "orders", id), { 
-                itemPrices: prices, subTotal: sub, deliveryCharge: del, platformFee: plat, status: "invoice_ready" 
-            });
-            alert("বিল সেভ হয়েছে!");
-        };
+        const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
+        const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
+        
+        // ডাটাসম্পূর্ণ না হলে ওয়ার্নিং
+        if (sub === 0) return alert("পণ্যের দাম ইনপুট দিন");
 
-        window.saveServiceBill = async (id) => {
-            const val = parseFloat(document.getElementById(`bill-${id}`).value) || 0;
-            await updateDoc(doc(db, "orders", id), { subTotal: val, status: "payment_pending" });
-            alert("বিল সেভ হয়েছে!");
-        };
+        await updateDoc(doc(db, "orders", id), { 
+            itemPrices: prices, 
+            subTotal: sub, 
+            deliveryCharge: del, 
+            platformFee: plat, 
+            status: "invoice_ready" 
+        });
+        alert("ইনভয়েস সফলভাবে সেভ হয়েছে!");
+    } catch (e) {
+        alert("সেভ করতে সমস্যা হয়েছে: " + e.message);
+    }
+};
+function renderOrderCard(order, container) {
+    const config = configs[order.serviceType] || configs.shopping;
+    const card = document.createElement('div');
+    card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color}`;
+    
+    card.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+            <span class="bg-slate-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-600">${config.title}</span>
+            <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
+        </div>
+        <div class="mb-4">
+            <h3 class="text-sm font-black text-gray-800">${order.customerName || 'কাস্টমার'}</h3>
+            <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone || ''}</p>
+            <p class="text-[10px] text-gray-400 mt-1">${order.customerAddress || 'ঠিকানা দেওয়া হয়নি'}</p>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100 text-[10px] font-bold">
+            সার্ভিস স্ট্যাটাস: <span class="text-blue-600 uppercase">${order.status.replace(/_/g, ' ')}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            ${config.steps.map((s, i) => `
+                <button onclick="updateStatus('${order.id}', '${s}')" 
+                    class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all 
+                    ${order.status === s ? 'bg-blue-900 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}">
+                    ${i+1}. ${s.replace(/_/g, ' ')}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    container.appendChild(card);
+}
 
-        window.removeItem = async (id, item) => {
-            if(confirm(`"${item}" বাদ দিবেন?`)) {
-                await updateDoc(doc(db, "orders", id), { items: arrayRemove(item) });
-            }
-        };
+// স্ট্যাটাস আপডেট করার গ্লোবাল ফাংশন
+window.updateStatus = async (id, s) => {
+    try {
+        await updateDoc(doc(db, "orders", id), { status: s });
+    } catch (e) {
+        alert("স্ট্যাটাস আপডেট হয়নি!");
+    }
+};
+window.updateLoc = async () => {
+    const userStore = localStorage.getItem('gPartnerAuth');
+    if(!userStore) return;
+    
+    const user = JSON.parse(userStore);
+    const loc = document.getElementById('locInput').value.trim();
+    
+    if(!loc) return alert("লোকেশন লিখুন");
 
-        window.updateLoc = async () => {
-            const user = JSON.parse(localStorage.getItem('gPartnerAuth'));
-            const loc = document.getElementById('locInput').value;
-            await updateDoc(doc(db, COLLECTION_NAME, user.id), { currentLocation: loc });
-            alert("লোকেশন আপডেট হয়েছে!");
-        };
-
-        window.handleLogout = () => { localStorage.removeItem('gPartnerAuth'); location.reload(); };
-
-        window.checkAuth();
+    try {
+        await updateDoc(doc(db, COLLECTION_NAME, user.id), { 
+            currentLocation: loc,
+            lastUpdate: new Date().toISOString()
+        });
+        alert("লোকেশন আপডেট হয়েছে!");
+    } catch (e) {
+        alert("লোকেশন আপডেট ব্যর্থ!");
+    }
+};
     </script>
 </body>
 </html>
