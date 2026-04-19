@@ -123,42 +123,54 @@
         let lastKnownStatus = "";
 
         // ১. অর্ডার পাঠানো
-        document.getElementById('submitOrderBtn').onclick = async () => {
-            const name = document.getElementById('custName').value.trim();
-            const phone = document.getElementById('custPhone').value.trim();
-            const addr = document.getElementById('custAddress').value.trim();
-            const list = document.getElementById('orderList').value.trim();
+        // ১. অর্ডার পাঠানো (Updated with assignedPerson)
+document.getElementById('submitOrderBtn').onclick = async () => {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const addr = document.getElementById('custAddress').value.trim();
+    const list = document.getElementById('orderList').value.trim();
 
-            if(!name || !phone || !addr || !list) return alert("সব তথ্য দিন!");
+    // পার্টনার আইডিটি localStorage থেকে নিয়ে আসা
+    const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
 
-            const submitBtn = document.getElementById('submitOrderBtn');
-            submitBtn.innerText = "অর্ডার যাচ্ছে...";
-            submitBtn.disabled = true;
+    if(!name || !phone || !addr || !list) return alert("সব তথ্য দিন!");
 
-            try {
-                const docRef = await addDoc(collection(db, "orders"), {
-                    customerName: name,
-                    customerPhone: phone,
-                    customerAddress: addr,
-                    items: list.split('\n').filter(i => i.trim() !== ""),
-                    status: "pending",
-                    createdAt: serverTimestamp(),
-                    subTotal: 0,
-                    deliveryCharge: 70,
-                    platformFee: 20,
-                    discount: 0,
-                    invoiceConfirmed: false,
-                    missingItems: [],
-                    alertTime: 0
-                });
-                localStorage.setItem('activeOrderId', docRef.id);
-                initTracking();
-            } catch (e) {
-                alert("চেষ্টা করুন আবার!");
-                submitBtn.innerText = "খাদেমকে লিস্ট পাঠান";
-                submitBtn.disabled = false;
-            }
-        };
+    const submitBtn = document.getElementById('submitOrderBtn');
+    submitBtn.innerText = "অর্ডার যাচ্ছে...";
+    submitBtn.disabled = true;
+
+    try {
+        const docRef = await addDoc(collection(db, "orders"), {
+            customerName: name,
+            customerPhone: phone,
+            customerAddress: addr,
+            items: list.split('\n').filter(i => i.trim() !== ""),
+            status: "pending",
+            
+            // এই অংশটি যোগ করা হয়েছে পার্টনার প্যানেলে ডাটা পাঠানোর জন্য
+            assignedPerson: {
+                id: partnerId
+            },
+
+            createdAt: serverTimestamp(),
+            subTotal: 0,
+            deliveryCharge: 70,
+            platformFee: 20,
+            discount: 0,
+            invoiceConfirmed: false,
+            missingItems: [],
+            alertTime: 0
+        });
+        
+        localStorage.setItem('activeOrderId', docRef.id);
+        initTracking();
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        alert("চেষ্টা করুন আবার!");
+        submitBtn.innerText = "খাদেমকে লিস্ট পাঠান";
+        submitBtn.disabled = false;
+    }
+};
 
         // ২. ট্র্যাকিং ফাংশন
         const initTracking = () => {

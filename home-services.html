@@ -50,66 +50,100 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
-            authDomain: "gkhidmah-8636b.firebaseapp.com",
-            projectId: "gkhidmah-8636b",
-            storageBucket: "gkhidmah-8636b.firebasestorage.app",
-            messagingSenderId: "780745438049",
-            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    // Firebase Config (আপনার বর্তমান কনফিগ ব্যবহার করুন)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statusMap = {
+        "expert_finding": { msg: "আপনার জন্য এক্সপার্ট খোঁজা হচ্ছে", progress: "20%" },
+        "expert_assigned": { msg: "এক্সপার্ট নির্ধারিত হয়েছে", progress: "40%" },
+        "work_in_progress": { msg: "কাজ চলছে...", progress: "70%" },
+        "payment_pending": { msg: "কাজ শেষ, পেমেন্ট করুন", progress: "90%" },
+        "completed": { msg: "সফলভাবে সম্পন্ন হয়েছে", progress: "100%" }
+    };
+
+    document.getElementById('submitBtn').onclick = async function() {
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const address = document.getElementById('custAddress').value.trim();
+        const category = document.getElementById('cat').value;
+        const note = document.getElementById('serviceNote').value.trim();
+
+        // ১. localStorage থেকে পার্টনার আইডি নিয়ে আসা (যা index.html থেকে সেট হয়েছে)
+        const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
+
+        if(!name || !phone || !category) return alert("অনুগ্রহ করে নাম, মোবাইল এবং ক্যাটাগরি পূরণ করুন।");
+
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "অনুরোধ পাঠানো হচ্ছে...";
+        btn.disabled = true;
+
+        const data = {
+            customerName: name,
+            customerPhone: phone,
+            customerAddress: address,
+            items: [`${category}: ${note}`],
+            serviceType: "home_service",
+            status: "expert_finding",
+            
+            // ২. এই ফিল্ডটি পার্টনার ড্যাশবোর্ডে ডাটা দেখানোর জন্য বাধ্যতামূলক
+            assignedPerson: {
+                id: partnerId
+            },
+
+            createdAt: serverTimestamp(),
+            subTotal: 0,
+            deliveryCharge: 0, // হোম সার্ভিসে সাধারণত ডেলিভারি ফি থাকে না, বিল পরে সেট হয়
+            platformFee: 20,
+            invoiceConfirmed: false
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
 
-        const statusMap = {
-            "expert_finding": { msg: "আপনার জন্য এক্সপার্ট খোঁজা হচ্ছে", progress: "20%" },
-            "expert_assigned": { msg: "এক্সপার্ট নির্ধারিত হয়েছে", progress: "40%" },
-            "work_in_progress": { msg: "কাজ চলছে...", progress: "70%" },
-            "payment_pending": { msg: "কাজ শেষ, পেমেন্ট করুন", progress: "90%" },
-            "completed": { msg: "সফলভাবে সম্পন্ন হয়েছে", progress: "100%" }
-        };
-
-        document.getElementById('submitBtn').onclick = async function() {
-            const data = {
-                customerName: document.getElementById('custName').value,
-                customerPhone: document.getElementById('custPhone').value,
-                customerAddress: document.getElementById('custAddress').value,
-                items: [`${document.getElementById('cat').value}: ${document.getElementById('serviceNote').value}`],
-                serviceType: "home_service", // অ্যাডমিনের সাথে হুবহু মিল
-                status: "expert_finding",
-                createdAt: serverTimestamp(),
-                subTotal: 0
-            };
-            if(!data.customerName || !data.customerPhone) return alert("তথ্য পূরণ করুন");
+        try {
             const docRef = await addDoc(collection(db, "orders"), data);
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
-        };
-
-        function initTracking() {
-            const orderId = localStorage.getItem('activeOrderId');
-            if(!orderId) return;
-            document.getElementById('orderSection').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-
-            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-                const data = snapshot.data();
-                if(data) {
-                    const step = statusMap[data.status] || statusMap["expert_finding"];
-                    document.getElementById('trackMessage').innerText = step.msg;
-                    document.getElementById('progressBar').style.width = step.progress;
-                    
-                    if(data.subTotal > 0) {
-                        document.getElementById('billBox').classList.remove('hidden');
-                        document.getElementById('totalBill').innerText = `৳${data.subTotal}`;
-                    }
-                }
-            });
+        } catch (e) {
+            console.error(e);
+            alert("দুঃখিত, ডাটা সেভ করতে সমস্যা হয়েছে।");
+            btn.innerText = "সার্ভিস কনফার্ম করুন";
+            btn.disabled = false;
         }
-        window.onload = initTracking;
-    </script>
+    };
+
+    function initTracking() {
+        const orderId = localStorage.getItem('activeOrderId');
+        if(!orderId) return;
+
+        document.getElementById('orderSection').classList.add('hidden');
+        document.getElementById('trackingSection').classList.remove('hidden');
+
+        onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+            if(!snapshot.exists()) return;
+            const data = snapshot.data();
+            
+            const step = statusMap[data.status] || statusMap["expert_finding"];
+            document.getElementById('trackMessage').innerText = step.msg;
+            document.getElementById('progressBar').style.width = step.progress;
+            
+            if(data.subTotal > 0) {
+                document.getElementById('billBox').classList.remove('hidden');
+                document.getElementById('totalBill').innerText = `৳${data.subTotal}`;
+            }
+        });
+    }
+
+    window.onload = initTracking;
+</script>
 </body>
 </html>

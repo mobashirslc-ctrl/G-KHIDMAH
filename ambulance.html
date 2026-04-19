@@ -21,35 +21,86 @@
     </header>
 
     <div class="max-w-md mx-auto p-4 space-y-4">
-        <div class="bg-white p-6 rounded-[2rem] shadow-xl border-t-4 border-red-600 text-center">
-            <div class="text-6xl mb-2">🚑</div>
-            <h2 class="text-2xl font-black text-gray-800 tracking-tighter italic uppercase">ইমার্জেন্সি অ্যাম্বুলেন্স</h2>
-            <p class="text-xs text-red-500 font-bold uppercase tracking-widest mt-1">সরাসরি কল করুন - দ্রুত সেবা</p>
-        </div>
+    <button onclick="sendAmbulanceRequest()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-red-200 animate-pulse flex items-center justify-center gap-3 active:scale-95 transition-all">
+        <span class="text-2xl">🚑</span> 
+        <span class="uppercase italic">সাপোর্ট টিমকে জানান</span>
+    </button>
 
-        <div class="space-y-3">
-            <div class="bg-white p-4 rounded-3xl shadow-md flex items-center gap-4 border border-red-50">
-                <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-3xl">👨‍✈️</div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-gray-800">ড্রাইভারঃ শফিকুল ইসলাম</h4>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">অবস্থানঃ ঢাকা মেডিকেল এরিয়া</p>
-                </div>
-                <a href="tel:017XXXXXXXX" class="bg-red-600 text-white p-3 rounded-full shadow-lg shadow-red-200">📞</a>
-            </div>
-
-            <div class="bg-white p-4 rounded-3xl shadow-md flex items-center gap-4 border border-red-50">
-                <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-3xl">👨‍✈️</div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-gray-800">ড্রাইভারঃ কামরুল হাসান</h4>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">অবস্থানঃ উত্তরা/টঙ্গী</p>
-                </div>
-                <a href="tel:019XXXXXXXX" class="bg-red-600 text-white p-3 rounded-full shadow-lg shadow-red-200">📞</a>
-            </div>
-        </div>
-
-        <div class="p-6 bg-red-100/50 rounded-3xl border border-dashed border-red-200">
-            <p class="text-[10px] text-red-700 font-bold text-center italic">সতর্কতাঃ অ্যাম্বুলেন্স সেবা সরাসরি ড্রাইভারের সাথে কথা বলে ভাড়া নির্ধারণ করুন। G-KHIDMAH শুধুমাত্র যোগাযোগের মাধ্যম।</p>
-        </div>
+    <div class="bg-white p-6 rounded-[2rem] shadow-xl border-t-4 border-red-600 text-center">
+        <div class="text-6xl mb-2">📞</div>
+        <h2 class="text-2xl font-black text-gray-800 tracking-tighter italic uppercase">সরাসরি কল করুন</h2>
+        <p class="text-[10px] text-red-500 font-bold uppercase tracking-widest mt-1">দ্রুত সেবার জন্য ড্রাইভারকে কল দিন</p>
     </div>
+
+    <div class="space-y-3">
+        <div class="bg-white p-4 rounded-3xl shadow-md flex items-center gap-4 border border-red-50">
+            <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-3xl">👨‍✈️</div>
+            <div class="flex-1">
+                <h4 class="font-bold text-gray-800">শফিকুল ইসলাম</h4>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">ঢাকা মেডিকেল এরিয়া</p>
+            </div>
+            <a href="tel:017XXXXXXXX" class="bg-green-600 text-white p-3 rounded-full shadow-lg">📞</a>
+        </div>
+        
+        </div>
+
+    <div class="p-6 bg-red-100/50 rounded-3xl border border-dashed border-red-200">
+        <p class="text-[10px] text-red-700 font-bold text-center italic">G-KHIDMAH শুধুমাত্র একটি প্ল্যাটফর্ম। সরাসরি কথা বলে ভাড়া নিশ্চিত করুন।</p>
+    </div>
+</div>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // অ্যাম্বুলেন্স রিকোয়েস্ট পাঠানোর ফাংশন
+    window.sendAmbulanceRequest = async function() {
+        const name = prompt("আপনার নাম লিখুন:");
+        const phone = prompt("আপনার মোবাইল নম্বর দিন:");
+
+        if (!name || !phone) {
+            return alert("সঠিক তথ্য দিয়ে সহযোগিতা করুন।");
+        }
+
+        // পার্টনার আইডি নিয়ে আসা
+        const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
+
+        const orderData = {
+            customerName: name,
+            customerPhone: phone,
+            customerAddress: "Emergency Ambulance Request",
+            items: ["জরুরি অ্যাম্বুলেন্স প্রয়োজন"],
+            serviceType: "ambulance", 
+            status: "pending", // পার্টনার যেন নতুন রিকোয়েস্ট হিসেবে দেখতে পায়
+            
+            assignedPerson: {
+                id: partnerId
+            },
+
+            createdAt: serverTimestamp(),
+            subTotal: 0,
+            invoiceConfirmed: false
+        };
+
+        try {
+            await addDoc(collection(db, "orders"), orderData);
+            alert("আপনার রিকোয়েস্ট পার্টনারের কাছে পাঠানো হয়েছে। শীঘ্রই আপনাকে কল করা হবে।");
+        } catch (e) {
+            console.error(e);
+            alert("দুঃখিত, এই মুহূর্তে রিকোয়েস্ট পাঠানো যাচ্ছে না। সরাসরি কল করুন।");
+        }
+    };
+</script>
 </body>
 </html>

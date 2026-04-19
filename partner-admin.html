@@ -107,33 +107,32 @@
 
         window.handleLogin = async () => {
     const phone = document.getElementById('loginPhone').value.trim();
-    const pin = document.getElementById('loginPin').value.trim();
+    const pinInput = document.getElementById('loginPin').value.trim();
     
-    if(!phone || !pin) return alert("নম্বর এবং পিন দিন");
+    if(!phone || !pinInput) return alert("নম্বর এবং পিন দিন");
 
     try {
         const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
         if (docSnap.exists()) {
             const data = docSnap.data();
-            // ডাটাবেসে পিন যে নামেই থাকুক (pin বা secretCode) সেটি চেক করা হচ্ছে
-            const dbPin = data.pin || data.secretCode || ""; 
+            // ডাটাবেসে pin ফিল্ডটি চেক করা হচ্ছে
+            const dbPin = data.pin ? data.pin.toString() : ""; 
             
-            if (dbPin.toString() === pin.toString()) {
+            if (dbPin === pinInput) {
                 const partnerData = { id: docSnap.id, ...data };
                 localStorage.setItem('gPartnerAuth', JSON.stringify(partnerData));
                 window.checkAuth();
             } else { 
-                alert("ভুল পিন! সঠিক পিন দিন।"); 
+                alert("ভুল পিন!"); 
             }
         } else { 
-            alert("পার্টনার খুঁজে পাওয়া যায়নি!"); 
+            alert("পার্টনার খুঁজে পাওয়া যায়নি!"); 
         }
     } catch (e) { 
         console.error(e);
         alert("লগইন এরর: " + e.message); 
     }
 };
-
 async function loadPartnerData(id) {
     // পার্টনারের প্রোফাইল এবং ওয়ালেট রিয়েলটাইম আপডেট
     onSnapshot(doc(db, COLLECTION_NAME, id), (snap) => {

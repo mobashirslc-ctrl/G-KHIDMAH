@@ -54,71 +54,110 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
-            authDomain: "gkhidmah-8636b.firebaseapp.com",
-            projectId: "gkhidmah-8636b",
-            storageBucket: "gkhidmah-8636b.firebasestorage.app",
-            messagingSenderId: "780745438049",
-            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statusConfig = {
+        "request_received": { msg: "গাড়ি খোঁজা হচ্ছে...", icon: "🔍", progress: "20%" },
+        "driver_assigned": { msg: "ড্রাইভার নির্ধারিত হয়েছে", icon: "✅", progress: "45%" },
+        "car_on_way": { msg: "গাড়ি আপনার দিকে আসছে", icon: "🚗", progress: "70%" },
+        "trip_started": { msg: "আপনার যাত্রা শুরু হয়েছে", icon: "🛣️", progress: "90%" },
+        "completed": { msg: "ট্রিপ শেষ! ধন্যবাদ", icon: "🎉", progress: "100%" }
+    };
+
+    document.getElementById('submitBtn').onclick = async () => {
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const pickup = document.getElementById('pickup').value.trim();
+        const dest = document.getElementById('destination').value.trim();
+        const note = document.getElementById('carNote').value.trim();
+
+        // ১. পার্টনার আইডি নিয়ে আসা (ড্যাশবোর্ডে ডাটা দেখানোর জন্য)
+        const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
+
+        if(!name || !phone || !pickup || !dest) return alert("অনুগ্রহ করে সব তথ্য পূরণ করুন!");
+
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "বুকিং পাঠানো হচ্ছে...";
+        btn.disabled = true;
+
+        const orderData = {
+            customerName: name,
+            customerPhone: phone,
+            customerAddress: `পিকআপ: ${pickup} | গন্তব্য: ${dest}`,
+            items: [note || "Car Rental Service"],
+            serviceType: "car_rental", 
+            status: "request_received",
+            
+            // ২. পার্টনার প্যানেলের জন্য আইডি অবজেক্ট
+            assignedPerson: {
+                id: partnerId
+            },
+
+            createdAt: serverTimestamp(),
+            subTotal: 0,
+            deliveryCharge: 0,
+            platformFee: 50, // কার রেন্টালের জন্য আলাদা ফি হতে পারে
+            invoiceConfirmed: false
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
 
-        const statusConfig = {
-            "request_received": { msg: "গাড়ি খোঁজা হচ্ছে...", icon: "🔍", progress: "20%" },
-            "driver_assigned": { msg: "ড্রাইভার নির্ধারিত হয়েছে", icon: "✅", progress: "45%" },
-            "car_on_way": { msg: "গাড়ি আপনার দিকে আসছে", icon: "🚗", progress: "70%" },
-            "trip_started": { msg: "আপনার যাত্রা শুরু হয়েছে", icon: "🛣️", progress: "90%" },
-            "completed": { msg: "ট্রিপ শেষ! ধন্যবাদ", icon: "🎉", progress: "100%" }
-        };
-
-        document.getElementById('submitBtn').onclick = async () => {
-            const docRef = await addDoc(collection(db, "orders"), {
-                customerName: document.getElementById('custName').value,
-                customerPhone: document.getElementById('custPhone').value,
-                customerAddress: `পিকআপ: ${document.getElementById('pickup').value} | গন্তব্য: ${document.getElementById('destination').value}`,
-                items: [document.getElementById('carNote').value],
-                serviceType: "car_rental", // অ্যাডমিনের সাথে মিল
-                status: "request_received",
-                createdAt: serverTimestamp(),
-                subTotal: 0
-            });
+        try {
+            const docRef = await addDoc(collection(db, "orders"), orderData);
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
-        };
-
-        function initTracking() {
-            const orderId = localStorage.getItem('activeOrderId');
-            if(!orderId) return;
-            document.getElementById('orderSection').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-
-            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-                const data = snapshot.data();
-                if(data) {
-                    const conf = statusConfig[data.status] || statusConfig["request_received"];
-                    document.getElementById('statusIcon').innerText = conf.icon;
-                    document.getElementById('trackMessage').innerText = conf.msg;
-                    document.getElementById('progressBar').style.width = conf.progress;
-
-                    if(data.subTotal > 0) {
-                        document.getElementById('invoiceBox').classList.remove('hidden');
-                        document.getElementById('rentDisplay').innerText = `৳${data.subTotal}`;
-                    }
-
-                    if(data.assignedPerson) {
-                        document.getElementById('driverInfo').classList.remove('hidden');
-                        document.getElementById('driverName').innerText = data.assignedPerson.name;
-                        document.getElementById('driverCall').href = `tel:${data.assignedPerson.phone}`;
-                    }
-                }
-            });
+        } catch (e) {
+            console.error(e);
+            alert("দুঃখিত, আবার চেষ্টা করুন।");
+            btn.innerText = "বুকিং রিকোয়েস্ট পাঠান";
+            btn.disabled = false;
         }
-        window.onload = initTracking;
-    </script>
+    };
+
+    function initTracking() {
+        const orderId = localStorage.getItem('activeOrderId');
+        if(!orderId) return;
+
+        document.getElementById('orderSection').classList.add('hidden');
+        document.getElementById('trackingSection').classList.remove('hidden');
+
+        onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+            const data = snapshot.data();
+            if(!data) return;
+
+            const conf = statusConfig[data.status] || statusConfig["request_received"];
+            document.getElementById('statusIcon').innerText = conf.icon;
+            document.getElementById('trackMessage').innerText = conf.msg;
+            document.getElementById('progressBar').style.width = conf.progress;
+
+            // ভাড়া বা বিল প্রদর্শন
+            if(data.subTotal > 0) {
+                document.getElementById('invoiceBox').classList.remove('hidden');
+                document.getElementById('rentDisplay').innerText = `৳${data.subTotal}`;
+            }
+
+            // ড্রাইভার তথ্য প্রদর্শন (যদি অ্যাডমিন ড্রাইভার এসাইন করে)
+            // এখানে data.assignedPerson.name/phone ব্যবহার করা হয়েছে যা অ্যাডমিন প্যানেল থেকে আসবে
+            if(data.driverName || (data.assignedPerson && data.assignedPerson.name)) {
+                document.getElementById('driverInfo').classList.remove('hidden');
+                document.getElementById('driverName').innerText = data.driverName || data.assignedPerson.name;
+                const dPhone = data.driverPhone || data.assignedPerson.phone;
+                document.getElementById('driverCall').href = dPhone ? `tel:${dPhone}` : "#";
+            }
+        });
+    }
+
+    window.onload = initTracking;
+</script>
 </body>
 </html>

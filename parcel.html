@@ -81,102 +81,141 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
-            authDomain: "gkhidmah-8636b.firebaseapp.com",
-            projectId: "gkhidmah-8636b",
-            storageBucket: "gkhidmah-8636b.firebasestorage.app",
-            messagingSenderId: "780745438049",
-            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let lastStatus = "";
+
+    const parcelStatus = {
+        "pending": { msg: "রাইডার খোঁজা হচ্ছে", icon: "🔍", progress: 15 },
+        "wait_confirmation": { msg: "চার্জ কনফার্ম করুন", icon: "💰", progress: 30 },
+        "rider_assigned": { msg: "রাইডার নিযুক্ত হয়েছে", icon: "🛵", progress: 45 },
+        "at_pickup": { msg: "রাইডার পিকআপ পয়েন্টে", icon: "📍", progress: 60 },
+        "picked": { msg: "পার্সেল রিসিভ করা হয়েছে", icon: "📦", progress: 75 },
+        "in_transit": { msg: "পার্সেল গন্তব্যের পথে", icon: "🚚", progress: 90 },
+        "completed": { msg: "ডেলিভারি সম্পন্ন", icon: "🎉", progress: 100 }
+    };
+
+    document.getElementById('submitBtn').onclick = async function() {
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const pAddr = document.getElementById('pickupAddr').value.trim();
+        const dAddr = document.getElementById('deliveryAddr').value.trim();
+        const note = document.getElementById('parcelNote').value.trim();
+        
+        // ১. পার্টনার আইডি নিয়ে আসা
+        const partnerId = localStorage.getItem('assignedPartnerId') || "01752425414"; 
+
+        if(!name || !phone || !pAddr || !dAddr) return alert("সব তথ্য পূরণ করুন!");
+
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "অনুরোধ পাঠানো হচ্ছে...";
+        btn.disabled = true;
+
+        const orderData = {
+            customerName: name, 
+            customerPhone: phone, 
+            pickupLocation: pAddr,
+            customerAddress: dAddr, 
+            items: [note || "Parcel Delivery"],
+            orderType: "parcel", 
+            status: "pending", 
+            
+            // ২. পার্টনার প্যানেলের জন্য জরুরি অবজেক্ট
+            assignedPerson: {
+                id: partnerId
+            },
+
+            deliveryCharge: 0, 
+            platformFee: 20,
+            invoiceConfirmed: false,
+            createdAt: serverTimestamp()
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        let lastStatus = "";
 
-        const parcelStatus = {
-            "pending": { msg: "রাইডার খোঁজা হচ্ছে", icon: "🔍", progress: 15 },
-            "wait_confirmation": { msg: "চার্জ কনফার্ম করুন", icon: "💰", progress: 30 },
-            "rider_assigned": { msg: "রাইডার নিযুক্ত হয়েছে", icon: "🛵", progress: 45 },
-            "at_pickup": { msg: "রাইডার পিকআপ পয়েন্টে", icon: "📍", progress: 60 },
-            "picked": { msg: "পার্সেল রিসিভ করা হয়েছে", icon: "📦", progress: 75 },
-            "in_transit": { msg: "পার্সেল গন্তব্যের পথে", icon: "🚚", progress: 90 },
-            "completed": { msg: "ডেলিভারি সম্পন্ন", icon: "🎉", progress: 100 }
-        };
-
-        document.getElementById('submitBtn').onclick = async function() {
-            const name = document.getElementById('custName').value.trim();
-            const phone = document.getElementById('custPhone').value.trim();
-            const pAddr = document.getElementById('pickupAddr').value.trim();
-            const dAddr = document.getElementById('deliveryAddr').value.trim();
-
-            if(!name || !phone || !pAddr || !dAddr) return alert("সব তথ্য পূরণ করুন!");
-
-            const docRef = await addDoc(collection(db, "orders"), {
-                customerName: name, customerPhone: phone, pickupLocation: pAddr,
-                customerAddress: dAddr, items: [document.getElementById('parcelNote').value],
-                orderType: "parcel", status: "pending", deliveryCharge: 0, 
-                createdAt: serverTimestamp()
-            });
+        try {
+            const docRef = await addDoc(collection(db, "orders"), orderData);
             localStorage.setItem('activeOrderId', docRef.id);
             initTracking();
-        };
-
-        function initTracking() {
-            const orderId = localStorage.getItem('activeOrderId');
-            if(!orderId) return;
-            document.getElementById('orderSection').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-
-            onSnapshot(doc(db, "orders", orderId), (snapshot) => {
-                const data = snapshot.data();
-                if(!data) return;
-
-                if(lastStatus !== "" && lastStatus !== data.status) {
-                    document.getElementById('notifySound').play().catch(() => {});
-                }
-                lastStatus = data.status;
-
-                const config = parcelStatus[data.status] || parcelStatus["pending"];
-                document.getElementById('statusIcon').innerText = config.icon;
-                document.getElementById('trackMessage').innerText = config.msg;
-                document.getElementById('progressBar').style.width = config.progress + "%";
-
-                // অ্যাডমিন লাইভ লোকেশন আপডেট লজিক
-                if(data.currentLoc) {
-                    document.getElementById('liveStatusBox').classList.remove('hidden');
-                    document.getElementById('liveStatusText').innerText = `📍 ${data.currentLoc}`;
-                } else {
-                    document.getElementById('liveStatusBox').classList.add('hidden');
-                }
-
-                // ইনভয়েস/চার্জ কনফার্মেশন লজিক
-                if(data.deliveryCharge > 0) {
-                    document.getElementById('chargeBox').classList.remove('hidden');
-                    document.getElementById('chargeDisplay').innerText = `৳${data.deliveryCharge}`;
-                    if(data.status === "wait_confirmation") {
-                        document.getElementById('confirmChargeBtn').classList.remove('hidden');
-                        document.getElementById('confirmChargeBtn').onclick = async () => {
-                            await updateDoc(doc(db, "orders", orderId), { status: "rider_assigned" });
-                        };
-                    } else {
-                        document.getElementById('chargeBox').classList.add('hidden');
-                    }
-                }
-
-                // রাইডার ডিটেইলস শো করার লজিক
-                if(["rider_assigned", "at_pickup", "picked", "in_transit", "completed"].includes(data.status)) {
-                    document.getElementById('riderCard').classList.remove('hidden');
-                    document.getElementById('riderName').innerText = data.riderName || "রাইডার তথ্য আসছে...";
-                    document.getElementById('riderPic').src = data.riderPic || "https://ui-avatars.com/api/?name=Rider";
-                    document.getElementById('riderCall').href = `tel:${data.riderPhone}`;
-                    document.getElementById('riderNid').innerText = `NID: ${data.riderNid || 'Verified'}`;
-                }
-            });
+        } catch (e) {
+            console.error(e);
+            alert("দুঃখিত, আবার চেষ্টা করুন।");
+            btn.innerText = "ডেলিভারি রিকোয়েস্ট পাঠান";
+            btn.disabled = false;
         }
-        window.onload = initTracking;
-    </script>
+    };
+
+    function initTracking() {
+        const orderId = localStorage.getItem('activeOrderId');
+        if(!orderId) return;
+
+        document.getElementById('orderSection').classList.add('hidden');
+        document.getElementById('trackingSection').classList.remove('hidden');
+
+        onSnapshot(doc(db, "orders", orderId), (snapshot) => {
+            const data = snapshot.data();
+            if(!data) return;
+
+            if(lastStatus !== "" && lastStatus !== data.status) {
+                document.getElementById('notifySound').play().catch(() => {});
+            }
+            lastStatus = data.status;
+
+            const config = parcelStatus[data.status] || parcelStatus["pending"];
+            document.getElementById('statusIcon').innerText = config.icon;
+            document.getElementById('trackMessage').innerText = config.msg;
+            document.getElementById('progressBar').style.width = config.progress + "%";
+
+            // লাইভ লোকেশন আপডেট
+            if(data.currentLoc) {
+                document.getElementById('liveStatusBox').classList.remove('hidden');
+                document.getElementById('liveStatusText').innerText = `📍 ${data.currentLoc}`;
+            } else {
+                document.getElementById('liveStatusBox').classList.add('hidden');
+            }
+
+            // চার্জ কনফার্মেশন লজিক
+            if(data.deliveryCharge > 0 && data.status === "wait_confirmation") {
+                document.getElementById('chargeBox').classList.remove('hidden');
+                document.getElementById('chargeDisplay').innerText = `৳${data.deliveryCharge}`;
+                
+                document.getElementById('confirmChargeBtn').onclick = async () => {
+                    const btn = document.getElementById('confirmChargeBtn');
+                    btn.innerText = "প্রসেসিং...";
+                    btn.disabled = true;
+                    await updateDoc(doc(db, "orders", orderId), { 
+                        status: "rider_assigned",
+                        invoiceConfirmed: true 
+                    });
+                };
+            } else {
+                document.getElementById('chargeBox').classList.add('hidden');
+            }
+
+            // রাইডার তথ্য প্রদর্শন
+            const showRiderStatuses = ["rider_assigned", "at_pickup", "picked", "in_transit", "completed"];
+            if(showRiderStatuses.includes(data.status)) {
+                document.getElementById('riderCard').classList.remove('hidden');
+                document.getElementById('riderName').innerText = data.riderName || "রাইডার খোঁজা হচ্ছে...";
+                document.getElementById('riderPic').src = data.riderPic || "https://ui-avatars.com/api/?name=Rider";
+                document.getElementById('riderCall').href = data.riderPhone ? `tel:${data.riderPhone}` : "#";
+                document.getElementById('riderNid').innerText = `NID: ${data.riderNid || 'Verified'}`;
+            } else {
+                document.getElementById('riderCard').classList.add('hidden');
+            }
+        });
+    }
+
+    window.onload = initTracking;
+</script>
 </body>
 </html>
