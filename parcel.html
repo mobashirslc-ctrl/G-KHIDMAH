@@ -17,8 +17,9 @@
             <div class="bg-green-700 w-8 h-8 rounded-lg flex items-center justify-center text-white font-black italic text-xl">G</div>
             <h1 class="text-xl font-bold text-green-700 uppercase italic">G KHIDMAH</h1>
         </div>
-        <button onclick="localStorage.removeItem('activeOrderId'); location.reload();" class="text-[10px] font-bold bg-red-50 text-red-600 px-3 py-1 rounded-full uppercase">নতুন পার্সেল</button>
-    </header>
+       <button onclick="refreshPage()" class="text-[10px] font-black bg-green-50 text-green-700 px-3 py-1 rounded-full uppercase">
+    নতুন পিকআপ
+</button>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
@@ -273,6 +274,10 @@
     };
 
     window.onload = initTracking;
+    window.refreshPage = function() {
+    localStorage.removeItem('activeOrderId'); 
+    window.location.href = window.location.pathname; 
+};
 </script>
 </body>
 </html>
