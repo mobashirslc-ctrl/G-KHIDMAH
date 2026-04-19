@@ -65,120 +65,189 @@
         </div>
     </div>
 
-    <script type="module">
-        // Firebase Import (এখানে আপনার মেইন Firebase Config এবং Logic থাকবে)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+   <script type="module">
+    // ১. Firebase SDKs ইম্পোর্ট করা
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = { /* আপনার কনফিগ এখানে বসান */ };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // ২. আপনার দেওয়া Firebase কনফিগ
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20",
+        measurementId: "G-GMYSW4MBVD"
+    };
 
-        // --- আপনার ডাটা এবং ফাংশনগুলো ---
-        const districtThanaData = { "Dhaka": ["Uttara", "Mirpur"], /* আপনার বাকি ডাটা... */ };
-        const partnerData = { "Uttara": ["Sector 7", "Sector 10"], /* আপনার বাকি ডাটা... */ };
-        let targetUrl = '';
+    // ৩. Firebase ইনিশিয়ালাইজ করা
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // ১. দূরত্ব মাপার লজিক
-        window.calculateDistance = (lat1, lon1, lat2, lon2) => {
-            const R = 6371; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        };
+    // --- ৪. ডাটা সোর্স ---
+    const districtThanaData = { 
+        "Dhaka": ["Uttara", "Mirpur", "Gulshan", "Dhanmondi"], 
+        "Chattogram": ["Panchlaish", "Halishahar"],
+        // ... আপনার বাকি ডাটা এখানে থাকবে
+    };
+    const partnerData = { 
+        "Uttara": ["Sector 7", "Sector 10"], 
+        "Mirpur": ["Mirpur 10", "Mirpur 1"] 
+    };
+    let targetUrl = '';
 
-        // ২. অটোমেটিক লোকেশন এবং পার্টনার খোঁজার ফাংশন
-        window.autoDetectLocation = async () => {
-            const btn = document.getElementById('autoLocateBtn');
-            btn.innerText = "খুঁজছি...";
-            
-            if (!navigator.geolocation) {
-                alert("জিপিএস সাপোর্ট করে না।");
-                return;
-            }
+    // --- ৫. গ্লোবাল ফাংশন ম্যাপিং (যাতে HTML থেকে কল করা যায়) ---
 
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const uLat = pos.coords.latitude;
-                const uLng = pos.coords.longitude;
+    // মডাল দেখানো
+    window.showLocationModal = () => {
+        document.getElementById('locationModal').classList.remove('hidden');
+    };
 
-                try {
-                    const partnersSnap = await getDocs(collection(db, "partners"));
-                    let nearestPartnerId = null;
-                    let shortestDistance = 5; 
+    // সার্ভিস লিংকে ক্লিক হ্যান্ডেল করা
+    window.handleServiceClick = (e, url) => {
+        e.preventDefault();
+        targetUrl = url;
+        const savedLoc = localStorage.getItem('userLocation');
+        if (savedLoc) {
+            window.location.href = url + "?area=" + encodeURIComponent(savedLoc);
+        } else {
+            window.showLocationModal();
+        }
+    };
 
-                    partnersSnap.forEach((doc) => {
-                        const p = doc.data();
-                        if(p.lat && p.lng) {
-                            const dist = calculateDistance(uLat, uLng, p.lat, p.lng);
-                            if(dist < shortestDistance) {
-                                shortestDistance = dist;
-                                nearestPartnerId = doc.id;
-                            }
+    // জেলা অনুযায়ী থানা আপডেট
+    window.updateThanas = () => {
+        const district = document.getElementById('district').value;
+        const thanaSelect = document.getElementById('thana');
+        thanaSelect.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
+        
+        if (districtThanaData[district]) {
+            districtThanaData[district].forEach(thana => {
+                let opt = document.createElement('option');
+                opt.value = thana; opt.innerText = thana;
+                thanaSelect.appendChild(opt);
+            });
+        }
+    };
+
+    // থানা অনুযায়ী পার্টনার এরিয়া আপডেট
+    window.updatePartnerAreas = () => {
+        const thana = document.getElementById('thana').value;
+        const partnerSelect = document.getElementById('partnerArea');
+        partnerSelect.innerHTML = '<option value="">সার্ভিস এরিয়া নির্বাচন করুন</option>';
+
+        if (partnerData[thana]) {
+            partnerData[thana].forEach(area => {
+                let opt = document.createElement('option');
+                opt.value = area; opt.innerText = area;
+                partnerSelect.appendChild(opt);
+            });
+        } else {
+            let opt = document.createElement('option');
+            opt.innerText = "এই থানায় বর্তমানে পার্টনার নেই";
+            partnerSelect.appendChild(opt);
+        }
+    };
+
+    // GPS দিয়ে অটো লোকেশন ডিটেক্ট
+    window.autoDetectLocation = async () => {
+        const btn = document.getElementById('autoLocateBtn');
+        btn.innerText = "খুঁজছি...";
+        
+        if (!navigator.geolocation) {
+            alert("জিপিএস সাপোর্ট করে না।");
+            btn.innerText = "📍 জিপিএস দিয়ে অটো সেট করুন";
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const uLat = pos.coords.latitude;
+            const uLng = pos.coords.longitude;
+
+            try {
+                const partnersSnap = await getDocs(collection(db, "partners"));
+                let nearestPartnerId = null;
+                let shortestDistance = 5; 
+
+                partnersSnap.forEach((doc) => {
+                    const p = doc.data();
+                    if(p.lat && p.lng) {
+                        const dist = window.calculateDistance(uLat, uLng, p.lat, p.lng);
+                        if(dist < shortestDistance) {
+                            shortestDistance = dist;
+                            nearestPartnerId = doc.id;
                         }
-                    });
-
-                    if(nearestPartnerId) {
-                        const locInfo = `GPS: Near ${nearestPartnerId}`;
-                        localStorage.setItem('userLocation', locInfo);
-                        localStorage.setItem('assignedPartnerId', nearestPartnerId);
-                        document.getElementById('locationModal').classList.add('hidden');
-                        updateUI();
-                        if (targetUrl) window.location.href = targetUrl + "?partner=" + nearestPartnerId;
-                    } else {
-                        alert("৫ কিমি এর মধ্যে কোনো পার্টনার নেই। দয়া করে ম্যানুয়ালি সিলেক্ট করুন।");
-                        btn.innerText = "📍 জিপিএস দিয়ে অটো সেট করুন";
                     }
-                } catch (error) {
-                    alert("সার্ভার সমস্যা। আবার চেষ্টা করুন।");
+                });
+
+                if(nearestPartnerId) {
+                    const locInfo = `GPS: Near ${nearestPartnerId}`;
+                    localStorage.setItem('userLocation', locInfo);
+                    localStorage.setItem('assignedPartnerId', nearestPartnerId);
+                    document.getElementById('locationModal').classList.add('hidden');
+                    window.updateUI();
+                    if (targetUrl) window.location.href = targetUrl + "?partner=" + nearestPartnerId;
+                } else {
+                    alert("৫ কিমি এর মধ্যে কোনো পার্টনার নেই। ম্যানুয়ালি সিলেক্ট করুন।");
                     btn.innerText = "📍 জিপিএস দিয়ে অটো সেট করুন";
                 }
-            }, () => {
-                alert("লোকেশন পারমিশন প্রয়োজন।");
+            } catch (error) {
+                alert("সার্ভার সমস্যা। আবার চেষ্টা করুন।");
                 btn.innerText = "📍 জিপিএস দিয়ে অটো সেট করুন";
-            });
-        };
-
-        // --- মডাল ও ম্যানুয়াল সিলেকশন লজিক ---
-        window.showLocationModal = () => document.getElementById('locationModal').classList.remove('hidden');
-        
-        window.updateUI = () => {
-            const loc = localStorage.getItem('userLocation');
-            if (loc) {
-                document.getElementById('displayAreaName').innerText = loc;
-                document.getElementById('displayAreaName').classList.remove('italic');
             }
-        };
+        }, () => {
+            alert("লোকেশন পারমিশন প্রয়োজন।");
+            btn.innerText = "📍 জিপিএস দিয়ে অটো সেট করুন";
+        });
+    };
 
-        window.confirmLocation = () => {
-            const d = document.getElementById('district').value;
-            const t = document.getElementById('thana').value;
-            const p = document.getElementById('partnerArea').value;
-            if (!d || !t || !p || p.includes("পার্টনার নেই")) return alert("সঠিক লোকেশন দিন");
+    // দূরত্ব মাপার লজিক (Haversine Formula)
+    window.calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    };
 
-            const fullLoc = `${d}, ${t}, ${p}`;
-            localStorage.setItem('userLocation', fullLoc);
-            document.getElementById('locationModal').classList.add('hidden');
-            updateUI();
-            if (targetUrl) window.location.href = targetUrl + "?area=" + encodeURIComponent(fullLoc);
-        };
+    // ম্যানুয়াল লোকেশন কনফার্ম করা
+    window.confirmLocation = () => {
+        const d = document.getElementById('district').value;
+        const t = document.getElementById('thana').value;
+        const p = document.getElementById('partnerArea').value;
+        if (!d || !t || !p || p.includes("পার্টনার নেই")) return alert("সঠিক লোকেশন দিন");
 
-        // Initialize Page
-        window.onload = () => {
-            const districtSelect = document.getElementById('district');
+        const fullLoc = `${d}, ${t}, ${p}`;
+        localStorage.setItem('userLocation', fullLoc);
+        document.getElementById('locationModal').classList.add('hidden');
+        window.updateUI();
+        if (targetUrl) window.location.href = targetUrl + "?area=" + encodeURIComponent(fullLoc);
+    };
+
+    // UI আপডেট করা
+    window.updateUI = () => {
+        const loc = localStorage.getItem('userLocation');
+        const display = document.getElementById('displayAreaName');
+        if (loc && display) {
+            display.innerText = loc;
+            display.classList.remove('italic');
+        }
+    };
+
+    // ইনিশিয়ালাইজেশন
+    window.onload = () => {
+        const districtSelect = document.getElementById('district');
+        if (districtSelect) {
             Object.keys(districtThanaData).sort().forEach(d => {
                 let opt = document.createElement('option');
                 opt.value = d; opt.innerText = d;
                 districtSelect.appendChild(opt);
             });
-            updateUI();
-        };
-        
-        // ফাংশনগুলো গ্লোবালি অ্যাক্সেসযোগ্য করার জন্য উইন্ডোতে রাখা হয়েছে
-        window.updateThanas = updateThanas;
-        window.updatePartnerAreas = updatePartnerAreas;
-        window.handleServiceClick = handleServiceClick;
-    </script>
+        }
+        window.updateUI();
+    };
+</script>
 </body>
 </html>
