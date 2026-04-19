@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style> 
         body { font-family: 'Hind Siliguri', sans-serif; } 
-        .tab-active { background-color: #1e3a8a; color: white; transform: scale(1.05); shadow-lg; }
         .section-tab { cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
         .section-tab.active { border-color: #1e3a8a; color: #1e3a8a; font-weight: 900; }
         .hidden { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-slate-100 pb-20">
@@ -41,17 +41,25 @@
         <div id="section-partners" class="hidden">
             <div class="bg-blue-900 p-6 rounded-[2.5rem] shadow-xl mb-8 border-b-4 border-blue-400">
                 <h3 class="text-sm font-black text-white uppercase italic mb-4">➕ নতুন পার্টনার যোগ করুন</h3>
+                
                 <div class="grid grid-cols-2 gap-3 mb-3">
-                    <input type="text" id="pName" placeholder="নাম" class="p-3 rounded-xl bg-white/10 text-white border-white/20 text-xs font-bold outline-none">
-                    <input type="tel" id="pPhone" placeholder="মোবাইল" class="p-3 rounded-xl bg-white/10 text-white border-white/20 text-xs font-bold outline-none">
+                    <input type="text" id="pName" placeholder="নাম" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none placeholder:text-white/40">
+                    <input type="tel" id="pPhone" placeholder="মোবাইল" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none placeholder:text-white/40">
                 </div>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <select id="pService" class="p-3 rounded-xl bg-white/10 text-white border-white/20 text-xs font-bold outline-none">
+
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <select id="pService" class="p-4 rounded-xl bg-blue-800 text-white border border-white/20 text-xs font-bold outline-none">
                         <option value="shopping">বাজার (Shopping)</option>
                         <option value="home_service">সার্ভিস (Home Service)</option>
                     </select>
-                    <input type="number" id="pComm" placeholder="কমিশন %" class="p-3 rounded-xl bg-white/10 text-white border-white/20 text-xs font-bold outline-none">
+                    <input type="number" id="pComm" placeholder="কমিশন %" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none placeholder:text-white/40">
                 </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="number" step="any" id="pLat" placeholder="Latitude (অক্ষাংশ)" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none placeholder:text-white/40">
+                    <input type="number" step="any" id="pLng" placeholder="Longitude (দ্রাঘিমাংশ)" class="p-4 rounded-xl bg-white/10 text-white border border-white/20 text-xs font-bold outline-none placeholder:text-white/40">
+                </div>
+
                 <button onclick="addNewPartner()" class="w-full bg-white text-blue-900 py-4 rounded-2xl text-xs font-black uppercase shadow-lg active:scale-95 transition-all">পার্টনার সেভ করুন</button>
             </div>
             <div id="partnerList" class="space-y-4"></div>
@@ -70,121 +78,142 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
-            authDomain: "gkhidmah-8636b.firebaseapp.com",
-            projectId: "gkhidmah-8636b",
-            storageBucket: "gkhidmah-8636b.firebasestorage.app",
-            messagingSenderId: "780745438049",
-            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+        authDomain: "gkhidmah-8636b.firebaseapp.com",
+        projectId: "gkhidmah-8636b",
+        storageBucket: "gkhidmah-8636b.firebasestorage.app",
+        messagingSenderId: "780745438049",
+        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // --- Section Switcher ---
-        window.switchSection = (id) => {
-            ['orders', 'partners', 'settings'].forEach(s => {
-                document.getElementById(`section-${s}`).classList.add('hidden');
-                document.getElementById(`tab-${s}`).classList.remove('active');
-            });
-            document.getElementById(`section-${id}`).classList.remove('hidden');
-            document.getElementById(`tab-${id}`).classList.add('active');
-        };
+    // --- Section Switcher ---
+    window.switchSection = (id) => {
+        ['orders', 'partners', 'settings'].forEach(s => {
+            document.getElementById(`section-${s}`).classList.add('hidden');
+            document.getElementById(`tab-${s}`).classList.remove('active');
+        });
+        document.getElementById(`section-${id}`).classList.remove('hidden');
+        document.getElementById(`tab-${id}`).classList.add('active');
+    };
 
-        // --- Partner Logic ---
-        window.addNewPartner = async () => {
-            const name = document.getElementById('pName').value.trim();
-            const phone = document.getElementById('pPhone').value.trim();
-            const service = document.getElementById('pService').value;
-            const comm = parseFloat(document.getElementById('pComm').value) || 10;
-            if(!name || !phone) return alert("তথ্য দিন!");
+    // --- Partner Logic ---
+    window.addNewPartner = async () => {
+        const name = document.getElementById('pName').value.trim();
+        const phone = document.getElementById('pPhone').value.trim();
+        const service = document.getElementById('pService').value;
+        const comm = parseFloat(document.getElementById('pComm').value) || 10;
+        const lat = parseFloat(document.getElementById('pLat').value);
+        const lng = parseFloat(document.getElementById('pLng').value);
+
+        if(!name || !phone || isNaN(lat) || isNaN(lng)) {
+            return alert("নাম, ফোন এবং লোকেশন (Lat/Lng) অবশ্যই দিতে হবে!");
+        }
+
+        try {
             await setDoc(doc(db, "partners", phone), {
-                name, phone, serviceType: service, commission: comm,
-                isActive: true, wallet: { totalEarning: 0, adminDue: 0 },
+                name, 
+                phone, 
+                serviceType: service, 
+                commission: comm,
+                lat: lat, 
+                lng: lng, 
+                isActive: true, 
+                wallet: { totalEarning: 0, adminDue: 0 },
+                createdAt: new Date(),
                 lastDueUpdate: new Date().toLocaleDateString()
             });
-            alert("পার্টনার যোগ হয়েছে!");
-        };
+            alert("পার্টনার সফলভাবে যোগ হয়েছে!");
+            
+            // Clear Fields
+            ['pName', 'pPhone', 'pLat', 'pLng', 'pComm'].forEach(id => document.getElementById(id).value = "");
+        } catch (error) {
+            console.error(error);
+            alert("সেভ করতে সমস্যা হয়েছে।");
+        }
+    };
 
-        onSnapshot(collection(db, "partners"), (snap) => {
-            const container = document.getElementById('partnerList');
-            container.innerHTML = "";
-            let totalDue = 0;
-            snap.forEach(d => {
-                const p = d.data();
-                totalDue += (p.wallet?.adminDue || 0);
-                const card = document.createElement('div');
-                card.className = `p-5 rounded-[2rem] bg-white shadow-lg border-l-8 ${p.isActive ? 'border-green-500' : 'border-red-500'}`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-black text-gray-800">${p.name} (${p.serviceType})</h4>
-                        <span class="text-[10px] font-bold ${p.isActive ? 'text-green-600' : 'text-red-600'}">${p.isActive ? 'ACTIVE' : 'BLOCKED'}</span>
+    // --- Listen for Partners ---
+    onSnapshot(collection(db, "partners"), (snap) => {
+        const container = document.getElementById('partnerList');
+        container.innerHTML = "";
+        let totalDue = 0;
+        snap.forEach(d => {
+            const p = d.data();
+            totalDue += (p.wallet?.adminDue || 0);
+            const card = document.createElement('div');
+            card.className = `p-5 rounded-[2rem] bg-white shadow-lg border-l-8 ${p.isActive ? 'border-green-500' : 'border-red-500'} mb-4`;
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-black text-gray-800">${p.name} (${p.serviceType})</h4>
+                    <span class="text-[10px] font-bold ${p.isActive ? 'text-green-600' : 'text-red-600'}">${p.isActive ? 'ACTIVE' : 'BLOCKED'}</span>
+                </div>
+                <p class="text-[10px] text-gray-500 mb-3 font-mono">📍 ${p.lat}, ${p.lng}</p>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="bg-slate-50 p-3 rounded-2xl text-center">
+                        <p class="text-[8px] font-bold text-gray-400 uppercase">Admin Due</p>
+                        <h5 class="text-md font-black text-red-600">৳${(p.wallet?.adminDue || 0).toFixed(2)}</h5>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <div class="bg-slate-50 p-3 rounded-2xl text-center">
-                            <p class="text-[8px] font-bold text-gray-400">ADMIN DUE</p>
-                            <h5 class="text-md font-black text-red-600">৳${(p.wallet?.adminDue || 0).toFixed(2)}</h5>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-2xl text-center">
-                            <p class="text-[8px] font-bold text-gray-400">EARNING</p>
-                            <h5 class="text-md font-black text-blue-900">৳${(p.wallet?.totalEarning || 0).toFixed(2)}</h5>
-                        </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl text-center">
+                        <p class="text-[8px] font-bold text-gray-400 uppercase">Earning</p>
+                        <h5 class="text-md font-black text-blue-900">৳${(p.wallet?.totalEarning || 0).toFixed(2)}</h5>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="clearDue('${d.id}')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-[10px] font-bold">Clear Due</button>
-                        <button onclick="toggleP('${d.id}', ${p.isActive})" class="flex-1 ${p.isActive ? 'bg-red-600' : 'bg-blue-600'} text-white py-2 rounded-xl text-[10px] font-bold">${p.isActive ? 'Block' : 'Unblock'}</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            document.getElementById('totalDueCollect').innerText = `৳${totalDue.toFixed(2)}`;
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="clearDue('${d.id}')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-[10px] font-bold">Clear Due</button>
+                    <button onclick="toggleP('${d.id}', ${p.isActive})" class="flex-1 ${p.isActive ? 'bg-red-600' : 'bg-blue-600'} text-white py-2 rounded-xl text-[10px] font-bold">${p.isActive ? 'Block' : 'Unblock'}</button>
+                </div>
+            `;
+            container.appendChild(card);
         });
+        document.getElementById('totalDueCollect').innerText = `৳${totalDue.toFixed(2)}`;
+    });
 
-        window.clearDue = async (id) => {
-            if(confirm("পেমেন্ট কি পেয়েছেন?")) {
-                await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0, isActive: true });
-            }
-        };
+    window.clearDue = async (id) => {
+        if(confirm("পেমেন্ট কি পেয়েছেন?")) {
+            await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0, isActive: true });
+        }
+    };
 
-        window.toggleP = async (id, stat) => {
-            await updateDoc(doc(db, "partners", id), { isActive: !stat });
-        };
+    window.toggleP = async (id, stat) => {
+        await updateDoc(doc(db, "partners", id), { isActive: !stat });
+    };
 
-        window.saveCoupon = async () => {
-            const code = document.getElementById('couponCode').value;
-            const disc = document.getElementById('couponDiscount').value;
-            await setDoc(doc(db, "settings", "coupons"), { code: code.toUpperCase(), discount: parseFloat(disc) });
-            alert("কুপন সেভ হয়েছে!");
-        };
+    window.saveCoupon = async () => {
+        const code = document.getElementById('couponCode').value;
+        const disc = document.getElementById('couponDiscount').value;
+        await setDoc(doc(db, "settings", "coupons"), { code: code.toUpperCase(), discount: parseFloat(disc) });
+        alert("কুপন সেভ হয়েছে!");
+    };
 
-        // --- Order rendering (আপনার আগের কোডটি এখানে ইনজেক্ট হবে) ---
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-            const container = document.getElementById('orderContainer');
-            container.innerHTML = "";
-            snap.forEach(d => {
-                const order = d.data();
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-[2rem] shadow-md border-l-4 border-blue-900 mb-4";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[9px] font-bold bg-slate-100 px-2 py-1 rounded-full uppercase">${order.serviceType || 'shopping'}</span>
-                        <span class="text-[9px] text-gray-300 font-mono">#${d.id.slice(-5)}</span>
-                    </div>
-                    <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                    <p class="text-[10px] text-gray-400 mb-3">${order.customerAddress}</p>
-                    <div class="flex gap-2">
-                        <button onclick="updateStatus('${d.id}', 'completed')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[9px] font-bold">Mark Completed</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+    // --- Order Rendering ---
+    onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+        const container = document.getElementById('orderContainer');
+        container.innerHTML = "";
+        snap.forEach(d => {
+            const order = d.data();
+            const card = document.createElement('div');
+            card.className = "bg-white p-5 rounded-[2rem] shadow-md border-l-4 border-blue-900 mb-4";
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] font-bold bg-slate-100 px-2 py-1 rounded-full uppercase">${order.serviceType || 'service'}</span>
+                    <span class="text-[9px] text-gray-300 font-mono">#${d.id.slice(-5)}</span>
+                </div>
+                <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
+                <p class="text-[10px] text-gray-400 mb-3">${order.customerAddress}</p>
+                <button onclick="updateStatus('${d.id}', 'completed')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[9px] font-bold">Mark Completed</button>
+            `;
+            container.appendChild(card);
         });
+    });
 
-        window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
+    window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
 
-    </script>
+</script>
 </body>
 </html>
