@@ -10,7 +10,6 @@
         body { font-family: 'Hind Siliguri', sans-serif; } 
         .card-animate { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .tab-active { background-color: #1e3a8a; color: white; }
     </style>
 </head>
 <body class="bg-slate-100 pb-24">
@@ -18,81 +17,55 @@
     <audio id="newOrderSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="loginSection" class="min-h-screen bg-blue-900 flex items-center justify-center p-4">
-    <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-black italic text-blue-900 tracking-tighter uppercase">G-KHIDMAH</h1>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">পার্টনার অথেন্টিকেশন</p>
-        </div>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">মোবাইল নম্বর</label>
-                <input type="tel" id="loginPhone" placeholder="017XXXXXXXX" 
-                    class="w-full p-5 rounded-[1.5rem] bg-slate-50 border border-slate-100 outline-none font-bold text-center text-lg focus:ring-2 focus:ring-blue-500 transition-all">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-black italic text-blue-900 tracking-tighter uppercase">G-KHIDMAH</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">পার্টনার অথেন্টিকেশন</p>
             </div>
-            
-            <div>
-                <label class="text-[10px] font-black text-slate-400 uppercase ml-4 mb-1 block">সিক্রেট পিন</label>
-                <input type="password" id="loginPin" placeholder="••••••" 
-                    class="w-full p-5 rounded-[1.5rem] bg-slate-50 border border-slate-100 outline-none font-bold text-center text-lg tracking-[0.5em] focus:ring-2 focus:ring-blue-500 transition-all">
+            <div class="space-y-4">
+                <input type="tel" id="loginPhone" placeholder="মোবাইল নম্বর" class="w-full p-5 rounded-[1.5rem] bg-slate-50 border border-slate-100 outline-none font-bold text-center text-lg focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="loginPin" placeholder="সিক্রেট পিন" class="w-full p-5 rounded-[1.5rem] bg-slate-50 border border-slate-100 outline-none font-bold text-center text-lg tracking-[0.5em] focus:ring-2 focus:ring-blue-500">
+                <button onclick="handleLogin()" class="w-full bg-blue-900 text-white py-5 rounded-[1.5rem] font-black shadow-xl active:scale-95 transition-all uppercase mt-4">লগইন করুন</button>
             </div>
-            
-            <button onclick="handleLogin()" 
-                class="w-full bg-blue-900 text-white py-5 rounded-[1.5rem] font-black shadow-xl hover:bg-blue-800 active:scale-95 transition-all uppercase mt-4">
-                লগইন করুন
-            </button>
         </div>
     </div>
-</div>
 
-   <div id="mainDashboard" class="max-w-md mx-auto p-4 hidden">
-    <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white p-8 rounded-[3rem] shadow-2xl mb-8 relative overflow-hidden transition-all">
-        <div class="relative z-10">
-            <div class="flex justify-between items-start mb-6">
+    <div id="mainDashboard" class="max-w-md mx-auto p-4 hidden">
+        <header class="bg-gradient-to-br from-blue-900 to-indigo-950 text-white p-8 rounded-[3rem] shadow-2xl mb-8 relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-start mb-6">
                 <div>
-                    <h1 class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mb-1">G-Khidmah Partner</h1>
-                    <h2 id="pName" class="text-2xl font-black italic tracking-tight">লোড হচ্ছে...</h2>
+                    <h1 class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mb-1 text-blue-200">G-Khidmah Partner</h1>
+                    <h2 id="pName" class="text-2xl font-black italic tracking-tight uppercase">লোড হচ্ছে...</h2>
                 </div>
-                <button onclick="logout()" class="bg-white/10 hover:bg-red-500/20 p-3 rounded-2xl backdrop-blur-md transition-all">
-                    🔒 <span class="text-[9px] font-black uppercase ml-1">Log out</span>
-                </button>
+                <button onclick="handleLogout()" class="bg-white/10 p-3 rounded-2xl backdrop-blur-md text-[9px] font-black uppercase border border-white/20">Log out</button>
             </div>
-            
             <div class="flex gap-2">
-                <span id="pType" class="bg-blue-500/30 text-blue-200 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/10">অ্যাসাইনড পার্টনার</span>
-                <span class="bg-emerald-500/30 text-emerald-300 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/10">Active</span>
+                <span id="pLocationStatus" class="bg-emerald-500/30 text-emerald-300 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/10">অ্যাক্টিভ পার্টনার ✅</span>
             </div>
-        </div>
-        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-    </header>
+        </header>
 
-    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-8 border border-slate-100">
-        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> প্রোফাইল কন্ট্রোল
-        </h3>
-        <div class="space-y-3">
-            <div class="flex gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
-                <input type="text" id="locInput" placeholder="আপনার বর্তমান লোকেশন..." 
-                    class="flex-1 bg-transparent p-3 text-xs font-bold outline-none placeholder:text-slate-300">
-                <button onclick="updateLoc()" class="bg-blue-900 text-white px-5 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">আপডেট</button>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-b-8 border-blue-500/20 text-center">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">মোট আয়</span>
+                <h3 class="text-xl font-black text-blue-900 mt-1">৳ <span id="totalEarn">0.00</span></h3>
             </div>
-            
-            <div class="flex gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
-                <input type="password" id="pinInput" placeholder="নতুন পিন সেট করুন" 
-                    class="flex-1 bg-transparent p-3 text-xs font-bold outline-none placeholder:text-slate-300">
-                <button onclick="updatePin()" class="bg-slate-700 text-white px-5 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">সেভ</button>
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-b-8 border-red-500/20 text-center">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">অ্যাডমিন ডিউ</span>
+                <h3 class="text-xl font-black text-red-600 mt-1">৳ <span id="adminDue">0.00</span></h3>
             </div>
         </div>
-    </div>
 
-    <div class="px-2 flex justify-between items-center mb-6">
-        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">চলমান কাজগুলো</h3>
-        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">!</span>
-    </div>
-    
-    <div id="orderContainer" class="space-y-6 min-h-[200px]">
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-8 border border-slate-100">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">📍 লোকেশন আপডেট করুন</h3>
+            <div class="flex gap-2 bg-slate-50 p-1.5 rounded-2xl border">
+                <input type="text" id="locInput" placeholder="আপনার বর্তমান লোকেশন..." class="flex-1 bg-transparent p-3 text-xs font-bold outline-none">
+                <button onclick="updateLoc()" class="bg-blue-900 text-white px-5 rounded-xl text-[10px] font-black uppercase">আপডেট</button>
+            </div>
         </div>
-</div>
+
+        <h3 class="text-xs font-black text-slate-500 uppercase mb-4 ml-4">চলমান অর্ডারসমূহ</h3>
+        <div id="orderContainer" class="space-y-6"></div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -109,8 +82,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        let currentPartner = JSON.parse(localStorage.getItem('gPartnerAuth')) || null;
+        const COLLECTION_NAME = "partners"; 
         let knownOrderIds = new Set();
 
         const configs = {
@@ -120,140 +92,118 @@
             delivery: { title: "পার্সেল ডেলিভারি", color: "border-purple-600", steps: ["pickup_pending", "rider_assigned", "picked_up", "on_the_way", "delivered", "completed"] }
         };
 
-        // --- Auth System ---
-        const checkAuth = () => {
-            if (!currentPartner) {
-                document.getElementById('loginSection').classList.remove('hidden');
-                document.getElementById('mainDashboard').classList.add('hidden');
-            } else {
+        window.checkAuth = () => {
+            const user = localStorage.getItem('gPartnerAuth');
+            if (user) {
+                const userData = JSON.parse(user);
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('mainDashboard').classList.remove('hidden');
-                document.getElementById('pName').innerText = currentPartner.name;
-                document.getElementById('pType').innerText = currentPartner.type;
-                startPartnerListener();
+                loadPartnerData(userData.id);
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('mainDashboard').classList.add('hidden');
             }
         };
 
         window.handleLogin = async () => {
-    const phone = document.getElementById('loginPhone').value.trim();
-    const pin = document.getElementById('loginPin').value.trim();
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pin = document.getElementById('loginPin').value.trim();
+            try {
+                const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const dbPin = data.secretCode || data.pin || ""; 
+                    if (dbPin.toString() === pin.toString()) {
+                        const partnerData = { id: docSnap.id, ...data };
+                        localStorage.setItem('gPartnerAuth', JSON.stringify(partnerData));
+                        window.checkAuth();
+                    } else { alert("ভুল পিন!"); }
+                } else { alert("পার্টনার খুঁজে পাওয়া যায়নি!"); }
+            } catch (e) { alert("লগইন এরর!"); }
+        };
 
-    try {
-        // কালেকশন নাম 'partners' কি না নিশ্চিত হয়ে নিন
-        const docSnap = await getDoc(doc(db, "partners", phone));
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // আপনার ডাটাবেসে পিন যে নামে আছে সেটি চেক করুন (যেমন: secretCode বা pin)
-            const dbPin = data.secretCode || data.pin || ""; 
-
-            if (dbPin && dbPin.toString() === pin) {
-                currentPartner = { id: docSnap.id, ...data };
-                localStorage.setItem('gPartnerAuth', JSON.stringify(currentPartner));
-                checkAuth();
-            } else {
-                alert("ভুল পিন নম্বর!");
-            }
-        } else {
-            alert("এই নম্বরটি পার্টনার হিসেবে রেজিস্টার্ড নয়।");
+        async function loadPartnerData(id) {
+            onSnapshot(doc(db, COLLECTION_NAME, id), (snap) => {
+                if(snap.exists()){
+                    const data = snap.data();
+                    document.getElementById('pName').innerText = data.name || "Partner";
+                    document.getElementById('totalEarn').innerText = data.wallet?.totalEarning || "0.00";
+                    document.getElementById('adminDue').innerText = data.wallet?.adminDue || "0.00";
+                    loadOrders(id);
+                }
+            });
         }
-    } catch (e) {
-        console.error(e);
-        alert("লগইন এরর: " + e.message);
-    }
-};
-        window.logout = () => { localStorage.removeItem('gPartnerAuth'); location.reload(); };
 
-        // --- Profile Update ---
-        window.updateLoc = async () => {
-            const loc = document.getElementById('locInput').value;
-            await updateDoc(doc(db, "team", currentPartner.id), { currentLocation: loc, lastActive: Date.now() });
-            alert("লোকেশন আপডেট হয়েছে!");
-        };
-
-        window.updatePin = async () => {
-            const pin = document.getElementById('pinInput').value;
-            await updateDoc(doc(db, "team", currentPartner.id), { secretCode: pin });
-            alert("পিন আপডেট হয়েছে!");
-        };
-
-        // --- Order Listener with Notification Sound ---
-        function startPartnerListener() {
-            const q = query(collection(db, "orders"), where("assignedPerson.id", "==", currentPartner.id), orderBy("createdAt", "desc"));
-            
+        function loadOrders(id) {
+            const q = query(collection(db, "orders"), where("assignedPerson.id", "==", id), orderBy("createdAt", "desc"));
             onSnapshot(q, (snap) => {
                 const container = document.getElementById('orderContainer');
                 container.innerHTML = "";
-                
                 snap.forEach(d => {
                     const order = { id: d.id, ...d.data() };
-                    
-                    // নতুন অর্ডারের জন্য সাউন্ড
                     if (knownOrderIds.size > 0 && !knownOrderIds.has(order.id)) {
-                        document.getElementById('newOrderSound').play().catch(e => console.log("Sound enabled after touch"));
+                        document.getElementById('newOrderSound').play().catch(() => {});
                     }
                     knownOrderIds.add(order.id);
-
-                    const type = order.serviceType || 'shopping';
-                    const config = configs[type] || configs.shopping;
-
-                    const card = document.createElement('div');
-                    card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color} mb-6`;
-                    
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">${config.title}</span>
-                            <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
-                        </div>
-                        <div class="mb-4">
-                            <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
-                            <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone}</p>
-                            <p class="text-[10px] text-gray-400 mt-1">${order.customerAddress}</p>
-                        </div>
-                        <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100">
-                            ${renderSpecifics(order)}
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            ${config.steps.map((s, i) => `
-                                <button onclick="updateStatus('${order.id}', '${s}')" class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all ${order.status === s ? 'bg-blue-900 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}">
-                                    ${i+1}. ${s.replace(/_/g, ' ')}
-                                </button>
-                            `).join('')}
-                        </div>
-                    `;
-                    container.appendChild(card);
+                    renderOrderCard(order, container);
                 });
             });
         }
 
-        // --- Invoice & Product Management Logic ---
+        function renderOrderCard(order, container) {
+            const config = configs[order.serviceType] || configs.shopping;
+            const card = document.createElement('div');
+            card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color}`;
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <span class="bg-slate-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-600">${config.title}</span>
+                    <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
+                    <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone}</p>
+                    <p class="text-[10px] text-gray-400 mt-1">${order.customerAddress || 'ঠিকানা দেওয়া হয়নি'}</p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100">
+                    ${renderSpecifics(order)}
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    ${config.steps.map((s, i) => `
+                        <button onclick="updateStatus('${order.id}', '${s}')" class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all ${order.status === s ? 'bg-blue-900 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}">
+                            ${i+1}. ${s.replace(/_/g, ' ')}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(card);
+        }
+
         function renderSpecifics(order) {
-            const type = order.serviceType || 'shopping';
-            if(type === 'shopping') {
+            if(order.serviceType === 'shopping') {
                 return `
                     <div class="space-y-2">
-                        ${order.items.map(item => `
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-50">
+                        ${(order.items || []).map(item => `
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-50">
                                 <button onclick="removeItem('${order.id}', '${item}')" class="text-red-400 font-bold px-2">×</button>
                                 <span class="text-[10px] flex-1 font-bold text-slate-700">${item}</span>
                                 <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-16 p-1.5 bg-blue-50 rounded-lg text-[10px] text-center font-bold outline-none" placeholder="৳">
                             </div>
                         `).join('')}
-                        <div class="pt-2 flex flex-col gap-2">
-                            <div class="flex gap-2">
-                                <input type="number" id="del-${order.id}" value="${order.deliveryCharge || 70}" class="w-1/2 p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ডেলিভারি">
-                                <input type="number" id="plat-${order.id}" value="${order.platformFee || 20}" class="w-1/2 p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ফি">
-                            </div>
-                            <button onclick="saveShoppingBill('${order.id}')" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase shadow-md active:scale-95 transition-all">ইনভয়েস সেভ করুন</button>
+                        <div class="pt-2 grid grid-cols-2 gap-2">
+                            <input type="number" id="del-${order.id}" value="${order.deliveryCharge || 70}" class="p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ডেলিভারি">
+                            <input type="number" id="plat-${order.id}" value="${order.platformFee || 20}" class="p-2 rounded-lg border text-[10px] font-bold outline-none" placeholder="ফি">
                         </div>
+                        <button onclick="saveShoppingBill('${order.id}')" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase shadow-md mt-2">ইনভয়েস সেভ করুন</button>
                     </div>`;
             } else {
                 return `
-                    <div class="space-y-3 text-center">
-                        <p class="text-[10px] font-bold text-blue-900 uppercase">সার্ভিস রিকোয়েস্ট: ${order.items.join(', ')}</p>
+                    <div class="space-y-2 text-center">
+                        <p class="text-[10px] font-bold text-blue-900 uppercase">সার্ভিস: ${(order.items || []).join(', ')}</p>
                         <div class="flex gap-2">
-                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="মোট বিল (৳)" class="flex-1 p-3 rounded-xl border text-xs font-bold outline-none bg-white">
+                            <input type="number" id="bill-${order.id}" value="${order.subTotal || ''}" placeholder="বিল (৳)" class="flex-1 p-2 rounded-xl border text-xs font-bold outline-none bg-white text-center">
                             <button onclick="saveServiceBill('${order.id}')" class="bg-blue-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">সেভ</button>
                         </div>
                     </div>`;
@@ -270,31 +220,34 @@
             });
             const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
             const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-
             await updateDoc(doc(db, "orders", id), { 
                 itemPrices: prices, subTotal: sub, deliveryCharge: del, platformFee: plat, status: "invoice_ready" 
             });
-            alert("শপিং বিল আপডেট হয়েছে!");
+            alert("বিল সেভ হয়েছে!");
         };
 
         window.saveServiceBill = async (id) => {
             const val = parseFloat(document.getElementById(`bill-${id}`).value) || 0;
             await updateDoc(doc(db, "orders", id), { subTotal: val, status: "payment_pending" });
-            alert("সার্ভিস বিল সেভ হয়েছে!");
+            alert("বিল সেভ হয়েছে!");
         };
 
-        // আইটেম রিমুভ করার সময় ইউজারকে নোটিফিকেশন মেসেজ পাঠানো
         window.removeItem = async (id, item) => {
-            if(confirm(`"${item}" তালিকা থেকে বাদ দিবেন? ইউজার নোটিফিকেশন পাবেন।`)) {
-                await updateDoc(doc(db, "orders", id), { 
-                    items: arrayRemove(item),
-                    alertMessage: `দুঃখিত, আপনার লিস্টের "${item}" এই মুহূর্তে পাওয়া যায়নি।`,
-                    alertTime: Date.now()
-                });
+            if(confirm(`"${item}" বাদ দিবেন?`)) {
+                await updateDoc(doc(db, "orders", id), { items: arrayRemove(item) });
             }
         };
 
-        checkAuth();
+        window.updateLoc = async () => {
+            const user = JSON.parse(localStorage.getItem('gPartnerAuth'));
+            const loc = document.getElementById('locInput').value;
+            await updateDoc(doc(db, COLLECTION_NAME, user.id), { currentLocation: loc });
+            alert("লোকেশন আপডেট হয়েছে!");
+        };
+
+        window.handleLogout = () => { localStorage.removeItem('gPartnerAuth'); location.reload(); };
+
+        window.checkAuth();
     </script>
 </body>
 </html>
