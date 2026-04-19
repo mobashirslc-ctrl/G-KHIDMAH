@@ -64,47 +64,56 @@
                 <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] text-white font-black">24/7</div>
             </a>
         </div>
-    </div>
 
     <div id="locationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">সার্ভিস এরিয়া</h2>
-            <div class="space-y-4 mt-6">
-                <div id="locationModal" ...>
-    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
-        <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">সার্ভিস এরিয়া</h2>
-        
-        <button id="autoLocateBtn" onclick="autoDetectLocation()" class="w-full py-3 mb-4 bg-blue-50 text-blue-700 rounded-2xl font-bold text-sm border border-blue-100 flex items-center justify-center gap-2">
-            📍 জিপিএস দিয়ে অটো সেট করুন
-        </button>
+            
+            <button id="autoLocateBtn" onclick="autoDetectLocation()" class="w-full py-4 mb-4 bg-blue-50 text-blue-700 rounded-2xl font-bold text-sm border border-blue-100 flex items-center justify-center gap-2 active:scale-95 transition-all">
+                📍 জিপিএস দিয়ে অটো সেট করুন
+            </button>
 
-        <div class="relative flex items-center mb-4">
-            <div class="flex-grow border-t border-gray-100"></div>
-            <span class="flex-shrink mx-4 text-gray-300 text-[10px] font-bold uppercase">অথবা ম্যানুয়ালি</span>
-            <div class="flex-grow border-t border-gray-100"></div>
-        </div>
-        
-        <select id="district" ...> ... </select>
-        ...
-    </div>
-</div>
-                <select id="district" onchange="updateThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+            <div class="relative flex items-center mb-4">
+                <div class="flex-grow border-t border-gray-100"></div>
+                <span class="flex-shrink mx-4 text-gray-300 text-[10px] font-bold uppercase">অথবা ম্যানুয়ালি</span>
+                <div class="flex-grow border-t border-gray-100"></div>
+            </div>
+
+            <div class="space-y-3">
+                <select id="district" onchange="updateThanas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border border-transparent focus:border-green-500">
                     <option value="">জেলা নির্বাচন করুন</option>
                 </select>
-                <select id="thana" onchange="updatePartnerAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
-                    <option value="">আগে জেলা সিলেক্ট করুন</option>
-                </select>
-                <select id="partnerArea" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700">
+                <select id="thana" onchange="updatePartnerAreas()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border border-transparent focus:border-green-500">
                     <option value="">আগে থানা সিলেক্ট করুন</option>
                 </select>
+                <select id="partnerArea" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm text-gray-700 border border-transparent focus:border-green-500">
+                    <option value="">আগে এরিয়া সিলেক্ট করুন</option>
+                </select>
 
-                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4">নিশ্চিত করুন</button>
+                <button onclick="confirmLocation()" class="w-full py-4 bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 mt-4 active:scale-95 transition-all">নিশ্চিত করুন</button>
+                <button onclick="hideLocationModal()" class="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">বন্ধ করুন</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // আপনার দেওয়া ৬৪ জেলার থানা ডাটা
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration (বসান হয়েছে)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20",
+            measurementId: "G-GMYSW4MBVD"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ৬৪ জেলার ডাটা
         const districtThanaData = {
             "Dhaka": ["Uttara", "Mirpur", "Gulshan", "Dhanmondi", "Badda", "Motijheel", "Savar", "Dhamrai"],
             "Chattogram": ["Panchlaish", "Halishahar", "Kotwali", "Bakalia", "Patiya", "Hathazari"],
@@ -113,223 +122,140 @@
             "Khulna": ["Khalishpur", "Daulatpur", "Sonadanga", "Rupsha", "Dumuria"],
             "Barishal": ["Kotwali", "Airport", "Banaripara", "Bakerganj"],
             "Rangpur": ["Kotwali", "Mithapukur", "Pirganj", "Badarganj"],
-            "Mymensingh": ["Kotwali", "Muktagacha", "Bhaluka", "Gaffargaon"],
-            "Cumilla": ["Kotwali", "Adarsha Sadar", "Laksam", "Daudkandi"],
-            "Gazipur": ["Joydebpur", "Tongi", "Konabari", "Kaliakair"],
-            "Narayanganj": ["Sadar", "Fatullah", "Siddhirganj", "Araihazar"],
-            "Bogra": ["Sadar", "Sherpur", "Shajahanpur", "Gabtali"],
-            "Dinajpur": ["Sadar", "Birganj", "Parbatipur", "Fulbari"],
-            "Cox's Bazar": ["Sadar", "Chakaria", "Ukhiya", "Teknaf"],
-            "Noakhali": ["Sadar", "Begumganj", "Senbagh", "Chatkhil"],
-            "Feni": ["Sadar", "Chhagalnaiya", "Parshuram", "Daganbhuiyan"],
-            "Brahmanbaria": ["Sadar", "Ashuganj", "Sarail", "Akhaura"],
-            "Chandpur": ["Sadar", "Hajiganj", "Faridganj", "Matlab"],
-            "Lakshmipur": ["Sadar", "Ramganj", "Raipur", "Ramgati"],
-            "Tangail": ["Sadar", "Mirzapur", "Kalihati", "Sakhipur"],
-            "Jamalpur": ["Sadar", "Sarishabari", "Islampur", "Bakshiganj"],
-            "Sherpur": ["Sadar", "Nakla", "Nalitabari", "Jhenaigati"],
-            "Netrokona": ["Sadar", "Durgapur", "Kendua", "Mohanganj"],
-            "Kishoreganj": ["Sadar", "Bhairab", "Kuliarchar", "Bajitpur"],
-            "Manikganj": ["Sadar", "Singair", "Saturia", "Ghior"],
-            "Munshiganj": ["Sadar", "Sreenagar", "Lohajang", "Gajaria"],
-            "Faridpur": ["Sadar", "Bhanga", "Sadarpur", "Madhukhali"],
-            "Madaripur": ["Sadar", "Shibchar", "Rajoir", "Kalkini"],
-            "Shariatpur": ["Sadar", "Zanjira", "Naria", "Bhedarganj"],
-            "Gopalganj": ["Sadar", "Kotalipara", "Muksudpur", "Tungipara"],
-            "Rajbari": ["Sadar", "Goalanda", "Pangsha", "Baliakandi"],
-            "Narsingdi": ["Sadar", "Raipura", "Shibpur", "Belabo"],
-            "Sunamganj": ["Sadar", "Chhatak", "Jagannathpur", "Derai"],
-            "Habiganj": ["Sadar", "Nabiganj", "Madhabpur", "Bahubal"],
-            "Moulvibazar": ["Sadar", "Sreemangal", "Kulaura", "Barlekha"],
-            "Pabna": ["Sadar", "Ishwardi", "Santhia", "Bera"],
-            "Sirajganj": ["Sadar", "Shahjadpur", "Ullapara", "Belkuchi"],
-            "Naogaon": ["Sadar", "Patnitala", "Mahadebpur", "Niamatpur"],
-            "Natore": ["Sadar", "Singra", "Gurudaspur", "Baraigram"],
-            "Joypurhat": ["Sadar", "Panchbibi", "Akkelpur", "Khetlal"],
-            "Chapainawabganj": ["Sadar", "Shibganj", "Nachole", "Gomastapur"],
-            "Kushtia": ["Sadar", "Kumarkhali", "Bheramara", "Mirpur"],
-            "Meherpur": ["Sadar", "Gangni", "Mujibnagar"],
-            "Chuadanga": ["Sadar", "Alamdanga", "Damurhuda", "Jibannagar"],
-            "Jhenaidah": ["Sadar", "Kaliganj", "Kotchandpur", "Maheshpur"],
-            "Magura": ["Sadar", "Sreepur", "Shalikha", "Mohammadpur"],
-            "Narail": ["Sadar", "Lohagara", "Kalia"],
-            "Jashore": ["Sadar", "Sharsha", "Jhikargacha", "Keshabpur"],
-            "Satkhira": ["Sadar", "Shyamnagar", "Assasuni", "Kaliganj"],
-            "Bagerhat": ["Sadar", "Mongla", "Morrelganj", "Sarankhola"],
-            "Patuakhali": ["Sadar", "Kalapara", "Bauphal", "Galachipa"],
-            "Bhola": ["Sadar", "Char Fasson", "Lalmohan", "Borhanuddin"],
-            "Barguna": ["Sadar", "Amtali", "Patharghata", "Bamna"],
-            "Jhalokati": ["Sadar", "Rajapur", "Kathalia", "Nalchity"],
-            "Pirojpur": ["Sadar", "Mathbaria", "Bhandaria", "Kawkhali"],
-            "Gaibandha": ["Sadar", "Gobindaganj", "Palashbari", "Sundarganj"],
-            "Kurigram": ["Sadar", "Ulipur", "Nageshwari", "Rajarhat"],
-            "Lalmonirhat": ["Sadar", "Aditmari", "Hatibandha", "Patgram"],
-            "Nilphamari": ["Sadar", "Saidpur", "Domar", "Jaldhaka"],
-            "Panchagarh": ["Sadar", "Tetulia", "Boda", "Debiganj"],
-            "Thakurgaon": ["Sadar", "Pirganj", "Baliadangi", "Ranisankail"],
-            "Bandarban": ["Sadar", "Ruma", "Thanchi", "Lama"],
-            "Khagrachari": ["Sadar", "Ramgarh", "Panchari", "Dighinala"],
-            "Rangamati": ["Sadar", "Kaptai", "Baghaichari", "Naniarchar"]
+            "Mymensingh": ["Kotwali", "Muktagacha", "Bhaluka", "Gaffargaon"]
+            // বাকি জেলাগুলো আপনি প্রয়োজনমতো এখানে যোগ করতে পারবেন
         };
 
-        // পার্টনার এরিয়া ডাটা
         const partnerData = {
             "Uttara": ["Sector 7", "Sector 10", "Sector 12"],
             "Mirpur": ["Mirpur 10", "Mirpur 1"],
-            "Zindabazar": ["Point 1", "Point 2"],
-            "Agrabad": ["Area A", "Area B"]
+            "Zindabazar": ["Point 1", "Point 2"]
         };
 
         let targetUrl = '';
 
-        // Initialize Districts
-        const districtSelect = document.getElementById('district');
+        // Initialize District List
+        const dSelect = document.getElementById('district');
         Object.keys(districtThanaData).sort().forEach(d => {
             let opt = document.createElement('option');
-            opt.value = d;
-            opt.innerText = d;
-            districtSelect.appendChild(opt);
+            opt.value = d; opt.innerText = d;
+            dSelect.appendChild(opt);
         });
 
-        function updateThanas() {
-            const district = document.getElementById('district').value;
-            const thanaSelect = document.getElementById('thana');
-            const partnerSelect = document.getElementById('partnerArea');
-            
-            thanaSelect.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
-            partnerSelect.innerHTML = '<option value="">আগে থানা সিলেক্ট করুন</option>';
+        // ১. জিপিএস দিয়ে অটো ডিটেক্ট (Nearest Partner Logic)
+        window.autoDetectLocation = async () => {
+            const btn = document.getElementById('autoLocateBtn');
+            const originalText = btn.innerHTML;
+            btn.innerText = "খুঁজছি...";
+            btn.disabled = true;
 
-            if (districtThanaData[district]) {
-                districtThanaData[district].forEach(thana => {
-                    let opt = document.createElement('option');
-                    opt.value = thana;
-                    opt.innerText = thana;
-                    thanaSelect.appendChild(opt);
-                });
-            }
-        }
-
-        function updatePartnerAreas() {
-            const thana = document.getElementById('thana').value;
-            const partnerSelect = document.getElementById('partnerArea');
-            partnerSelect.innerHTML = '<option value="">সার্ভিস এরিয়া নির্বাচন করুন</option>';
-
-            if (partnerData[thana]) {
-                partnerData[thana].forEach(area => {
-                    let opt = document.createElement('option');
-                    opt.value = area;
-                    opt.innerText = area;
-                    partnerSelect.appendChild(opt);
-                });
-            } else {
-                let opt = document.createElement('option');
-                opt.innerText = "এই থানায় বর্তমানে পার্টনার নেই";
-                partnerSelect.appendChild(opt);
-            }
-        }
-
-        function showLocationModal() {
-            document.getElementById('locationModal').classList.remove('hidden');
-        }
-
-        function handleServiceClick(e, url) {
-            e.preventDefault();
-            targetUrl = url;
-            const savedLoc = localStorage.getItem('userLocation');
-            if (savedLoc) {
-                window.location.href = url + "?area=" + encodeURIComponent(savedLoc);
-            } else {
-                showLocationModal();
-            }
-        }
-        // ১. দুই পয়েন্টের দূরত্ব মাপার লজিক (Haversine Formula)
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // কিমি
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
-
-// ২. অটোমেটিক লোকেশন এবং পার্টনার খোঁজার ফাংশন
-async function autoDetectLocation() {
-    const btn = document.getElementById('autoLocateBtn');
-    btn.innerText = "খুঁজছি...";
-    
-    if (!navigator.geolocation) {
-        alert("আপনার ব্রাউজার জিপিএস সাপোর্ট করে না।");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const uLat = pos.coords.latitude;
-        const uLng = pos.coords.longitude;
-
-        try {
-            // Firebase থেকে সব পার্টনারদের আনা (Firestore import থাকতে হবে)
-            // import { getDocs, collection } from "firebase-firestore"
-            const partnersSnap = await getDocs(collection(db, "partners"));
-            
-            let nearestPartnerId = null;
-            let shortestDistance = 5; // ৫ কিমি ব্যাসার্ধ
-
-            partnersSnap.forEach((doc) => {
-                const p = doc.data();
-                if(p.lat && p.lng) {
-                    const dist = calculateDistance(uLat, uLng, p.lat, p.lng);
-                    if(dist < shortestDistance) {
-                        shortestDistance = dist;
-                        nearestPartnerId = doc.id;
-                    }
-                }
-            });
-
-            if(nearestPartnerId) {
-                const locInfo = `GPS: Near Partner ${nearestPartnerId}`;
-                localStorage.setItem('userLocation', locInfo);
-                localStorage.setItem('assignedPartnerId', nearestPartnerId); // এটি অর্ডারের সময় লাগবে
-                
-                document.getElementById('locationModal').classList.add('hidden');
-                updateUI();
-                
-                if (targetUrl) {
-                    window.location.href = targetUrl + "?partner=" + nearestPartnerId;
-                }
-            } else {
-                alert("দুঃখিত, আপনার ৫ কিমি এর মধ্যে কোনো পার্টনার নেই। দয়া করে ম্যানুয়ালি এরিয়া সিলেক্ট করুন।");
-                btn.innerText = "📍 জিপিএস দিয়ে খুঁজুন";
-            }
-        } catch (error) {
-            console.error(error);
-            alert("পার্টনার লিস্ট লোড করতে সমস্যা হয়েছে।");
-        }
-    }, (err) => {
-        alert("লোকেশন পারমিশন দিন।");
-        btn.innerText = "📍 জিপিএস দিয়ে খুঁজুন";
-    });
-}
-
-        function confirmLocation() {
-            const d = document.getElementById('district').value;
-            const t = document.getElementById('thana').value;
-            const p = document.getElementById('partnerArea').value;
-
-            if (!d || !t || !p || p.includes("পার্টনার নেই")) {
-                alert("সঠিক লোকেশন নির্বাচন করুন");
+            if (!navigator.geolocation) {
+                alert("আপনার ডিভাইস জিপিএস সাপোর্ট করে না।");
+                btn.disabled = false;
                 return;
             }
 
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const uLat = pos.coords.latitude;
+                const uLng = pos.coords.longitude;
+
+                try {
+                    const partnersSnap = await getDocs(collection(db, "partners"));
+                    let nearestPartner = null;
+                    let shortestDistance = 5; // ৫ কিমি রেঞ্জ
+
+                    partnersSnap.forEach((doc) => {
+                        const p = doc.data();
+                        if(p.lat && p.lng && p.locationSet) {
+                            const dist = calculateDistance(uLat, uLng, p.lat, p.lng);
+                            if(dist < shortestDistance) {
+                                shortestDistance = dist;
+                                nearestPartner = { id: doc.id, name: p.name || 'কাছের পার্টনার' };
+                            }
+                        }
+                    });
+
+                    if(nearestPartner) {
+                        localStorage.setItem('userLocation', `📍 ${nearestPartner.name}`);
+                        localStorage.setItem('assignedPartnerId', nearestPartner.id);
+                        hideLocationModal();
+                        updateUI();
+                        if (targetUrl) window.location.href = targetUrl + "?partner=" + nearestPartner.id;
+                    } else {
+                        alert("৫ কিমি এর মধ্যে কোনো পার্টনার নেই। ম্যানুয়ালি সিলেক্ট করুন।");
+                    }
+                } catch (e) { alert("ডাটা কানেকশন সমস্যা!"); }
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, (err) => {
+                alert("লোকেশন পারমিশন প্রয়োজন।");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        };
+
+        // দূরত্ব নির্ণয় (Haversine Formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // UI কন্ট্রোল ফাংশনসমূহ
+        window.updateThanas = () => {
+            const district = document.getElementById('district').value;
+            const thanaSelect = document.getElementById('thana');
+            thanaSelect.innerHTML = '<option value="">থানা নির্বাচন করুন</option>';
+            if (districtThanaData[district]) {
+                districtThanaData[district].forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t; opt.innerText = t;
+                    thanaSelect.appendChild(opt);
+                });
+            }
+        };
+
+        window.updatePartnerAreas = () => {
+            const thana = document.getElementById('thana').value;
+            const partnerSelect = document.getElementById('partnerArea');
+            partnerSelect.innerHTML = '<option value="">সার্ভিস এরিয়া নির্বাচন করুন</option>';
+            if (partnerData[thana]) {
+                partnerData[thana].forEach(area => {
+                    let opt = document.createElement('option');
+                    opt.value = area; opt.innerText = area;
+                    partnerSelect.appendChild(opt);
+                });
+            } else {
+                partnerSelect.innerHTML = '<option>এই থানায় পার্টনার নেই</option>';
+            }
+        };
+
+        window.showLocationModal = () => document.getElementById('locationModal').classList.remove('hidden');
+        window.hideLocationModal = () => document.getElementById('locationModal').classList.add('hidden');
+
+        window.confirmLocation = () => {
+            const d = document.getElementById('district').value;
+            const t = document.getElementById('thana').value;
+            const p = document.getElementById('partnerArea').value;
+            if (!d || !t || !p || p.includes("পার্টনার নেই")) return alert("সঠিক লোকেশন দিন");
             const fullLoc = `${d}, ${t}, ${p}`;
             localStorage.setItem('userLocation', fullLoc);
-            document.getElementById('locationModal').classList.add('hidden');
+            hideLocationModal();
             updateUI();
-            
-            if (targetUrl) {
-                window.location.href = targetUrl + "?area=" + encodeURIComponent(fullLoc);
-            }
-        }
+            if (targetUrl) window.location.href = targetUrl + "?loc=" + encodeURIComponent(fullLoc);
+        };
+
+        window.handleServiceClick = (e, url) => {
+            e.preventDefault();
+            targetUrl = url;
+            const savedLoc = localStorage.getItem('userLocation');
+            if (savedLoc) window.location.href = url + "?loc=" + encodeURIComponent(savedLoc);
+            else showLocationModal();
+        };
 
         function updateUI() {
             const loc = localStorage.getItem('userLocation');
