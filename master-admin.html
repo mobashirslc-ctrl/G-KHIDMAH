@@ -235,7 +235,13 @@
         });
         document.getElementById('totalDueCollect').innerText = `৳${totalDue.toFixed(2)}`;
     });
-
+async function togglePartnerStatus(phone, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
+    await updateDoc(doc(db, "partners", phone), {
+        status: newStatus
+    });
+    alert(`পার্টনার এখন ${newStatus}`);
+}
     // --- Helpers ---
     window.clearDue = async (id) => { if(confirm("পেমেন্ট কি পেয়েছেন?")) await updateDoc(doc(db, "partners", id), { "wallet.adminDue": 0 }); };
     window.toggleP = async (id, s) => { await updateDoc(doc(db, "partners", id), { isActive: !s }); };
