@@ -35,7 +35,7 @@
             <div class="relative z-10 flex justify-between items-start mb-6">
                 <div>
                     <h1 class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mb-1 text-blue-200">G-Khidmah Partner</h1>
-                    <h2 id="pName" class="text-2xl font-black italic tracking-tight uppercase">লোড হচ্ছে...</h2>
+                    <h2 id="pName" class="text-2xl font-black italic tracking-tight uppercase text-white">লোড হচ্ছে...</h2>
                 </div>
                 <button onclick="handleLogout()" class="bg-white/10 p-3 rounded-2xl backdrop-blur-md text-[9px] font-black uppercase border border-white/20">Log out</button>
             </div>
@@ -55,12 +55,22 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-8 border border-slate-100">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">📍 লোকেশন আপডেট করুন</h3>
-            <div class="flex gap-2 bg-slate-50 p-1.5 rounded-2xl border">
-                <input type="text" id="locInput" placeholder="আপনার বর্তমান লোকেশন..." class="flex-1 bg-transparent p-3 text-xs font-bold outline-none">
-                <button onclick="updateLoc()" class="bg-blue-900 text-white px-5 rounded-xl text-[10px] font-black uppercase">আপডেট</button>
+        <div id="teamSection" class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-8 border border-slate-100">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">👥 টিম মেম্বার অ্যাড করুন</h3>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <input type="text" id="tmName" placeholder="নাম" class="p-3 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+                <input type="tel" id="tmPhone" placeholder="মোবাইল" class="p-3 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
             </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <select id="tmRole" class="p-3 bg-slate-50 border rounded-xl text-[10px] font-bold outline-none">
+                    <option value="rider">ডেলিভারি ম্যান (Rider)</option>
+                    <option value="plumber">প্লাম্বার</option>
+                    <option value="electrician">ইলেকট্রিশিয়ান</option>
+                    <option value="driver">ড্রাইভার</option>
+                </select>
+                <input type="text" id="tmNid" placeholder="NID নাম্বার" class="p-3 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+            </div>
+            <button onclick="addTeamMember()" class="w-full bg-emerald-600 text-white py-3 rounded-xl text-[10px] font-black uppercase shadow-lg">টিম মেম্বার সেভ করুন</button>
         </div>
 
         <h3 class="text-xs font-black text-slate-500 uppercase mb-4 ml-4">চলমান অর্ডারসমূহ</h3>
@@ -68,208 +78,183 @@
     </div>
 
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, collection, onSnapshot, query, where, arrayRemove, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, onSnapshot, query, where, arrayRemove, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
-        authDomain: "gkhidmah-8636b.firebaseapp.com",
-        projectId: "gkhidmah-8636b",
-        storageBucket: "gkhidmah-8636b.firebasestorage.app",
-        messagingSenderId: "780745438049",
-        appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEq12vL_6e52-6ZOba-yUPchKi-saCy0",
+            authDomain: "gkhidmah-8636b.firebaseapp.com",
+            projectId: "gkhidmah-8636b",
+            storageBucket: "gkhidmah-8636b.firebasestorage.app",
+            messagingSenderId: "780745438049",
+            appId: "1:780745438049:web:d60cc33b84200a12bc4b20"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const COLLECTION_NAME = "partners"; 
-    let knownOrderIds = new Set();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const COLLECTION_NAME = "partners"; 
+        let currentPartnerId = "";
+        let knownOrderIds = new Set();
 
-    const configs = {
-        shopping: { title: "বাজার সদাই", color: "border-green-600", steps: ["pending", "received", "invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"] },
-        home_service: { title: "হোম সার্ভিস", color: "border-orange-500", steps: ["expert_finding", "expert_assigned", "work_in_progress", "payment_pending", "completed"] },
-        car_rental: { title: "কার রেন্টাল", color: "border-blue-500", steps: ["request_received", "driver_assigned", "car_on_way", "trip_started", "completed"] },
-        delivery: { title: "পার্সেল ডেলিভারি", color: "border-purple-600", steps: ["pickup_pending", "rider_assigned", "picked_up", "on_the_way", "delivered", "completed"] }
-    };
+        // মাল্টি-সার্ভিস ১০ স্টেপ ট্র্যাকিং
+        const multiServiceStatus = {
+            shopping: ["pending", "received", "invoice_ready", "confirmed", "on_the_way", "market_reached", "shopping", "packing", "delivery", "completed"],
+            parcel: ["pending", "received", "invoice_ready", "confirmed", "rider_assigned", "at_pickup", "picked", "in_transit", "near_delivery", "completed"],
+            home_service: ["pending", "confirmed", "expert_assigned", "on_the_way", "reached", "working", "parts_needed", "invoice_ready", "payment_done", "completed"]
+        };
 
-    // --- Auth Logic ---
-    window.checkAuth = () => {
-        const user = localStorage.getItem('gPartnerAuth');
-        if (user) {
-            const userData = JSON.parse(user);
+        // Auth Logic (আপনার অরিজিনাল লজিক)
+        window.handleLogin = async () => {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pinInput = document.getElementById('loginPin').value.trim();
+            if(!phone || !pinInput) return alert("নম্বর এবং পিন দিন");
+            try {
+                const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
+                if (docSnap.exists() && docSnap.data().pin?.toString() === pinInput) {
+                    localStorage.setItem('gPartnerAuth', JSON.stringify({ id: docSnap.id }));
+                    location.reload();
+                } else { alert("ভুল তথ্য!"); }
+            } catch (e) { alert("এরর: " + e.message); }
+        };
+
+        window.handleLogout = () => {
+            localStorage.removeItem('gPartnerAuth');
+            location.reload();
+        };
+
+        // টিম মেম্বার অ্যাড
+        window.addTeamMember = async () => {
+            const name = document.getElementById('tmName').value;
+            const phone = document.getElementById('tmPhone').value;
+            const role = document.getElementById('tmRole').value;
+            const nid = document.getElementById('tmNid').value;
+            if(!name || !phone) return alert("তথ্য পূরণ করুন");
+
+            try {
+                await addDoc(collection(db, "partners", currentPartnerId, "team"), {
+                    name, phone, role, nid, createdAt: new Date()
+                });
+                alert("মেম্বার যুক্ত হয়েছে!");
+                location.reload();
+            } catch (e) { console.error(e); }
+        };
+
+        // ডাটা লোডিং
+        const authStore = localStorage.getItem('gPartnerAuth');
+        if(authStore) {
+            currentPartnerId = JSON.parse(authStore).id;
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
-            loadPartnerData(userData.id);
-        } else {
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('mainDashboard').classList.add('hidden');
-        }
-    };
 
-    window.handleLogin = async () => {
-        const phone = document.getElementById('loginPhone').value.trim();
-        const pinInput = document.getElementById('loginPin').value.trim();
-        if(!phone || !pinInput) return alert("নম্বর এবং পিন দিন");
-        try {
-            const docSnap = await getDoc(doc(db, COLLECTION_NAME, phone));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.pin?.toString() === pinInput) {
-                    localStorage.setItem('gPartnerAuth', JSON.stringify({ id: docSnap.id, ...data }));
-                    window.checkAuth();
-                } else { alert("ভুল পিন!"); }
-            } else { alert("পার্টনার খুঁজে পাওয়া যায়নি!"); }
-        } catch (e) { alert("লগইন এরর: " + e.message); }
-    };
-
-    window.handleLogout = () => {
-        localStorage.removeItem('gPartnerAuth');
-        window.checkAuth();
-    };
-
-    // --- Data Loading ---
-    async function loadPartnerData(id) {
-        onSnapshot(doc(db, COLLECTION_NAME, id), (snap) => {
-            if(snap.exists()){
-                const data = snap.data();
-                document.getElementById('pName').innerText = data.name || "Partner";
-                const wallet = data.wallet || { totalEarning: 0, adminDue: 0 };
-                document.getElementById('totalEarn').innerText = wallet.totalEarning || "0.00";
-                document.getElementById('adminDue').innerText = wallet.adminDue || "0.00";
-                loadOrders(id);
-            }
-        });
-    }
-
-    function loadOrders(id) {
-        const container = document.getElementById('orderContainer');
-        const q = query(collection(db, "orders"), where("assignedPerson.id", "==", id), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snap) => {
-            container.innerHTML = "";
-            if (snap.empty) {
-                container.innerHTML = `<p class="text-center text-gray-400 text-xs mt-10">কোন চলমান অর্ডার নেই</p>`;
-                return;
-            }
-            snap.forEach(d => {
-                const order = { id: d.id, ...d.data() };
-                if (knownOrderIds.size > 0 && !knownOrderIds.has(order.id)) {
-                    document.getElementById('newOrderSound')?.play().catch(() => {});
+            // পার্টনার প্রোফাইল ও ওয়ালেট
+            onSnapshot(doc(db, COLLECTION_NAME, currentPartnerId), (snap) => {
+                if(snap.exists()){
+                    const d = snap.data();
+                    document.getElementById('pName').innerText = d.name || "Partner";
+                    document.getElementById('totalEarn').innerText = d.wallet?.totalEarning || "0.00";
+                    document.getElementById('adminDue').innerText = d.wallet?.adminDue || "0.00";
                 }
-                knownOrderIds.add(order.id);
-                renderOrderCard(order, container);
             });
-        });
-    }
 
-    // --- Action Functions ---
-    window.removeItem = async (id, item) => {
-        if(confirm(`আপনি কি "${item}" তালিকা থেকে বাদ দিতে চান?`)) {
-            await updateDoc(doc(db, "orders", id), { 
-                items: arrayRemove(item), 
-                alertMessage: `দুঃখিত, "${item}" এই মুহূর্তে পাওয়া যায়নি।`, 
-                alertType: "item_removed",
-                alertTime: Date.now() 
+            // অর্ডার ট্র্যাকিং ও সাউন্ড
+            const q = query(collection(db, "orders"), where("assignedPerson.id", "==", currentPartnerId), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                const container = document.getElementById('orderContainer');
+                container.innerHTML = "";
+                if(snap.empty) container.innerHTML = `<p class="text-center text-gray-400 text-[10px] mt-10">কোন অর্ডার নেই</p>`;
+                
+                snap.forEach(d => {
+                    const order = { id: d.id, ...d.data() };
+                    if (knownOrderIds.size > 0 && !knownOrderIds.has(order.id)) {
+                        document.getElementById('newOrderSound')?.play().catch(()=>{});
+                    }
+                    knownOrderIds.add(order.id);
+                    renderOrderCard(order, container);
+                });
             });
         }
-    };
 
-    window.saveShoppingBill = async (id) => {
-    const prices = {}; 
-    let sub = 0;
-    document.querySelectorAll(`input[data-id="${id}"]`).forEach(inp => {
-        const p = parseFloat(inp.value) || 0;
-        prices[inp.dataset.item] = p; 
-        sub += p;
-    });
-    
-    // এই অংশটুকু নিশ্চিত করুন
-    const del = parseFloat(document.getElementById(`del-${id}`).value) || 0;
-    const plat = parseFloat(document.getElementById(`plat-${id}`).value) || 0;
-    
-    await updateDoc(doc(db, "orders", id), { 
-        itemPrices: prices, 
-        subTotal: sub, 
-        deliveryCharge: del, 
-        platformFee: plat, // এটি ডাটাবেসে আলাদা থাকবে
-        status: "invoice_ready",
-        alertType: "invoice_updated"
-    });
-    alert("ইনভয়েস আপডেট হয়েছে!");
-};
-    window.updateStatus = async (id, s) => {
-        try { await updateDoc(doc(db, "orders", id), { status: s }); } 
-        catch (e) { alert("স্ট্যাটাস আপডেট হয়নি!"); }
-    };
+        async function renderOrderCard(order, container) {
+            const card = document.createElement('div');
+            card.className = "card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-t-8 border-blue-900 mb-6";
+            
+            const steps = multiServiceStatus[order.serviceType] || multiServiceStatus.shopping;
+            
+            // টিম লোড করা
+            const teamSnap = await getDocs(collection(db, "partners", currentPartnerId, "team"));
+            let options = `<option value="">টিম মেম্বার সিলেক্ট করুন</option>`;
+            teamSnap.forEach(m => {
+                options += `<option value='${JSON.stringify(m.data())}'>${m.data().name} (${m.data().role})</option>`;
+            });
 
-    window.updateLoc = async () => {
-        const user = JSON.parse(localStorage.getItem('gPartnerAuth'));
-        const loc = document.getElementById('locInput').value.trim();
-        if(!loc) return alert("লোকেশন লিখুন");
-        try {
-            await updateDoc(doc(db, COLLECTION_NAME, user.id), { currentLocation: loc, lastUpdate: new Date().toISOString() });
-            alert("লোকেশন আপডেট হয়েছে!");
-        } catch (e) { alert("ব্যর্থ হয়েছে!"); }
-    };
-
-    // --- UI Rendering ---
-    function renderOrderCard(order, container) {
-        const config = configs[order.serviceType] || configs.shopping;
-        const card = document.createElement('div');
-        card.className = `card-animate bg-white p-6 rounded-[2.5rem] shadow-xl border-l-[12px] ${config.color}`;
-        
-        let billingSection = "";
-        if(order.serviceType === 'shopping' || !order.serviceType) {
-            billingSection = `
-                <div class="space-y-3 bg-slate-50 p-4 rounded-3xl border border-slate-100 mt-4 mb-4">
-                    <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">পণ্যের তালিকা ও দাম</h4>
-                    ${order.items.map(item => `
-                        <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-50">
-                            <button onclick="removeItem('${order.id}', '${item}')" class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white w-7 h-7 rounded-lg font-bold flex items-center justify-center transition-all">×</button>
-                            <span class="text-[11px] flex-1 font-bold text-slate-700 truncate">${item}</span>
-                            <div class="flex items-center bg-blue-50 rounded-lg px-2 border border-blue-100">
-                                <span class="text-[10px] text-blue-400 font-bold">৳</span>
-                                <input type="number" data-id="${order.id}" data-item="${item}" value="${order.itemPrices?.[item] || ''}" class="w-14 p-1.5 bg-transparent rounded-lg text-[11px] text-center font-black outline-none" placeholder="0">
-                            </div>
-                        </div>
-                    `).join('')}
-                    <div class="grid grid-cols-2 gap-2 mt-4">
-                        <div class="space-y-1">
-                            <label class="text-[8px] font-black text-slate-400 ml-1 uppercase">ডেলিভারি চার্জ</label>
-                            <input type="number" id="del-${order.id}" value="${order.deliveryCharge || 70}" class="w-full p-2.5 rounded-xl border border-slate-200 text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[8px] font-black text-slate-400 ml-1 uppercase">প্ল্যাটফর্ম ফি</label>
-                            <input type="number" id="plat-${order.id}" value="${order.platformFee || 20}" class="w-full p-2.5 rounded-xl border border-slate-200 text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
+            // শপিং লিস্ট থাকলে দেখাবে (আপনার আগের কোড অনুযায়ী)
+            let itemsHtml = "";
+            if(order.serviceType === 'shopping' && order.items) {
+                itemsHtml = `
+                    <div class="bg-slate-50 p-4 rounded-3xl my-4 border">
+                        <p class="text-[9px] font-black text-gray-400 uppercase mb-2">Shopping List</p>
+                        ${order.items.map(item => `<div class="flex justify-between text-[11px] font-bold mb-1 border-b pb-1 text-slate-600"><span>${item}</span> <span>৳ ${order.itemPrices?.[item] || 0}</span></div>`).join('')}
                     </div>
-                    <button onclick="saveShoppingBill('${order.id}')" class="w-full bg-blue-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all mt-2">সেভ ও ইনভয়েস পাঠান</button>
-                </div>`;
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-[9px] font-black uppercase">${order.serviceType || 'Service'}</span>
+                    <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-sm font-black text-gray-800">${order.customerName}</h3>
+                    <p class="text-[10px] text-gray-400">${order.customerAddress}</p>
+                </div>
+
+                ${itemsHtml}
+
+                <div class="bg-blue-50 p-4 rounded-3xl mb-4">
+                    <p class="text-[9px] font-black text-blue-400 uppercase mb-3">Invoice & Assignment</p>
+                    <div class="flex gap-2 mb-3">
+                        <input type="number" id="charge-${order.id}" value="${order.deliveryCharge || ''}" placeholder="বিল এমাউন্ট" class="w-1/2 p-2 rounded-xl text-xs font-bold border-none outline-none">
+                        <button onclick="sendInvoice('${order.id}')" class="w-1/2 bg-blue-900 text-white rounded-xl text-[9px] font-black uppercase">বিল পাঠান</button>
+                    </div>
+                    <select onchange='assignMember("${order.id}", this.value)' class="w-full p-2 rounded-xl text-[10px] font-bold outline-none border-none">
+                        ${options}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    ${steps.map((s, i) => {
+                        const isLocked = !order.invoiceConfirmed && i > 2; // ইউজার কনফার্ম না করলে ৩ নম্বর ধাপের পর লক
+                        return `
+                        <button onclick="updateStatus('${order.id}', '${s}')" ${isLocked ? 'disabled' : ''} 
+                            class="py-2.5 rounded-xl text-[8px] font-black uppercase transition-all 
+                            ${order.status === s ? 'bg-blue-900 text-white shadow-lg' : isLocked ? 'bg-gray-50 text-gray-200' : 'bg-gray-100 text-gray-400'}">
+                            ${i+1}. ${s.replace(/_/g, ' ')} ${isLocked ? '🔒' : ''}
+                        </button>`;
+                    }).join('')}
+                </div>
+            `;
+            container.appendChild(card);
         }
 
-        card.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <span class="bg-slate-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-600">${config.title}</span>
-                <span class="text-[9px] font-bold text-gray-300">#${order.id.slice(-5)}</span>
-            </div>
-            <div class="mb-4">
-                <h3 class="text-sm font-black text-gray-800">${order.customerName || 'কাস্টমার'}</h3>
-                <p class="text-[11px] text-blue-600 font-bold">${order.customerPhone || ''}</p>
-                <p class="text-[10px] text-gray-400 mt-1">${order.customerAddress || 'ঠিকানা দেওয়া হয়নি'}</p>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-3xl mb-4 border border-slate-100 text-[10px] font-bold">
-                সার্ভিস স্ট্যাটাস: <span class="text-blue-600 uppercase">${order.status.replace(/_/g, ' ')}</span>
-            </div>
-            ${billingSection}
-            <h4 class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">অর্ডার স্ট্যাটাস আপডেট</h4>
-            <div class="grid grid-cols-2 gap-2">
-                ${config.steps.map((s, i) => `
-                    <button onclick="updateStatus('${order.id}', '${s}')" class="py-2.5 px-1 rounded-xl text-[8px] font-black uppercase transition-all ${order.status === s ? 'bg-blue-900 text-white shadow-lg' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}">${i+1}. ${s.replace(/_/g, ' ')}</button>
-                `).join('')}
-            </div>`;
-        container.appendChild(card);
-    }
+        window.sendInvoice = async (id) => {
+            const val = document.getElementById(`charge-${id}`).value;
+            await updateDoc(doc(db, "orders", id), { deliveryCharge: parseFloat(val), status: "invoice_ready" });
+            alert("ইনভয়েস পাঠানো হয়েছে। ইউজার কনফার্ম করলে বাকি বাটন আনলক হবে।");
+        };
 
-    window.checkAuth();
-</script>
+        window.assignMember = async (id, mJson) => {
+            if(!mJson) return;
+            const m = JSON.parse(mJson);
+            await updateDoc(doc(db, "orders", id), {
+                riderName: m.name, riderPhone: m.phone, riderNid: m.nid, status: (m.role === 'rider' ? 'rider_assigned' : 'expert_assigned')
+            });
+            alert(m.name + " কে এসাইন করা হয়েছে।");
+        };
+
+        window.updateStatus = async (id, s) => {
+            await updateDoc(doc(db, "orders", id), { status: s });
+        };
+
+    </script>
 </body>
 </html>
